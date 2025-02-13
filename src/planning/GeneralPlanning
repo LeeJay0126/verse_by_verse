@@ -15,6 +15,9 @@ https://bibliaapi.com/docs/
 MySQL -> Hostinger MySQL Hosting migration when deployed. Host it locally while development.
 DB will include user information, community information, 
 
+
+// General Features
+
 Aside from home page, which will look like "LayoutReference.webp" under component > frontend > LayoutReference.webp
 
 There will be four main parts.
@@ -25,4 +28,9 @@ Read - Page where you can read the bible in English and Korean (potentially othe
 
 study & reflect - self study and reflect as you read the bible verse by verse. (Room for development. Some retorhecal questions?)
 
-Community - Create & Join community to share studies and ask questions 
+Community - Create & Join community to share studies and ask questions. User may create a community with an invitation code to invite other participants and authorized manager may remove participants from the community.
+
+/*
+    Color used
+*/
+
