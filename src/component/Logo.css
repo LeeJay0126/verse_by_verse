@@ -1,6 +1,8 @@
 .Logo {
     font-size: 24px;
-    letter-spacing: 1px;
     font-family: "Playfair Display", serif;
     font-optical-sizing: auto;
+
+    padding: 20px 40px;
+    cursor: pointer;
 }
