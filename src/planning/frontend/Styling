@@ -1,4 +1,4 @@
-Fonts: Body Fonts: .baskervville-regular {
+/* Fonts: Body Fonts: .baskervville-regular {
     font-family: "Baskervville", serif;
     font-weight: 400;
     font-style: normal;
@@ -16,4 +16,4 @@ Header Fonts:
     font-optical-sizing: auto;
     font-weight: <weight>;
     font-style: normal;
-}
+} */
