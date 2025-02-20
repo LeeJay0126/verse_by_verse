@@ -1,9 +1,12 @@
+import Hero from "./Hero";
 import "./Home.css";
 
 const Home = () => {
 
     return (
-       <div></div> 
+       <div>
+        <Hero/>
+       </div> 
     );
 };
 
