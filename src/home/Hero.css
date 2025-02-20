@@ -28,3 +28,13 @@
 .HeroH2 {
     font-size: 32px;
 }
+
+.HeroButton {
+    margin: 20px auto;
+    padding: 10px 20px;
+    border: solid white 1px;
+    text-align: center;
+    width: 200px;
+    color: #0f0f0f;
+    cursor: pointer;
+}

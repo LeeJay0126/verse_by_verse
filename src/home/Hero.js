@@ -9,6 +9,9 @@ const Hero = () => {
             <h2 className="HeroH2">
                 One Verse At a Time
             </h2>
+            <div className="HeroButton">
+                GET STARTED
+            </div>
         </div>
     );
 };
