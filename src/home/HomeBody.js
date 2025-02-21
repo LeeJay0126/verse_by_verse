@@ -2,12 +2,18 @@ import "./HomeBody.css";
 
 const HomeBody = () => {
 
-    return(
-        <body className="HomeBody">
-            <h1 className="HomeH1">
-                
-            </h1>
-        </body>
+    return (
+        <section className="HomeBody">
+            <div className="HomeHeader">
+                <ul className="HomeHeaderList">
+                    <li>ABOUT</li>
+                    <li>READ</li>
+                    <li>STUDY</li>
+                    <li>COMMUNITY</li>
+                </ul>
+            </div>
+
+        </section>
     );
 };
 

@@ -2,3 +2,19 @@
     Fonts:     color: #8C6E4D;
     Background color: #0f0f0f
 */
+
+.HomeBody {
+    background-color: #0f0f0f;
+}
+
+.HomeHeader {
+    width: 90%;
+    padding-top: 20px;
+    margin: 0 auto;
+}
+
+.HomeHeaderList li {
+    display: inline-block;
+    color: #8C6E4D;
+    padding: 20px 70px;
+}
