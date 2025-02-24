@@ -1,6 +1,6 @@
-import Hero from "./Hero";
+import Hero from "./homeHero/Hero";
 import "./Home.css";
-import HomeBody from "./HomeBody";
+import HomeBody from "./homeBody/HomeBody";
 
 const Home = () => {
 
