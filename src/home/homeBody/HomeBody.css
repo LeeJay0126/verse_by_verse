@@ -16,3 +16,33 @@
 /*
     Home Body Cards CSS
 */
+
+.HomeBodyCardContainer {
+    margin: 0 auto;
+    padding-top: 20px;
+    width: 90%;
+    max-width: 1200px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.HBC {
+    padding: 10px;
+}
+
+.HBC h3 {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 300;
+    font-family: "Playfair Display", serif;
+    font-optical-sizing: auto;
+    color: #8C6E4D;
+    padding-bottom: 20px;
+}
+
+.HomeBodyCard {
+    border: 1px solid;
+    border-radius: 15px;
+    height: 200px;
+}
+
