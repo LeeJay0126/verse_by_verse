@@ -1,7 +1,7 @@
 
 .Header {
     /* background: linear-gradient(to right,#e6e7dd, #d3d4cb); */
-    background: linear-gradient(to right,#1A1A1A, #0f0f0f);
+    background: linear-gradient(to right,#0c0c0c, #0f0f0f);
     opacity: 90%;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     display: flex;

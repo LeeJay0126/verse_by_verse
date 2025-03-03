@@ -43,8 +43,11 @@
 .HomeBodyCard {
     border: 1px solid;
     border-radius: 15px;
-    height: 200px;
-    padding: 15px ;
+    min-height: 250px;
+}
+
+.HBCBody {
+    padding: 15px;
 }
 
 .HomeBodyCard p {
@@ -52,3 +55,30 @@
     color: #8C6E4D;
 }
 
+.CardImage {
+    height: 100px;
+    width: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    background-position: center;
+    padding: 0 5px;
+
+    border-radius: 5px;
+}
+
+.CommunityCard {
+    background-image: url('../../component/images/homePage/homeCards/Community.jpeg');
+}
+
+.ReadCard {
+    background-image: url('../../component/images/homePage/homeCards/Bible.jpeg');
+}
+
+.StudyCard {
+    background-image: url('../../component/images/homePage/homeCards/Study2.jpeg');
+}
+
+.AboutCard {
+    background-image: url('../../component/images/homePage/homeCards/About.jpeg');
+}
