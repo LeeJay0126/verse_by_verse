@@ -3,7 +3,8 @@
     font-family: "Playfair Display", serif;
     font-optical-sizing: auto;
 
-    color: #8C6E4D;
+    /* color: #8C6E4D; */
+    color: #0f0f0f;
     opacity: 85%;
     padding: 20px 40px;
     cursor: pointer;
