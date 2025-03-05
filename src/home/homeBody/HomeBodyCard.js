@@ -14,6 +14,9 @@ const HomeBodyCard = (props) => {
                     <p>
                         {props.desc}
                     </p>
+                    <button className='CardMore'>
+                        Learn More
+                    </button>
                 </section>
             </div >
         </div >
