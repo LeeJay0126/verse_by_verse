@@ -9,10 +9,10 @@ const HomeBodyCard = (props) => {
                 <section className={`CardImage ${props.image}`}></section>
                 <section className='HBCBody'>
                     <h3>
-                        Read the Bible
+                        {props.title}
                     </h3>
                     <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        {props.desc}
                     </p>
                 </section>
             </div >
