@@ -1,0 +1,17 @@
+
+.HomeUpdate {
+    /* width: 80%;
+    margin: 0 auto; */
+    height: 500px;
+
+    background-image: url('../../component/images/homePage/mobileSection/TableWithOpenBible.jpg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.UpdatePhoneMock {
+    height: 300px;
+}
