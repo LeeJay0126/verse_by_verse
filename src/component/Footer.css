@@ -4,12 +4,12 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 50px;
+    height: 20px;
 }
 
 .Footer p {
     color: white;
-    font-size: 12px;
+    font-size: 10px;
 }
 
 .line {
