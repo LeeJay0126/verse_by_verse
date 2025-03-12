@@ -6,9 +6,16 @@ const HomeUpdate = () => {
     return (
         <section className='HomeUpdate'>
             <h2 className='UpdateHeader'>
-                Take Verse by Verse on the go
+                UPCOMING UPDATE
             </h2>
-            <img className="UpdatePhoneMock" alt='phone mockup for update section' src={phoneMock}/>
+            <div className='UpdateFlex'>
+                <div className='UpdateDesc'>
+                    <h3 className='UpdateDescHeader'>
+                        Take Verse by Verse on the go!
+                    </h3>
+                </div>
+                <img className="UpdatePhoneMock" alt='phone mockup for update section' src={phoneMock} />
+            </div>
         </section>
     );
 };
