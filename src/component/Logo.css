@@ -9,3 +9,8 @@
     padding: 20px 40px;
     cursor: pointer;
 }
+
+.Logo a, .Logo a:visited  {
+    text-decoration: none;
+    color: #0f0f0f;
+}
