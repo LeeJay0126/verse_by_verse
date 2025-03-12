@@ -11,3 +11,8 @@
     color: #0f0f0f;
     opacity: 85%;
 }
+
+.MenuOptionList a, .MenuOptionList a:visited {
+    color: #0f0f0f;
+    text-decoration: none;
+}
