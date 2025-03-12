@@ -1,5 +1,5 @@
 import Header from '../../component/Header';
-import 'Account.css';
+import './Account.css';
 
 const Account = () => {
 

@@ -1,5 +1,5 @@
 import Header from '../../component/Header';
-import 'Study.css';
+import './Study.css';
 
 const Study = () => {
 
