@@ -88,6 +88,11 @@
     cursor: pointer;
 }
 
+.CardMore a , .CardMore a:visited {
+    text-decoration: none;
+    color: #0f0f0f;
+}
+
 /*
     Card Image CSS Class
  */
