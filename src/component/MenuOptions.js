@@ -8,6 +8,10 @@ import './MenuOptions.css';
 import { Link } from 'react-router-dom';
 import Contact from '../pages/Contact/Contact';
 
+/* TODO
+Have the MenuOption list to take props
+
+*/
 const MenuOptions = () => {
 
     return (

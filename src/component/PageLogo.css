@@ -1,0 +1,16 @@
+
+
+.PageLogo {
+    font-size: 24px;
+    font-family: "Playfair Display", serif;
+    font-optical-sizing: auto;
+
+    color: white;
+    padding: 20px 40px;
+    cursor: pointer;
+}
+
+.PageLogo a, .PageLogo a:visited  {
+    text-decoration: none;
+    color: white;
+}
