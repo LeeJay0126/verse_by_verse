@@ -7,9 +7,11 @@
     height: 20px;
 }
 
-.Footer p {
+.Footer a, .Footer a:visited {
     color: white;
     font-size: 10px;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .line {

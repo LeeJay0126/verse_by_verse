@@ -5,7 +5,7 @@ const Footer = () => {
     return (
         <section className='Footer'>
             <div className='line'></div>
-            <p>Powered By Jay.Asen</p>
+            <a target="_blank" rel='noreferrer' href='http://www.jayasen.com/'>Powered By Jay.Asen</a>
             <div className='line'></div>
         </section>
     );
