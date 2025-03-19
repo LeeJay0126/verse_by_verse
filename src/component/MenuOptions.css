@@ -2,17 +2,37 @@
     padding-right: 20px;
 }
 
-.MenuOptionList {
+.MenuOptionList,
+.MenuOptionListPage {
     display: inline-block;
     font-size: 12px;
     padding: 5px 15px;
     cursor: pointer;
     /* color: #8C6E4D; */
-    color: #0f0f0f;
     opacity: 85%;
 }
 
-.MenuOptionList a, .MenuOptionList a:visited {
+.MenuOptionList {
     color: #0f0f0f;
+}
+
+.MenuOptionListPage {
+    color: white;
+}
+
+.MenuOptionList a,
+.MenuOptionList a:visited,
+.MenuOptionListPage a,
+.MenuOptionListPage a:visited {
     text-decoration: none;
+}
+
+.MenuOptionList a,
+.MenuOptionList a:visited {
+    color: #0f0f0f;
+}
+
+.MenuOptionListPage a,
+.MenuOptionListPage a:visited {
+    color: white;
 }

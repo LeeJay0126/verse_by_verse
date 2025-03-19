@@ -1,13 +1,13 @@
-import Header from '../../component/Header';
 import './About.css';
+import AboutHeader from './AboutHeader';
 
 const About = () => {
 
     return (
         <section className='About'>
-            <Header />
             <div className='AboutHero'>
-                <h1 className ="HeroH1 AboutH1">
+                <AboutHeader />
+                <h1 className="HeroH1 AboutH1">
                     Welcome to Verse by Verse
                 </h1>
             </div>

@@ -12,16 +12,16 @@ import Contact from '../pages/Contact/Contact';
 Have the MenuOption list to take props
 
 */
-const MenuOptions = () => {
+const MenuOptions = (props) => {
 
     return (
         <ul className='MenuOptions'>
-            <li className='MenuOptionList'><Link to='/' element={<Home />}>HOME</Link></li>
-            <li className='MenuOptionList'><Link to='/about' element={<About />}>ABOUT</Link></li>
-            <li className='MenuOptionList'><Link to='/study' element={<Study />}> STUDY & REFLECT </Link></li>
-            <li className='MenuOptionList'><Link to='/community' element={<Community />}>COMMUNITIES</Link></li>
-            <li className='MenuOptionList'><Link to='/contact' element={<Contact />}>CONTACT</Link></li>
-            <li className='MenuOptionList'><Link to='/account' element={<Account />}>ACCOUNT</Link></li>
+            <li className={props.page ? 'MenuOptionList' : 'MenuOptionListPage'}><Link to='/' element={<Home />}>HOME</Link></li>
+            <li className={props.page ? 'MenuOptionList' : 'MenuOptionListPage'}><Link to='/about' element={<About />}>ABOUT</Link></li>
+            <li className={props.page ? 'MenuOptionList' : 'MenuOptionListPage'}><Link to='/study' element={<Study />}> STUDY & REFLECT </Link></li>
+            <li className={props.page ? 'MenuOptionList' : 'MenuOptionListPage'}><Link to='/community' element={<Community />}>COMMUNITIES</Link></li>
+            <li className={props.page ? 'MenuOptionList' : 'MenuOptionListPage'}><Link to='/contact' element={<Contact />}>CONTACT</Link></li>
+            <li className={props.page ? 'MenuOptionList' : 'MenuOptionListPage'}><Link to='/account' element={<Account />}>ACCOUNT</Link></li>
         </ul>
     );
 };

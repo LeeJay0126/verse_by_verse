@@ -1,4 +1,5 @@
 
 .BibleHeader {
     background-color: transparent;
+    display: flex;
 }

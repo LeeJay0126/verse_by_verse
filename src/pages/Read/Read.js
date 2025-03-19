@@ -1,11 +1,12 @@
 import Header from '../../component/Header';
+import BibleHeader from './BibleHeader';
 import './Read.css';
 
 const Read = () => {
 
     return (
         <section className='Read'>
-            <Header />
+            <BibleHeader />
         </section>
     );
 };

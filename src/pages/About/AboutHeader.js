@@ -1,16 +1,14 @@
-import './BibleHeader.css';
-import '../../component/Header.css';
+import './AboutHeader.css';
 import PageLogo from '../../component/PageLogo';
 import MenuOptions from '../../component/MenuOptions';
 
-const BibleHeader = () => {
-
+const AboutHeader = () => {
     return (
-        <header className='BibleHeader'>
+        <header className='AboutHeader'>
             <PageLogo/>
             <MenuOptions page={false}/>
         </header>
     );
 };
 
-export default BibleHeader;
+export default AboutHeader;

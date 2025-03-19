@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 const Logo = () => {
 
     return (
-        <p className="Logo">
+        <p className="PageLogo">
             <Link to="/" element={<Home />}>
                 Verse by Verse
             </Link>

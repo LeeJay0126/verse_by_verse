@@ -7,7 +7,7 @@ const Header = () => {
     return (
         <header className="Header">
             <Logo />
-            <MenuOptions/>
+            <MenuOptions page= {true}/>
         </header>
     );
 };
