@@ -1,4 +1,3 @@
-import Header from '../../component/Header';
 import BibleHeader from './BibleHeader';
 import './Read.css';
 

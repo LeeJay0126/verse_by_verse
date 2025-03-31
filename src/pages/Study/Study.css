@@ -1,0 +1,12 @@
+
+.StudyHero {
+    background-color: #00000080;
+    background-image: url('../../component/images/homePage/mobileSection/TableWithOpenBible.jpg');
+    height: 500px;
+
+    background-blend-mode: saturation;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+}
