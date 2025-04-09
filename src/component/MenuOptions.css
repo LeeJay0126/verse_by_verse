@@ -10,6 +10,9 @@
     cursor: pointer;
     /* color: #8C6E4D; */
     opacity: 85%;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
 }
 
 .MenuOptionList {
