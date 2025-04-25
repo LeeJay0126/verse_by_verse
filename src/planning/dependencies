@@ -1,0 +1,9 @@
+
+axios: 
+npm install axios
+
+react-router: 
+npm i react-router
+
+react icons:
+npm install react-icons --save
