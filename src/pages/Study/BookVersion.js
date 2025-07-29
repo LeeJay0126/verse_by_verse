@@ -1,7 +1,11 @@
 import './BookVersion.css';
 import { GoTriangleDown } from "react-icons/go";
+import { useState } from 'react';
 
 const BookVersion = () => {
+
+    const [book, setBook] = useState("Genesis");
+    const [chapter, setChapter] = useState("Intro");
 
     return (
         <div className="BookVersionHolder">
