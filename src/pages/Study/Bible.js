@@ -1,5 +1,5 @@
 import './Bible.css';
-import BookVersion from './BookVersion';
+import BookVersion from './BibleBookVersions/BookVersion';
 
 const Bible = () => {
 

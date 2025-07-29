@@ -1,3 +1,6 @@
+import "./BookVersionComponent.css";
+import { useState } from "react";
+
 const BookVersionComponent = (props) => {
   return (
     <div className="BookModal">
