@@ -4,10 +4,10 @@ SERVER SIDE PLANNING
 1. Database
 -- 
 /*
-    Bibiliaapi provides korean translation as well
+    Need to find a separate API that provides Korean bible API
 */
 Bible Database & API:
-https://bibliaapi.com/docs/
+https://scripture.api.bible/
 --
 /*
     First host it locally on MySQL and then migrate it to "Hostinger MySQL Hosting" – Starts at $2.99/month.
@@ -23,6 +23,8 @@ Aside from home page, which will look like "LayoutReference.webp" under componen
 There will be four main parts.
 
 About page - Explanation of the project and the purpose of the web app. Brief guide on how to better utilize the app should be included
+
+Read / Study may be done together
 
 Read - Page where you can read the bible in English and Korean (potentially other languages too). Components should be structured reusable so that it can be used in study & reflect and join community page
 
