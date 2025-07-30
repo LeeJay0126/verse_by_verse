@@ -1,10 +1,11 @@
 import getBibleVersions from "./GetBibleVersions";
+import SortVersionsByLanguage from "./SortVersionsByLanguage";
 
 const VersionList = () => {
-    const versionList = document.querySelector(`#bible-version-list`);
-    let versionHTML = ``;
+    // const versionList = document.querySelector(`#bible-version-list`);
+    // let versionHTML = ``;
     getBibleVersions.then((bibleVersionList) => {
-        const sortedVersions = sortVersionsByLanguage(bibleVersionList);
+        const sortedVersions = SortVersionsByLanguage(bibleVersionList);
         for (let languageGroup in sortedVersions) {
             const language = languageGroup;
             versionHTML += `<h4 class="list-heading"><span>${language}</span></h4><ul>`;
