@@ -1,0 +1,42 @@
+
+.BookModal {
+    position: absolute;
+    left: 0;
+    top: 28px;
+    width: 500px;
+    background-color: white;
+}
+
+.ModalHeader {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    background-color: white;
+    color: rgb(34, 34, 34);
+}
+
+.ModalTitle, .ModalExitButton {
+    text-align: end;
+}
+
+.ModalTitle {
+    font-size: 24px;
+}
+
+.ModalExitButton {
+    font-size: 12px;
+}
+
+.ModalFilter {
+    width: 100%;
+    padding: 3px 5px;
+}
+
+.ModalFilterInput {
+    width: 100%;
+    color: rgb(34, 34, 34);
+}
+
+.ModalHidden {
+    display: none;
+}
+
