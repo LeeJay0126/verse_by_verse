@@ -4,18 +4,20 @@
     left: 0;
     top: 28px;
     width: 500px;
-    background-color: white;
+    background-color: rgb(147, 142, 142);
 }
 
 .ModalHeader {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
-    background-color: white;
+    padding: 5px 5px;
     color: rgb(34, 34, 34);
+    align-items: center;
 }
 
 .ModalTitle, .ModalExitButton {
     text-align: end;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
 .ModalTitle {
@@ -38,5 +40,9 @@
 
 .ModalHidden {
     display: none;
+}
+
+.ModalDisplayList {
+    min-height: 300px;
 }
 
