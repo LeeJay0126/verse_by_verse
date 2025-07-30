@@ -1,38 +1,31 @@
+import { useState, useEffect } from "react";
 import getBibleVersions from "./GetBibleVersions";
-import SortVersionsByLanguage from "./SortVersionsByLanguage";
+import IndividualVersion from "./IndividualVersion";
+import IndividualVersionHeader from "./IndividualVersionHeader";
+import sortVersionsByLanguage from "./SortVersionsByLanguage";
 
 const VersionList = () => {
-    // const versionList = document.querySelector(`#bible-version-list`);
-    // let versionHTML = ``;
+  const [versionsByLanguage, setVersionsByLanguage] = useState({});
+
+  useEffect(() => {
     getBibleVersions.then((bibleVersionList) => {
-        const sortedVersions = SortVersionsByLanguage(bibleVersionList);
-        for (let languageGroup in sortedVersions) {
-            const language = languageGroup;
-            versionHTML += `<h4 class="list-heading"><span>${language}</span></h4><ul>`;
-            const versions = sortedVersions[languageGroup];
-            for (let version of versions) {
-                versionHTML += `<li class="bible">
-                        <a href="book.html?version=${version.id}&abbr=${version.abbreviation
-                    }">
-                          <abbr class="bible-version-abbr" title="${version.name
-                    }">${version.abbreviation}</abbr>
-                          <span>
-                            <span class="bible-version-name">${version.name
-                    }</span>
-                            ${version.description
-                        ? '<span class="bible-version-desc">' +
-                        version.description +
-                        "</span>"
-                        : ""
-                    }
-                          </span>
-                        </a>
-                      </li>`;
-            }
-            versionHTML += `</ul>`;
-        }
-        versionList.innerHTML = versionHTML;
+      const sorted = sortVersionsByLanguage(bibleVersionList);
+      setVersionsByLanguage(sorted);
     });
-}
+  }, []);
+
+  return (
+    <div>
+      {Object.entries(versionsByLanguage).map(([language, versions]) => (
+        <div key={language}>
+          <IndividualVersionHeader language={language} />
+          {versions.map((version) => (
+            <IndividualVersion key={version.id} version={version} />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default VersionList;

@@ -1,27 +1,25 @@
 
-const sortVersionsByLanguage = (bibleVersionList) => {
-    let sortedVersions = {};
+const sortVersionsByLanguage = (versionList) => {
+  const sortedVersions = {};
 
-    for (const version of bibleVersionList) {
-        if (!sortedVersions[version.language]) {
-            sortedVersions[version.language] = [];
-        }
-        sortedVersions[version.language].push(version);
+  versionList.forEach((version) => {
+    const language = version.language?.name || 'Unknown';
+
+    if (!sortedVersions[language]) {
+      sortedVersions[language] = [];
     }
-    for (const version in sortedVersions) {
-        sortedVersions[version].sort((a, b) => {
-            const nameA = a.abbreviation.toUpperCase();
-            const nameB = b.abbreviation.toUpperCase();
-            if (nameA < nameB) {
-                return -1;
-            }
-            if (nameA > nameB) {
-                return 1;
-            }
-            return 0;
-        });
-    }
-    return sortedVersions;
+
+    sortedVersions[language].push(version);
+  });
+
+  // Sort versions alphabetically within each language group by abbreviation
+  for (const language in sortedVersions) {
+    sortedVersions[language].sort((a, b) => {
+      return a.abbreviation.localeCompare(b.abbreviation);
+    });
+  }
+
+  return sortedVersions;
 };
 
-export default SortVersionsByLanguage;
+export default sortVersionsByLanguage;

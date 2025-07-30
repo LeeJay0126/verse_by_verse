@@ -1,37 +1,23 @@
-import API_KEY from "../../../component/Key";
+import api from "../../../component/Key";
 
-const getBibleVersions = () => {
+const API_KEY = api;
+const API_URL = 'https://api.scripture.api.bible/v1/bibles';
 
-    return (
-        new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = false;
-
-            xhr.addEventListener(`readystatechange`, function () {
-                if (this.readyState === this.DONE) {
-                    const { data } = JSON.parse(this.responseText);
-                    const versions = data.map((data) => {
-                        return {
-                            name: data.name,
-                            id: data.id,
-                            abbreviation: data.abbreviation,
-                            description: data.description,
-                            language: data.language.name,
-                        };
-                    });
-
-                    resolve(versions);
-                }
-            });
-
-            xhr.open(`GET`, `https://api.scripture.api.bible/v1/bibles`);
-            xhr.setRequestHeader(`api-key`, API_KEY);
-
-            xhr.onerror = () => reject(xhr.statusText);
-
-            xhr.send();
-        })
-    );
-};
+const getBibleVersions = fetch(API_URL, {
+  method: 'GET',
+  headers: {
+    'api-key': API_KEY,
+    'accept': 'application/json',
+  }
+})
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    return res.json();
+  })
+  .then(data => data.data) // `data` field inside JSON contains the array of bibles
+  .catch(err => {
+    console.error("Failed to fetch Bible versions:", err);
+    return [];
+  });
 
 export default getBibleVersions;
