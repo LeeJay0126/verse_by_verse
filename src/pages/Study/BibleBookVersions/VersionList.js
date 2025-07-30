@@ -5,27 +5,33 @@ import IndividualVersionHeader from "./IndividualVersionHeader";
 import sortVersionsByLanguage from "./SortVersionsByLanguage";
 
 const VersionList = () => {
-  const [versionsByLanguage, setVersionsByLanguage] = useState({});
+    const [versionsByLanguage, setVersionsByLanguage] = useState({});
 
-  useEffect(() => {
-    getBibleVersions.then((bibleVersionList) => {
-      const sorted = sortVersionsByLanguage(bibleVersionList);
-      setVersionsByLanguage(sorted);
-    });
-  }, []);
+    useEffect(() => {
+        getBibleVersions.then((bibleVersionList) => {
+            const sorted = sortVersionsByLanguage(bibleVersionList);
+            setVersionsByLanguage(sorted);
+        });
+    }, []);
 
-  return (
-    <div>
-      {Object.entries(versionsByLanguage).map(([language, versions]) => (
-        <div key={language}>
-          <IndividualVersionHeader language={language} />
-          {versions.map((version) => (
-            <IndividualVersion key={version.id} version={version} />
-          ))}
+    return (
+        <div>
+            {Object.entries(versionsByLanguage)
+                .sort(([langA], [langB]) => {
+                    if (langA === "English") return -1;
+                    if (langB === "English") return 1;
+                    return langA.localeCompare(langB);
+                })
+                .map(([language, versions]) => (
+                    <div key={language}>
+                        <IndividualVersionHeader language={language} />
+                        {versions.map((version) => (
+                            <IndividualVersion key={version.id} version={version} />
+                        ))}
+                    </div>
+                ))}
         </div>
-      ))}
-    </div>
-  );
+    );
 };
 
 export default VersionList;
