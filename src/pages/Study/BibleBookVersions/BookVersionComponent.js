@@ -1,8 +1,7 @@
 import "./BookVersionComponent.css";
-
+import VersionList from "./VersionList";
 
 const BookVersionComponent = (props) => {
-
   const modalCloseHandler = () => {
     props.setVis(false);
     console.log(props.visibilityStatus);
@@ -19,7 +18,9 @@ const BookVersionComponent = (props) => {
       <section className="ModalFilter">
         <input className="ModalFilterInput" placeholder="Filter Books..." />
       </section>
-      <section className="ModalDisplayList"></section>
+      <section className="ModalDisplayList">
+        <VersionList />
+      </section>
     </div>
   );
 };
