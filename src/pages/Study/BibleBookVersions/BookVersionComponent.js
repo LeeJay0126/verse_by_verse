@@ -10,7 +10,7 @@ const BookVersionComponent = (props) => {
   return (
     <div className={props.visibilityStatus ? "BookModal" : "ModalHidden"}>
       <section className="ModalHeader">
-        <h3 className="ModalTitle">BOOK</h3>
+        <h3 className="ModalTitle">Versions</h3>
         <h4 className="ModalExitButton" onClick={modalCloseHandler}>
           CANCEL
         </h4>
