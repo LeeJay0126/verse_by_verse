@@ -3,7 +3,9 @@
   left: 0;
   top: 28px;
   width: 500px;
-  background-color: rgb(147, 142, 142);
+  border: 1px solid black;
+  border-top: none;
+  background-color: rgb(255, 252, 252);
 }
 
 .ModalHeader {
