@@ -1,5 +1,6 @@
 import "./BookVersionComponent.css";
 import VersionList from "./VersionList";
+import { Scrollbar } from "react-scrollbars-custom";
 
 const BookVersionComponent = (props) => {
   const modalCloseHandler = () => {
@@ -10,7 +11,7 @@ const BookVersionComponent = (props) => {
   return (
     <div className={props.visibilityStatus ? "BookModal" : "ModalHidden"}>
       <section className="ModalHeader">
-        <h3 className="ModalTitle">BOOK</h3>
+        <h3 className="ModalTitle">Versions</h3>
         <h4 className="ModalExitButton" onClick={modalCloseHandler}>
           CANCEL
         </h4>
@@ -19,7 +20,9 @@ const BookVersionComponent = (props) => {
         <input className="ModalFilterInput" placeholder="Filter Books..." />
       </section>
       <section className="ModalDisplayList">
-        <VersionList />
+        <Scrollbar style={{ width: 500, height: 500 }}>
+          <VersionList />
+        </Scrollbar>
       </section>
     </div>
   );

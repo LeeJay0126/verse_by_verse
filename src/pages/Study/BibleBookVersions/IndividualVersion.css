@@ -1,0 +1,14 @@
+
+.bibleItem {
+    list-style: none;
+    padding: 15px 5px;
+}
+
+.bibleItem:hover {
+    background-color: aliceblue;
+}
+
+.bibleItem a, .bibleItem a:visited {
+    text-decoration: none;
+    color: rgb(34,34,34);
+}

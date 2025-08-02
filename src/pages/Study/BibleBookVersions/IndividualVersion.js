@@ -1,3 +1,5 @@
+import './IndividualVersion.css';
+
 const IndividualVersion = ({ version }) => {
   const { id, abbreviation, name } = version;
 

@@ -1,48 +1,48 @@
-
 .BookModal {
-    position: absolute;
-    left: 0;
-    top: 28px;
-    width: 500px;
-    background-color: rgb(147, 142, 142);
+  position: absolute;
+  left: 0;
+  top: 28px;
+  width: 500px;
+  background-color: rgb(147, 142, 142);
 }
 
 .ModalHeader {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    padding: 5px 5px;
-    color: rgb(34, 34, 34);
-    align-items: center;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  padding: 5px 5px;
+  color: rgb(34, 34, 34);
+  align-items: center;
 }
 
-.ModalTitle, .ModalExitButton {
-    text-align: end;
-    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+.ModalTitle,
+.ModalExitButton {
+  text-align: end;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
 }
 
 .ModalTitle {
-    font-size: 24px;
+  font-size: 24px;
 }
 
 .ModalExitButton {
-    font-size: 12px;
+  font-size: 12px;
 }
 
 .ModalFilter {
-    width: 100%;
-    padding: 3px 5px;
+  width: 100%;
+  padding: 3px 5px;
 }
 
 .ModalFilterInput {
-    width: 100%;
-    color: rgb(34, 34, 34);
+  width: 100%;
+  color: rgb(34, 34, 34);
 }
 
 .ModalHidden {
-    display: none;
+  display: none;
 }
 
 .ModalDisplayList {
-    min-height: 300px;
+  height: 500px;
 }
-

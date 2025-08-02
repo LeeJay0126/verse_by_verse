@@ -7,3 +7,6 @@ npm i react-router
 
 react icons:
 npm install react-icons --save
+
+react-scrollbar:
+npm install react-scrollbars-custom

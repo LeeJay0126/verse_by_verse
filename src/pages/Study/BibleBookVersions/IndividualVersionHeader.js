@@ -1,3 +1,5 @@
+import './IndividualVersionHeader.css';
+
 const IndividualVersionHeader = ({ language }) => {
   return (
     <h3 className="languageHeader">{language}</h3>
