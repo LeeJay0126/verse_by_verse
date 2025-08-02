@@ -9,19 +9,23 @@
 }
 
 .Books, .Versions {
-    display: flex;
     position: relative;
     padding: 5px 10px;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
     padding-bottom: 3px;
     border-bottom: 1px solid #5f5e5e;
-    width: 200px;
-    cursor: pointer;
     margin-bottom: 30px;
 }
 
-.Books:hover, .Versions:hover {
-    background-color: rgb(147, 142, 142);
+.BookTabContainer, .VersionTabContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 200px;
+    cursor: pointer;
 }
+
+/* .Books:hover, .Versions:hover {
+    border: 1px black solid;
+    border-bottom: none;
+} */

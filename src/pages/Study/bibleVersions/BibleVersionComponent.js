@@ -1,4 +1,4 @@
-import "./BookVersionComponent.css";
+import "./BibleVersionComponent.css";
 import VersionList from "./VersionList";
 import { Scrollbar } from "react-scrollbars-custom";
 
