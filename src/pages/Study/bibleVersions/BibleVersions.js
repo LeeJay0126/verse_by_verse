@@ -1,7 +1,7 @@
-import './BookVersion.css';
+import './BibleVersions.css';
 import { GoTriangleDown } from "react-icons/go";
 import { useState } from 'react';
-import BookVersionComponent from './BookVersionComponent';
+import BookVersionComponent from './BibleVersionComponent';
 
 const BookVersion = () => {
   const [book, setBook] = useState("Genesis");
