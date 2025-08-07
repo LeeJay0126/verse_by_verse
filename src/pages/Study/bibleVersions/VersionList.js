@@ -5,33 +5,51 @@ import IndividualVersionHeader from "./IndividualVersionHeader";
 import sortVersionsByLanguage from "./SortVersionsByLanguage";
 
 const VersionList = () => {
-    const [versionsByLanguage, setVersionsByLanguage] = useState({});
+  const [versionsByLanguage, setVersionsByLanguage] = useState({});
 
-    useEffect(() => {
-        getBibleVersions.then((bibleVersionList) => {
-            const sorted = sortVersionsByLanguage(bibleVersionList);
-            setVersionsByLanguage(sorted);
-        });
-    }, []);
+  // Abbreviations to show
+  const allowedAbbreviations = ["ASV", "BSB", "engKJV", "WEB", "FBV"];
 
-    return (
-        <div>
-            {Object.entries(versionsByLanguage)
-                .sort(([langA], [langB]) => {
-                    if (langA === "English") return -1;
-                    if (langB === "English") return 1;
-                    return langA.localeCompare(langB);
-                })
-                .map(([language, versions]) => (
-                    <div key={language}>
-                        <IndividualVersionHeader language={language} />
-                        {versions.map((version) => (
-                            <IndividualVersion key={version.id} version={version} />
-                        ))}
-                    </div>
-                ))}
-        </div>
-    );
+  useEffect(() => {
+    getBibleVersions.then((bibleVersionList) => {
+      const sorted = sortVersionsByLanguage(bibleVersionList);
+      setVersionsByLanguage(sorted);
+    });
+  }, []);
+
+  return (
+    <div>
+      {Object.entries(versionsByLanguage)
+        .filter(([language]) => language === "English")
+        .map(([language, versions]) => {
+          // Keep only allowed abbreviations
+          const filtered = versions.filter((version) =>
+            allowedAbbreviations.includes(version.abbreviation || version.id)
+          );
+
+          // Remove duplicates, keeping latest occurrence
+          const uniqueLatest = filtered.reduceRight((acc, curr) => {
+            const abbr = curr.abbreviation || curr.id;
+            if (!acc.some((v) => (v.abbreviation || v.id) === abbr)) {
+              acc.unshift(curr); // keep order as original (latest wins)
+            }
+            return acc;
+          }, []);
+
+          return (
+            <div key={language}>
+              <IndividualVersionHeader language={language} />
+              {uniqueLatest.map((version) => (
+                <IndividualVersion key={version.id} version={version} />
+              ))}
+            </div>
+          );
+        })}
+    </div>
+  );
 };
 
 export default VersionList;
+
+
+
