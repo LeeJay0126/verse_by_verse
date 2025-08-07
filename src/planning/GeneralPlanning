@@ -8,6 +8,13 @@ SERVER SIDE PLANNING
 */
 Bible Database & API:
 https://scripture.api.bible/
+Korean Bible API:
+https://m.ibibles.net/quote10.htm
+>>  
+    Korean Bible API is extremely outdated as all korean API's have been 
+    monetized as of 20 years ago.
+    These APIs' provide non-JSON raw HTML and need to be handled separately from other language(s).
+    Only 1 version of Korean Bible is available. 
 --
 /*
     First host it locally on MySQL and then migrate it to "Hostinger MySQL Hosting" – Starts at $2.99/month.
