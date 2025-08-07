@@ -4,7 +4,7 @@ import IndividualVersion from "./IndividualVersion";
 import IndividualVersionHeader from "./IndividualVersionHeader";
 import sortVersionsByLanguage from "./SortVersionsByLanguage";
 
-const VersionList = () => {
+const VersionList = (props) => {
   const [versionsByLanguage, setVersionsByLanguage] = useState({});
 
   // Abbreviations to show
@@ -45,10 +45,10 @@ const VersionList = () => {
             <div key={language}>
               <IndividualVersionHeader language={language} />
               {uniqueLatest.map((version) => (
-                <IndividualVersion key={version.id} version={version} />
+                <IndividualVersion key={version.id} version={version} chVer={props.ver} />
               ))}
               <IndividualVersionHeader language={"Korean"} />
-              <IndividualVersion key={"kor"} version={KorVersion} />
+              <IndividualVersion key={"kor"} version={KorVersion} chVer={props.ver}/>
             </div>
           );
         })}

@@ -7,7 +7,7 @@ import BibleVersionModal from '../bookVersions/BookVersionModal';
 const BookVersion = () => {
   const [book, setBook] = useState("Genesis");
   const [chapter, setChapter] = useState("Intro");
-  const [version, setVersion] = useState("NIV");
+  const [version, setVersion] = useState("ASV");
   const [bookModal, setVisibility] = useState(false);
   const [versionModal, setVersionVisibility] = useState(false);
 
@@ -30,10 +30,11 @@ const BookVersion = () => {
       </div>
       <div className="Versions">
         <section className='VersionTabContainer' onClick={VersionModalVisibilityHander}>
-          <p className="VersionNameDisplay">NIV</p>
+          <p className="VersionNameDisplay">{version}</p>
           <GoTriangleDown className="BookVersionDownArrow" />
         </section>
-        <BibleVersionComponent setVis={setVersionVisibility} visibilityStatus={versionModal} />
+        <BibleVersionComponent setVis={setVersionVisibility} visibilityStatus={versionModal} 
+        versionChange={setVersion}/>
       </div>
     </div>
   );
