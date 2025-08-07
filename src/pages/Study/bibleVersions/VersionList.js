@@ -17,6 +17,11 @@ const VersionList = () => {
     });
   }, []);
 
+    const KorVersion = {
+        abbreviation: "KOR",
+        name: "Korean 한국어 성경"
+    };
+
   return (
     <div>
       {Object.entries(versionsByLanguage)
@@ -42,6 +47,8 @@ const VersionList = () => {
               {uniqueLatest.map((version) => (
                 <IndividualVersion key={version.id} version={version} />
               ))}
+              <IndividualVersionHeader language={"Korean"} />
+              <IndividualVersion key={"kor"} version={KorVersion} />
             </div>
           );
         })}
@@ -50,6 +57,3 @@ const VersionList = () => {
 };
 
 export default VersionList;
-
-
-

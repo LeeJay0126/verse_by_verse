@@ -1,13 +1,13 @@
-import './IndividualVersion.css';
+import "./IndividualVersion.css";
 
 const IndividualVersion = ({ version }) => {
-  const { id, abbreviation, name } = version;
+  const {abbreviation, name } = version;
 
   return (
     <li className="bibleItem">
-      <a href={`book.html?version=${id}&abbr=${abbreviation}`}>
+      <p>
         {abbreviation} - {name}
-      </a>
+      </p>
     </li>
   );
 };
