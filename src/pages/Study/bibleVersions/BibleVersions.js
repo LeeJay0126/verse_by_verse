@@ -1,7 +1,8 @@
-import './BookVersion.css';
+import './BibleVersions.css';
 import { GoTriangleDown } from "react-icons/go";
 import { useState } from 'react';
-import BookVersionComponent from './BookVersionComponent';
+import BookVersionComponent from './BibleVersionComponent';
+import BookVersionModal from '../bookVersions/BookVersionModal';
 
 const BookVersion = () => {
   const [book, setBook] = useState("Genesis");
@@ -21,12 +22,17 @@ const BookVersion = () => {
   return (
     <div className="BookVersionHolder">
       <div className="Books">
-        <p className="BookNameDisplay" onClick={BookModalVisibilityHandler}>{book}</p>
-        {/* <GoTriangleDown className="BookVersionDownArrow" onClick={BookModalVisibilityHandler} /> */}
+        <section className='BookTabContainer' onClick={BookModalVisibilityHandler}>
+          <p className="BookNameDisplay">{book}</p>
+          <GoTriangleDown className="BookVersionDownArrow" />
+        </section>
+        <BookVersionModal setVis={setVisibility} visibilityStatus={bookModal} />
       </div>
       <div className="Versions">
-        <p className="VersionNameDisplay" onClick={VersionModalVisibilityHander}>NIV</p>
-        <GoTriangleDown className="BookVersionDownArrow" />
+        <section className='VersionTabContainer' onClick={VersionModalVisibilityHander}>
+          <p className="VersionNameDisplay">NIV</p>
+          <GoTriangleDown className="BookVersionDownArrow" />
+        </section>
         <BookVersionComponent setVis={setVersionVisibility} visibilityStatus={versionModal} />
       </div>
     </div>
