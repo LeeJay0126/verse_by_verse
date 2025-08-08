@@ -17,10 +17,10 @@ const VersionList = (props) => {
     });
   }, []);
 
-    const KorVersion = {
-        abbreviation: "KOR",
-        name: "Korean 한국어 성경"
-    };
+  const KorVersion = {
+    abbreviation: "KOR",
+    name: "Korean 한국어 성경"
+  };
 
   return (
     <div>
@@ -45,10 +45,12 @@ const VersionList = (props) => {
             <div key={language}>
               <IndividualVersionHeader language={language} />
               {uniqueLatest.map((version) => (
-                <IndividualVersion key={version.id} version={version} chVer={props.ver} />
+                <IndividualVersion key={version.id} id={version.id} version={version}
+                  chVer={props.ver} setId={props.setVersionId} />
               ))}
               <IndividualVersionHeader language={"Korean"} />
-              <IndividualVersion key={"kor"} version={KorVersion} chVer={props.ver}/>
+              <IndividualVersion key={"kor"} id={"kor"} version={KorVersion}
+                chVer={props.ver} setId={props.setVersionId} />
             </div>
           );
         })}

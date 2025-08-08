@@ -21,7 +21,7 @@ const BookVersionComponent = (props) => {
       </section>
       <section className="ModalDisplayList">
         <Scrollbar style={{ width: 500, height: 500 }}>
-          <VersionList ver={props.versionChange}/>
+          <VersionList ver={props.versionChange} setVersionId={props.setCurrentVersionId}/>
         </Scrollbar>
       </section>
     </div>
