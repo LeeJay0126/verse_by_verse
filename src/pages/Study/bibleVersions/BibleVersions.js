@@ -28,7 +28,7 @@ const BookVersion = () => {
           <p className="BookNameDisplay">{book}</p>
           <GoTriangleDown className="BookVersionDownArrow" />
         </section>
-        <BookVersionModal setVis={setVisibility} visibilityStatus={bookModal} versionId={version} />
+        <BookVersionModal setVis={setVisibility} visibilityStatus={bookModal} versionId={currVersionID} />
       </div>
       <div className="Versions">
         <section className='VersionTabContainer' onClick={VersionModalVisibilityHander}>
