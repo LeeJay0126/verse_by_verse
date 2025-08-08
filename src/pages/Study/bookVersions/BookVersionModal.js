@@ -4,7 +4,6 @@ import { Scrollbar } from "react-scrollbars-custom";
 const BookVersionModal = (props) => {
   const modalCloseHandler = () => {
     props.setVis(false);
-    console.log(props.visibilityStatus);
   };
 
   return (
