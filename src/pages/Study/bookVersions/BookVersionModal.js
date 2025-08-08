@@ -4,7 +4,6 @@ import { Scrollbar } from "react-scrollbars-custom";
 const BookVersionModal = (props) => {
   const modalCloseHandler = () => {
     props.setVis(false);
-    console.log(props.visibilityStatus);
   };
 
   return (
@@ -20,7 +19,7 @@ const BookVersionModal = (props) => {
       </section>
       <section className="ModalDisplayList">
         <Scrollbar style={{ width: 500, height: 500 }}>
-
+        
         </Scrollbar>
       </section>
     </div>
