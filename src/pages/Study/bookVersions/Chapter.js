@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../../../component/Key";
+import "../bibleVersions/IndividualVersion.css"
 
 const Chapter = ({ version: bibleVersionID, book: bibleBookID, setChapters }) => {
   const [localChapters, setLocalChapters] = useState([]);
@@ -37,7 +38,7 @@ const Chapter = ({ version: bibleVersionID, book: bibleBookID, setChapters }) =>
   return (
     <>
       {localChapters.map(({ id, number }) => (
-        <li key={id}>Chapter {number}</li>
+        <li className="bibleItem" key={id}>Chapter {number}</li>
       ))}
     </>
   );
