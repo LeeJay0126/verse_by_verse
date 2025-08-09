@@ -1,42 +1,48 @@
 import './BibleVersions.css';
 import { GoTriangleDown } from "react-icons/go";
 import { useState } from 'react';
-import BookVersionComponent from './BibleVersionComponent';
+import BibleVersionComponent from './BibleVersionComponent';
 import BookVersionModal from '../bookVersions/BookVersionModal';
 
-const BookVersion = () => {
+const BibleVersions = () => {
   const [book, setBook] = useState("Genesis");
   const [chapter, setChapter] = useState("Intro");
-  const [version, setVersion] = useState("NIV");
+  const [version, setVersion] = useState("ASV");
+  const [currVersionID, setCurrentVersion] = useState('06125adad2d5898a-01');
   const [bookModal, setVisibility] = useState(false);
   const [versionModal, setVersionVisibility] = useState(false);
-
-  const BookModalVisibilityHandler = () => {
-    setVisibility(!bookModal);
-  };
-
-  const VersionModalVisibilityHander = () => {
-    setVersionVisibility(!versionModal);
-  }
 
   return (
     <div className="BookVersionHolder">
       <div className="Books">
-        <section className='BookTabContainer' onClick={BookModalVisibilityHandler}>
+        <section className='BookTabContainer' onClick={() => setVisibility(!bookModal)}>
           <p className="BookNameDisplay">{book}</p>
           <GoTriangleDown className="BookVersionDownArrow" />
         </section>
-        <BookVersionModal setVis={setVisibility} visibilityStatus={bookModal} />
+
+        <BookVersionModal
+          setVis={setVisibility}
+          visibilityStatus={bookModal}
+          versionId={currVersionID}              
+          onBookSelect={setBook}                  
+          onChapterSelect={setChapter}            
+        />
       </div>
+
       <div className="Versions">
-        <section className='VersionTabContainer' onClick={VersionModalVisibilityHander}>
-          <p className="VersionNameDisplay">NIV</p>
+        <section className='VersionTabContainer' onClick={() => setVersionVisibility(!versionModal)}>
+          <p className="VersionNameDisplay">{version}</p>
           <GoTriangleDown className="BookVersionDownArrow" />
         </section>
-        <BookVersionComponent setVis={setVersionVisibility} visibilityStatus={versionModal} />
+        <BibleVersionComponent
+          setVis={setVersionVisibility}
+          visibilityStatus={versionModal}
+          versionChange={setVersion}
+          setCurrentVersionId={setCurrentVersion}
+        />
       </div>
     </div>
   );
 };
 
-export default BookVersion;
+export default BibleVersions;

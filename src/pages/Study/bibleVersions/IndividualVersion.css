@@ -8,7 +8,7 @@
     background-color: aliceblue;
 }
 
-.bibleItem a, .bibleItem a:visited {
-    text-decoration: none;
+.bibleItem p {
     color: rgb(34,34,34);
+    cursor: pointer;
 }

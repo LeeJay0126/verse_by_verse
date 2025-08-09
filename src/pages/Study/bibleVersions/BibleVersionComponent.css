@@ -14,6 +14,7 @@
   padding: 5px 5px;
   color: rgb(34, 34, 34);
   align-items: center;
+  position: relative;
 }
 
 .ModalTitle,
@@ -29,6 +30,7 @@
 
 .ModalExitButton {
   font-size: 12px;
+  cursor: pointer;
 }
 
 .ModalFilter {
@@ -47,4 +49,20 @@
 
 .ModalDisplayList {
   height: 500px;
+}
+
+/*
+  Book Modal
+*/
+
+.BookVersionBackButton {
+  font-size: 20px;
+  font-weight: 700;
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+  position: absolute;
+  left: 10px;
+  background-color: transparent;
+  border: none;
 }
