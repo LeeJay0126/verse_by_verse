@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "../bibleVersions/BibleVersionComponent.css";
-import "../bibleVersions/IndividualVersion.css"
+
 import { Scrollbar } from "react-scrollbars-custom";
 import GetBookVersions from "./GetBookVersions";
 import Chapter from "./Chapter";
@@ -49,9 +49,9 @@ const BookVersionModal = ({ setVis, visibilityStatus, versionId, onBookSelect, o
           {!selectedBookId && !error && (
             books.length
               ? books.map(({ id, name }) => (
-                <li className="bibleItem"
+                <li
                   key={id}
-                  style={{ cursor: "pointer" }}
+                  className="bibleItem"
                   onClick={() => {
                     setSelectedBookId(id);
                     onBookSelect(name);
