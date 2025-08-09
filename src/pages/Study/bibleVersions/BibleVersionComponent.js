@@ -1,11 +1,18 @@
+import { useState } from "react";
 import "./BibleVersionComponent.css";
 import VersionList from "./VersionList";
 import { Scrollbar } from "react-scrollbars-custom";
 
 const BookVersionComponent = (props) => {
+  const [filterText, setFilterText] = useState("");
+
   const modalCloseHandler = () => {
     props.setVis(false);
     console.log(props.visibilityStatus);
+  };
+
+  const filterChangeHandler = (e) => {
+    setFilterText(e.target.value);
   };
 
   return (
@@ -17,11 +24,20 @@ const BookVersionComponent = (props) => {
         </h4>
       </section>
       <section className="ModalFilter">
-        <input className="ModalFilterInput" placeholder="Filter Books..." />
+        <input
+          className="ModalFilterInput"
+          placeholder="Filter Books..."
+          value={filterText}
+          onChange={filterChangeHandler}
+        />
       </section>
       <section className="ModalDisplayList">
         <Scrollbar style={{ width: 500, height: 500 }}>
-          <VersionList ver={props.versionChange} setVersionId={props.setCurrentVersionId}/>
+          <VersionList
+            ver={props.versionChange}
+            setVersionId={props.setCurrentVersionId}
+            filterText={filterText} // pass filter text as prop
+          />
         </Scrollbar>
       </section>
     </div>
