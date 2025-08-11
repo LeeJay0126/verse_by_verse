@@ -1,0 +1,17 @@
+
+.DisplaySection {
+    width: 80%;
+    padding-top: 30px;
+}
+
+.bookChapterHeader {
+    width: 100%;
+    text-align: center;
+}
+
+.displayArea {
+    padding-top: 30px;
+    width: 80%;
+    display: flex;
+    justify-content: center;
+}
