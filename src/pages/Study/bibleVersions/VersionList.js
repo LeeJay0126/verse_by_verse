@@ -75,6 +75,7 @@ const VersionList = (props) => {
                 version={KorVersion}
                 chVer={props.ver}
                 setId={props.setVersionId}
+                setVis={props.setVisibility}
               />
             </div>
           );
