@@ -66,6 +66,7 @@ const VersionList = (props) => {
                   version={version}
                   chVer={props.ver}
                   setId={props.setVersionId}
+                  setVis={props.setVisibility}
                 />
               ))}
               <IndividualVersionHeader language={"Korean"} />
