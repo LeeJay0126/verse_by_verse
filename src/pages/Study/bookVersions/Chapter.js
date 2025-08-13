@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import API from "../../../component/Key";
 import "../bibleVersions/IndividualVersion.css"
 
-const Chapter = ({ version: bibleVersionID, book: bibleBookID, setChapters }) => {
+const Chapter = ({ version: bibleVersionID, book: bibleBookID, setChapters, closeModal }) => {
   const [localChapters, setLocalChapters] = useState([]);
   const [error, setError] = useState(null);
   const API_KEY = API;
@@ -23,7 +23,6 @@ const Chapter = ({ version: bibleVersionID, book: bibleBookID, setChapters }) =>
         const chaptersData = data.map(({ number, id }) => ({ number, id }));
 
         setLocalChapters(chaptersData);
-        setChapters(chaptersData);
       } catch (err) {
         setError(err.message);
       }
@@ -36,11 +35,16 @@ const Chapter = ({ version: bibleVersionID, book: bibleBookID, setChapters }) =>
   if (!localChapters.length) return <li>Loading chapters...</li>;
 
   return (
-    <>
+    <div>
       {localChapters.map(({ id, number }) => (
-        <li className="bibleItem" key={id}>Chapter {number}</li>
+        <li className="bibleItem" key={id}
+          onClick={() => {
+            setChapters(number);
+            closeModal(false);
+          }}
+        >Chapter {number}</li>
       ))}
-    </>
+    </div>
   );
 };
 

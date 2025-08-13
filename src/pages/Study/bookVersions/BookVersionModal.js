@@ -93,10 +93,8 @@ const BookVersionModal = ({
             <Chapter
               version={versionId}
               book={selectedBookId}
-              setChapters={(chapters) => {
-                if (chapters.length > 0)
-                  onChapterSelect(`Chapter ${chapters[0].number}`);
-              }}
+              setChapters={onChapterSelect}
+              closeModal={setVis}
             />
           )}
         </Scrollbar>
