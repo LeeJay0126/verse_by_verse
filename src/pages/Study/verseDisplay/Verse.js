@@ -1,6 +1,6 @@
-import './VerseDisplay.css';
+import './Verse.css';
 
-const VerseDisplay = () => {
+const Verse = ({chapter, book}) => {
     /*
         bookChapterHeader is a combination of Book version
         + Chapter 
@@ -8,7 +8,7 @@ const VerseDisplay = () => {
     return (
         <section className="DisplaySection">
             <h2 className="bookChapterHeader">
-                Book Chapter
+                {book} {chapter}
             </h2>
             <div className="displayArea">
                 display
@@ -17,4 +17,4 @@ const VerseDisplay = () => {
     );
 };
 
-export default VerseDisplay;
+export default Verse;
