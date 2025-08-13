@@ -5,7 +5,8 @@ const IndividualVersion = (props) => {
   const clickHandler = () =>{
     props.chVer(props.version.abbreviation);
     props.setId(props.id);
-  }
+    props.setVis(false);
+  };
 
   return (
     // <li className="bibleItem" onClick={()=>chVer(version.id)}>
