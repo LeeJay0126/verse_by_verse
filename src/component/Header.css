@@ -1,9 +1,27 @@
-
 .Header {
-    background-color: #C0C0C0 ;
-    opacity: 90%;
+    background-color: #C0C0C0;
+    opacity: 0.9;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    /* Responsive padding line */
+    padding: clamp(8px, 2vw, 16px) clamp(12px, 3vw, 40px);
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+/* Make room for wrapped menus on tablets */
+@media (max-width: 992px) {
+    .Header {
+        flex-wrap: wrap;
+        row-gap: 8px;
+    }
+}
+
+/* >= 1440px: a touch more padding */
+@media (min-width: 1440px) {
+    .Header {
+        padding: 20px 48px;
+    }
 }

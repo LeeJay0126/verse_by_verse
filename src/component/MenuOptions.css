@@ -1,18 +1,24 @@
 .MenuOptions {
-    padding-right: 20px;
+    padding-right: clamp(8px, 2.2vw, 20px);
+    display: flex;
+    align-items: center;
+    gap: clamp(6px, 1.6vw, 18px);
+    flex-wrap: wrap; /* allow wrapping when space is tight */
 }
 
+/* Base item styles */
 .MenuOptionList,
 .MenuOptionListPage {
     display: inline-block;
-    font-size: 12px;
-    padding: 5px 15px;
+    padding: 6px 10px;
     cursor: pointer;
-    /* color: #8C6E4D; */
-    opacity: 85%;
-    font-size: 13px;
+    opacity: 0.85;
     font-weight: 500;
-    letter-spacing: 1px;
+    letter-spacing: 0.06em;
+    /* Fluid font size */
+    font-size: clamp(12px, 1.1vw, 14px);
+    line-height: 1.2;
+    border-radius: 6px; /* helps tap targets on mobile */
 }
 
 .MenuOptionList {
@@ -38,4 +44,38 @@
 .MenuOptionListPage a,
 .MenuOptionListPage a:visited {
     color: white;
+}
+
+/* Hover/focus affordances for larger screens */
+@media (hover: hover) and (pointer: fine) {
+    .MenuOptionList:hover,
+    .MenuOptionListPage:hover {
+        opacity: 1;
+        text-decoration: underline;
+    }
+}
+
+/* <= 992px: increase spacing a bit and allow 2-line menus */
+@media (max-width: 992px) {
+    .MenuOptions {
+        gap: 10px 14px;
+    }
+}
+
+/* <= 768px: make items easier to tap */
+@media (max-width: 768px) {
+    .MenuOptionList,
+    .MenuOptionListPage {
+        padding: 8px 12px;
+        border-radius: 8px;
+    }
+}
+
+/* <= 480px: stack items and center them */
+@media (max-width: 480px) {
+    .MenuOptions {
+        justify-content: center;
+        padding-right: 8px;
+        gap: 8px 10px;
+    }
 }

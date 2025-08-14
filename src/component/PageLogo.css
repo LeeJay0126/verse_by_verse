@@ -1,16 +1,21 @@
-
-
 .PageLogo {
-    font-size: 24px;
+    font-size: clamp(20px, 2.2vw, 28px);
     font-family: "Playfair Display", serif;
     font-optical-sizing: auto;
-
     color: white;
-    padding: 20px 40px;
+    padding: clamp(8px, 1.8vw, 20px) clamp(12px, 2.8vw, 40px);
     cursor: pointer;
+    line-height: 1;
 }
 
-.PageLogo a, .PageLogo a:visited  {
+.PageLogo a,
+.PageLogo a:visited  {
     text-decoration: none;
     color: white;
+}
+
+@media (max-width: 480px) {
+    .PageLogo {
+        padding: 8px 12px;
+    }
 }

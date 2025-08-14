@@ -4,19 +4,50 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 20px;
+    /* Fluid height for better tap area on mobile */
+    height: clamp(36px, 5vh, 56px);
+    padding: 0 12px;
+    gap: 12px;
+    box-sizing: border-box;
 }
 
-.Footer a, .Footer a:visited {
+.Footer a,
+.Footer a:visited {
     color: white;
-    font-size: 10px;
+    /* Fluid type */
+    font-size: clamp(10px, 1.2vw, 14px);
     text-decoration: none;
     cursor: pointer;
+    line-height: 1.2;
+    white-space: nowrap;
 }
 
 .line {
-    width: 30%;
+    flex: 1 1 auto;
     height: 1px;
     background-color: white;
-    margin: 0 5%;
+    max-width: 320px;
+    opacity: 0.6;
+}
+
+/* <= 768px: simplify footer layout */
+@media (max-width: 768px) {
+    .Footer {
+        gap: 8px;
+    }
+    .line {
+        display: none; /* remove the decorative line on small screens */
+    }
+}
+
+/* >= 1440px: a bit more breathing room */
+@media (min-width: 1440px) {
+    .Footer {
+        height: 48px;
+        gap: 24px;
+    }
+    .Footer a,
+    .Footer a:visited {
+        font-size: 14px;
+    }
 }
