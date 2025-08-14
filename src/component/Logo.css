@@ -1,16 +1,24 @@
 .Logo {
-    font-size: 24px;
+    /* Fluid type scales nicely from mobile to desktop */
+    font-size: clamp(20px, 2.2vw, 28px);
     font-family: "Playfair Display", serif;
     font-optical-sizing: auto;
-
-    /* color: #8C6E4D; */
     color: #0f0f0f;
-    opacity: 85%;
-    padding: 20px 40px;
+    opacity: 0.85;
+    padding: clamp(8px, 1.8vw, 20px) clamp(12px, 2.8vw, 40px);
     cursor: pointer;
+    line-height: 1;
 }
 
-.Logo a, .Logo a:visited  {
+.Logo a,
+.Logo a:visited  {
     text-decoration: none;
     color: #0f0f0f;
+}
+
+/* Tighten on very small screens */
+@media (max-width: 480px) {
+    .Logo {
+        padding: 8px 12px;
+    }
 }
