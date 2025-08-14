@@ -37,6 +37,7 @@ const BookVersionComponent = (props) => {
             ver={props.versionChange}
             setVersionId={props.setCurrentVersionId}
             filterText={filterText} // pass filter text as prop
+            setVisibility={props.setVis}
           />
         </Scrollbar>
       </section>

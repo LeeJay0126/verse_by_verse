@@ -1,14 +1,16 @@
-
 .bibleItem {
     list-style: none;
     padding: 15px 5px;
+    color: rgb(34, 34, 34);
+    cursor: pointer;
 }
 
 .bibleItem:hover {
     background-color: aliceblue;
 }
 
-.bibleItem p {
-    color: rgb(34,34,34);
+/* .bibleItem p,
+.bibleItem li {
+    color: rgb(34, 34, 34);
     cursor: pointer;
-}
+} */

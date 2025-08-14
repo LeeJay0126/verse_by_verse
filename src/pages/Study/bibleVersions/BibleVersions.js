@@ -4,9 +4,7 @@ import { useState } from 'react';
 import BibleVersionComponent from './BibleVersionComponent';
 import BookVersionModal from '../bookVersions/BookVersionModal';
 
-const BibleVersions = () => {
-  const [book, setBook] = useState("Genesis");
-  const [chapter, setChapter] = useState("Intro");
+const BibleVersions = ({ setChapter, book, setBook }) => {
   const [version, setVersion] = useState("ASV");
   const [currVersionID, setCurrentVersion] = useState('06125adad2d5898a-01');
   const [bookModal, setVisibility] = useState(false);
@@ -23,9 +21,9 @@ const BibleVersions = () => {
         <BookVersionModal
           setVis={setVisibility}
           visibilityStatus={bookModal}
-          versionId={currVersionID}              
-          onBookSelect={setBook}                  
-          onChapterSelect={setChapter}            
+          versionId={currVersionID}
+          onBookSelect={setBook}
+          onChapterSelect={setChapter}
         />
       </div>
 
