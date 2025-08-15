@@ -1,11 +1,11 @@
-import BibleHeader from './BibleHeader';
+import PageHeader from "../../component/PageHeader";
 import './Read.css';
 
 const Read = () => {
 
     return (
         <section className='Read'>
-            <BibleHeader />
+            <PageHeader />
         </section>
     );
 };
