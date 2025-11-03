@@ -23,9 +23,6 @@ const Chapter = ({ version: bibleVersionID, book: bibleBookID, filterText = "", 
         const next = (data || []).map(({ number, id /*, reference, title*/ }) => ({
           number,
           id,
-          // If your API returns titles or references, you can keep them:
-          // title,
-          // reference,
         }));
         setChapters(next);
       } catch (err) {

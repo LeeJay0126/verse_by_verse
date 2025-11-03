@@ -8,7 +8,6 @@ const BookVersionComponent = (props) => {
 
   const modalCloseHandler = () => {
     props.setVis(false);
-    console.log(props.visibilityStatus);
   };
 
   const filterChangeHandler = (e) => {
