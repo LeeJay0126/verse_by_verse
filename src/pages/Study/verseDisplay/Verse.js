@@ -1,5 +1,6 @@
 import './Verse.css';
 import { useEffect, useState } from 'react';
+import API from "../../../component/Key";
 
 const Verse = ({ chapterId, currVersionId, book }) => {
     /*
@@ -28,7 +29,7 @@ const Verse = ({ chapterId, currVersionId, book }) => {
                 // url.searchParams.set("fums-version", "3");
 
                 const res = await fetch(url.toString(), {
-                    headers: { "api-key": process.env.REACT_APP_BIBLE_API_KEY },
+                    headers: { "api-key": API, "accept": "application/json" },
                     signal: controller.signal
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
