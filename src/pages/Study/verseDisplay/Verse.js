@@ -2,66 +2,117 @@ import './Verse.css';
 import { useEffect, useState } from 'react';
 import API from "../../../component/Key";
 
-const Verse = ({ chapterId, currVersionId, book }) => {
-    /*
-        bookChapterHeader is a combination of Book version
-        + Chapter 
-    */
-    const [verses, setVerses] = useState([]);
-    const [error, setError] = useState(null);
+const Verse = ({ chapterId, currVersionId , book}) => {
+  const [verses, setVerses] = useState([]);
+  const [verseTexts, setVerseTexts] = useState({}); // { [verseId]: text }
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        if (!currVersionId || !chapterId) return;
-        const controller = new AbortController();
-        (async () => {
-            try {
-                setError(null);
-                setVerses([]);
-                const url = new URL(
-                    `https://api.scripture.api.bible/v1/bibles/${currVersionId}/chapters/${chapterId}/verses`
-                );
-                console.log(url);
-                // Optional display options:
-                url.searchParams.set("content-type", "json");           // or "html"
-                url.searchParams.set("include-verse-numbers", "true");
-                url.searchParams.set("include-verse-spans", "true");
-                // If you’re returning text/html content later, consider FUMS v3:
-                // url.searchParams.set("fums-version", "3");
+  // 1) Get the list of verses (ids + numbers)
+  useEffect(() => {
+    if (!currVersionId || !chapterId) return;
+    const controller = new AbortController();
 
-                const res = await fetch(url.toString(), {
-                    headers: { "api-key": API, "accept": "application/json" },
-                    signal: controller.signal
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const { data } = await res.json();
-                // `data` is an array of verse objects; each typically has id like "GEN.1.1"
-                setVerses(Array.isArray(data) ? data : []);
-            } catch (e) {
-                if (e.name !== "AbortError") setError(e.message || "Failed to load verses");
-            }
-        })();
-        return () => controller.abort();
-    }, [currVersionId, chapterId]);
+    (async () => {
+      try {
+        setError(null);
+        setVerses([]);
+        setVerseTexts({});
+        setLoading(true);
 
-    if (error) return <div role="alert">Error: {error}</div>;
-    if (!verses.length) return <div>Loading verses…</div>;
+        const url = new URL(
+          `https://api.scripture.api.bible/v1/bibles/${currVersionId}/chapters/${chapterId}/verses`
+        );
+        url.searchParams.set("content-type", "json");
+        url.searchParams.set("include-verse-numbers", "true");
+        url.searchParams.set("include-verse-spans", "true");
 
-    return (
-        <section className="DisplaySection">
-            <h2 className="bookChapterHeader">
-                {book} {chapterId}
-            </h2>
-            <div className="displayArea">
-                <ul>
-                    {verses.map(v => (
-                        <li key={v.id}>
-                            Verse {v.verseNumber ?? v.reference ?? v.id}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        </section>
-    );
+        const res = await fetch(url.toString(), {
+          headers: { "api-key": API, "accept": "application/json" },
+          signal: controller.signal
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { data } = await res.json();
+        setVerses(Array.isArray(data) ? data : []);
+      } catch (e) {
+        if (e.name !== "AbortError") setError(e.message || "Failed to load verses");
+      } finally {
+        setLoading(false);
+      }
+    })();
+
+    return () => controller.abort();
+  }, [currVersionId, chapterId]);
+
+  // 2) Automatically fetch the text for each verse id
+  useEffect(() => {
+    if (!currVersionId || verses.length === 0) return;
+    const controller = new AbortController();
+
+    (async () => {
+      try {
+        // naive fetch-all (fine for now; can batch/optimize later)
+        const entries = await Promise.all(
+          verses.map(async (v) => {
+            const vUrl = new URL(
+              `https://api.scripture.api.bible/v1/bibles/${currVersionId}/verses/${v.id}`
+            );
+            // choose text or html; using plain text per your request
+            vUrl.searchParams.set("content-type", "text");
+            vUrl.searchParams.set("include-verse-numbers", "false");
+            vUrl.searchParams.set("include-notes", "false");
+            vUrl.searchParams.set("include-titles", "false");
+
+            const r = await fetch(vUrl.toString(), {
+              headers: { "api-key": API, "accept": "application/json" },
+              signal: controller.signal
+            });
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const { data } = await r.json();
+            // data.text (plain) or data.content (html) depending on content-type
+            const text = (data?.text ?? data?.content ?? "").toString().trim();
+            return [v.id, text];
+          })
+        );
+
+        // convert [id, text][] -> { id: text }
+        const nextMap = Object.fromEntries(entries);
+        setVerseTexts(nextMap);
+      } catch (e) {
+        if (e.name !== "AbortError") setError(e.message || "Failed to load verse content");
+      }
+    })();
+
+    return () => controller.abort();
+  }, [currVersionId, verses]);
+
+  if (error) return <div role="alert">Error: {error}</div>;
+  if (loading && !verses.length) return <div>Loading verses…</div>;
+
+  // show just the chapter number, not the book name
+  const chapterNumber = chapterId?.split(".")[1] ?? "";
+
+  return (
+    <section className="DisplaySection">
+      <h2 className="bookChapterHeader">
+        {book} {chapterNumber}
+      </h2>
+
+      <div className="displayArea">
+        <ul className="versesList">
+          {verses.map((v) => (
+            <li key={v.id} className="verseRow">
+              {/* Show just the verse number and the text */}
+              <span className="verseNumber">{v.verseNumber ?? ""}</span>
+              <span className="verseText">
+                {verseTexts[v.id] ?? "Loading…"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
 };
 
 export default Verse;
