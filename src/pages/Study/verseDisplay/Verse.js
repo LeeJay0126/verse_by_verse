@@ -99,17 +99,15 @@ const Verse = ({ chapterId, currVersionId , book}) => {
       </h2>
 
       <div className="displayArea">
-        <ul className="versesList">
+        <ol className="versesList">
           {verses.map((v) => (
             <li key={v.id} className="verseRow">
-              {/* Show just the verse number and the text */}
-              <span className="verseNumber">{v.verseNumber ?? ""}</span>
               <span className="verseText">
                 {verseTexts[v.id] ?? "Loading…"}
               </span>
             </li>
           ))}
-        </ul>
+        </ol>
       </div>
     </section>
   );
