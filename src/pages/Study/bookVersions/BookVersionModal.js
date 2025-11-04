@@ -59,12 +59,12 @@ const BookVersionModal = ({
 
   const handleBookClick = useCallback(({ id, name }) => {
     setSelectedBookId(id);
-    onBookSelect?.(name);
+    onBookSelect?.(id,name);
   }, [onBookSelect]);
 
   const handleChapterSelect = useCallback((chapter) => {
     // chapter: { id, number }
-    onChapterSelect?.(`Chapter ${chapter.number}`);
+    onChapterSelect?.(chapter.id);
     setVis(false); // optional: close modal after selection
   }, [onChapterSelect, setVis]);
 

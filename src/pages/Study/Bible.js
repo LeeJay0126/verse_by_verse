@@ -4,22 +4,22 @@ import BibleVersion from './bibleVersions/BibleVersions';
 import Verse from './verseDisplay/Verse';
 
 const Bible = () => {
-    const [currChapter, setCurrentChapter] = useState("Intro");
-    const [currBook, setCurrentBook] = useState("Genesis");
+    const [currChapterId, setCurrentChapterId] = useState(null); // e.g., "GEN.3"
+    const [currBookId, setCurrentBookId] = useState(null);       // e.g., "GEN"
     const [currVersion, setVersion] = useState('06125adad2d5898a-01');
-
     return (
         <section className="ReadBible">
             <BibleVersion
-                setChapter={setCurrentChapter}
-                book={currBook}
-                setBook={setCurrentBook}
+                setChapter={setCurrentChapterId}
+                book={currBookId}
+                setBook={setCurrentBookId}
                 currVersionId={currVersion}
                 setCurrentVersion={setVersion}
             />
             <Verse
-                chapter={currChapter}
-                book={currBook}
+                chapterId={currChapterId}
+                currVersionId={currVersion}
+                book={currBookId}
             />
         </section>
     );
