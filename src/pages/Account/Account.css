@@ -1,0 +1,95 @@
+.Account {
+    display: grid;
+    place-items: center;
+    padding: 2rem 1rem;
+  }
+  
+  .account-card {
+    width: min(420px, 100%);
+    background: var(--surface, #fff);
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 6px 24px rgba(0,0,0,.06);
+  }
+  
+  .account-title {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  
+  .account-error {
+    background: #ffe8e8;
+    color: #b00020;
+    border: 1px solid #ffc5c5;
+    padding: .75rem;
+    border-radius: 8px;
+    margin-bottom: .75rem;
+    font-size: .95rem;
+  }
+  
+  .account-form {
+    display: grid;
+    gap: .9rem;
+  }
+  
+  .account-label {
+    display: grid;
+    gap: .4rem;
+    font-weight: 600;
+    font-size: .95rem;
+  }
+  
+  .account-input {
+    padding: .7rem .9rem;
+    border: 1px solid #cfd4dc;
+    border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+  }
+  .account-input:focus {
+    border-color: #7aa2ff;
+    box-shadow: 0 0 0 3px rgba(122,162,255,.2);
+  }
+  
+  .password-wrap {
+    position: relative;
+  }
+  .toggle-pw {
+    position: absolute;
+    right: .5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+  
+  .account-btn {
+    margin-top: .6rem;
+    padding: .8rem 1rem;
+    border: 0;
+    border-radius: 10px;
+    background: #2d6cdf;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .account-btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+  }
+  
+  .account-help {
+    margin-top: .9rem;
+    font-size: .9rem;
+    color: #556;
+  }
+  .account-help a {
+    color: #2d6cdf;
+    text-decoration: underline;
+  }
+  
