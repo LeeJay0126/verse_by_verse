@@ -6,6 +6,7 @@
   border: 1px solid black;
   border-top: none;
   background-color: rgb(255, 252, 252);
+  z-index: 1000;
 }
 
 .ModalHeader {
