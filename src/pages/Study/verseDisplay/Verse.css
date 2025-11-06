@@ -20,15 +20,28 @@
 }
 
 .versesList {
-    padding-bottom: 50px;
-    list-style: none;
+  list-style: none;
+  counter-reset: verse;
+  padding-left: 0;
+  padding-bottom: 200px;
 }
 
-.verseRow {
-    display: flex;
-    align-items: flex-start;
-    margin: 4px 0;
-    line-height: 1.5;
+/* verse padding -- subjected to change */
+.versesList li {
+  position: relative;
+  padding-left: 0.5rem;
+  padding-bottom: 20px;
+  counter-increment: verse;
+}
+
+.versesList li::before {
+  content: counter(verse);
+  position: absolute;
+  left: 0;
+  top: -0.1em;  /* now this works */
+  font-size: 0.5rem;
+  color: #888;
+  font-weight: 600;
 }
 
 .verseNumber {
