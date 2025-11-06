@@ -24,6 +24,7 @@ const BibleVersions = ({ setChapter, book, setBook }) => {
           versionId={currVersionID}
           onBookSelect={(b) => { setBook(b); setChapter(null); }}   // clear chapter on new book
           onChapterSelect={setChapter}
+          currentBookId={book?.id}
         />
       </div>
 

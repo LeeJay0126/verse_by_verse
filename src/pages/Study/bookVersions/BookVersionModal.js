@@ -11,9 +11,10 @@ const BookVersionModal = ({
   versionId,
   onBookSelect,
   onChapterSelect,
+  currentBookId
 }) => {
   const [books, setBooks] = useState([]);
-  const [selectedBookId, setSelectedBookId] = useState(null);
+  const [selectedBookId, setSelectedBookId] = useState(currentBookId !== undefined ? currentBookId : undefined);
   const [error, setError] = useState(null);
 
   // Separate filters: one for books, one for chapters
@@ -39,17 +40,39 @@ const BookVersionModal = ({
 
   const backToBooks = useCallback(() => {
     setSelectedBookId(null);
-    setChapterFilterText(""); // reset chapter filter when going back
+    setChapterFilterText("");
   }, []);
 
   // Reset all filters when modal closes
+  // Reset filters when closing, but KEEP selectedBookId to persist chapter view
   useEffect(() => {
     if (!visibilityStatus) {
       setBookFilterText("");
       setChapterFilterText("");
-      setSelectedBookId(null);
+      // do not reset selectedBookId here
     }
   }, [visibilityStatus]);
+
+  // When opening the modal, if a book is already chosen, start in Chapters view
+  useEffect(() => {
+    if (visibilityStatus && currentBookId && selectedBookId === undefined) {
+      setSelectedBookId(currentBookId); // only on first open/init
+    }
+  }, [visibilityStatus, currentBookId, selectedBookId])
+
+  // Allow Backspace to go back to Books when viewing Chapters
+  useEffect(() => {
+    if (!visibilityStatus || !selectedBookId) return;
+    const onKeyDown = (e) => {
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        setSelectedBookId(null);
+        setChapterFilterText("");
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [visibilityStatus, selectedBookId]);
 
   const filteredBooks = useMemo(() => {
     if (!bookFilterText) return books;
@@ -59,7 +82,7 @@ const BookVersionModal = ({
 
   const handleBookClick = useCallback(({ id, name }) => {
     setSelectedBookId(id);
-    onBookSelect?.({id,name});
+    onBookSelect?.({ id, name });
   }, [onBookSelect]);
 
   const handleChapterSelect = useCallback((chapter) => {
