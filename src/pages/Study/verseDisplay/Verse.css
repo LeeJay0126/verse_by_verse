@@ -1,3 +1,9 @@
+:root {
+  --content-width: 680px;     
+  --arrow-offset: 56px;      
+  --arrow-size: 44px;         
+}
+
 .DisplaySection {
     width: 680px;
     padding-top: 30px;
@@ -16,6 +22,7 @@
     padding-top: 30px;
     width: 80%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
 }
 
@@ -54,4 +61,51 @@
 .verseText {
     flex: 1;
     color: #222;
+}
+
+.navArrow {
+  position: fixed;
+  top: 70%;
+  transform: translateY(-50%);
+  z-index: 1000;              /* above page content, below modals if those use >1000 */
+  width: var(--arrow-size);
+  height: var(--arrow-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  backdrop-filter: blur(2px);
+  transition: background 0.2s, transform 0.1s;
+}
+
+.navArrow:hover { background: rgba(0,0,0,0.12); }
+.navArrow:active { transform: translateY(-50%) scale(0.98); }
+
+/* Place them near the content column. The content is centered, so its left edge is (50% - content/2) */
+.navArrowLeft {
+  /* keep at least 12px from the viewport edge; otherwise anchor to content edge minus offset */
+  left: max(12px, calc(50% - (var(--content-width) / 2) - var(--arrow-offset)));
+}
+
+.navArrowRight {
+  right: max(12px, calc(50% - (var(--content-width) / 2) - var(--arrow-offset)));
+}
+
+/* Hide arrows entirely when they’re not renderable (you already conditionally render them).
+   If you ever keep them mounted, you can also visually hide with: */
+.navArrow[disabled] { display: none; }
+
+/* Small screens: bring arrows closer to edges and make them slightly smaller */
+@media (max-width: 768px) {
+  :root {
+    --content-width: 100vw;   /* content effectively full width on mobile */
+    --arrow-offset: 12px;
+    --arrow-size: 40px;
+  }
 }

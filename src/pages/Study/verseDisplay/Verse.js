@@ -2,7 +2,7 @@ import './Verse.css';
 import { useEffect, useState } from 'react';
 import API from "../../../component/Key";
 
-const Verse = ({ chapterId, currVersionId, book }) => {
+const Verse = ({ chapterId, currVersionId, book, onPrev, onNext, canPrev, canNext }) => {
   const [verses, setVerses] = useState([]);
   const [verseTexts, setVerseTexts] = useState({}); // { [verseId]: text }
   const [error, setError] = useState(null);
@@ -44,20 +44,18 @@ const Verse = ({ chapterId, currVersionId, book }) => {
     return () => controller.abort();
   }, [currVersionId, chapterId]);
 
-  // 2) Automatically fetch the text for each verse id
+  // 2) Fetch verse text content
   useEffect(() => {
     if (!currVersionId || verses.length === 0) return;
     const controller = new AbortController();
 
     (async () => {
       try {
-        // naive fetch-all (fine for now; can batch/optimize later)
         const entries = await Promise.all(
           verses.map(async (v) => {
             const vUrl = new URL(
               `https://api.scripture.api.bible/v1/bibles/${currVersionId}/verses/${v.id}`
             );
-            // choose text or html; using plain text per your request
             vUrl.searchParams.set("content-type", "text");
             vUrl.searchParams.set("include-verse-numbers", "false");
             vUrl.searchParams.set("include-notes", "false");
@@ -69,15 +67,11 @@ const Verse = ({ chapterId, currVersionId, book }) => {
             });
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             const { data } = await r.json();
-            // data.text (plain) or data.content (html) depending on content-type
             const text = (data?.text ?? data?.content ?? "").toString().trim();
             return [v.id, text];
           })
         );
-
-        // convert [id, text][] -> { id: text }
-        const nextMap = Object.fromEntries(entries);
-        setVerseTexts(nextMap);
+        setVerseTexts(Object.fromEntries(entries));
       } catch (e) {
         if (e.name !== "AbortError") setError(e.message || "Failed to load verse content");
       }
@@ -86,16 +80,31 @@ const Verse = ({ chapterId, currVersionId, book }) => {
     return () => controller.abort();
   }, [currVersionId, verses]);
 
+useEffect(() => {
+  const onKeyDown = (e) => {
+    const el = e.target;
+    const typing = el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+    if (typing) return;
+
+    if (e.key === "ArrowLeft" && canPrev) { e.preventDefault(); onPrev?.(); }
+    if (e.key === "ArrowRight" && canNext) { e.preventDefault(); onNext?.(); }
+  };
+  window.addEventListener("keydown", onKeyDown);
+  return () => window.removeEventListener("keydown", onKeyDown);
+}, [canPrev, canNext, onPrev, onNext]);
+
+
   if (error) return <div role="alert">Error: {error}</div>;
   if (loading && !verses.length) return <div>Loading verses…</div>;
 
-  // show just the chapter number, not the book name
   const chapterNumber = chapterId?.split(".")[1] ?? "";
 
   return (
     <section className="DisplaySection">
       <h2 className="bookChapterHeader">
-        {book?.name || ""} {chapterNumber}
+        <span className="chapterTitle">
+          {book?.name || ""} {chapterNumber}
+        </span>
       </h2>
 
       <div className="displayArea">
@@ -108,6 +117,27 @@ const Verse = ({ chapterId, currVersionId, book }) => {
             </li>
           ))}
         </ol>
+        <section className='chapterNav'>
+
+          {canPrev && (
+            <button
+              className="navArrow navArrowLeft"
+              onClick={onPrev}
+              aria-label="Previous chapter"
+            >
+              ←
+            </button>
+          )}
+          {canNext && (
+            <button
+              className="navArrow navArrowRight"
+              onClick={onNext}
+              aria-label="Next chapter"
+            >
+              →
+            </button>
+          )}
+        </section>
       </div>
     </section>
   );

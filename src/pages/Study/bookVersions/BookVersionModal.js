@@ -64,7 +64,15 @@ const BookVersionModal = ({
   useEffect(() => {
     if (!visibilityStatus || !selectedBookId) return;
     const onKeyDown = (e) => {
-      if (e.key === "Backspace") {
+
+      const el = e.target;
+      const isTypingTarget =
+        el && (
+          el.tagName === "INPUT" ||
+          el.tagName === "TEXTAREA" ||
+          el.isContentEditable
+        );
+      if (e.key === "Backspace" && !isTypingTarget) {
         e.preventDefault();
         setSelectedBookId(null);
         setChapterFilterText("");
@@ -94,7 +102,7 @@ const BookVersionModal = ({
   return (
     <div className={visibilityStatus ? "BookModal" : "ModalHidden"} role="dialog" aria-modal="true">
       <section className="ModalHeader">
-        {selectedBookId && (
+        {(selectedBookId !== null && selectedBookId !== undefined) && (
           <button className="BookVersionBackButton" onClick={backToBooks} aria-label="Back to books">
             ←
           </button>
