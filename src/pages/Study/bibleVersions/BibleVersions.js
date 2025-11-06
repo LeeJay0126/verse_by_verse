@@ -14,7 +14,7 @@ const BibleVersions = ({ setChapter, book, setBook }) => {
     <div className="BookVersionHolder">
       <div className="Books">
         <section className='BookTabContainer' onClick={() => setVisibility(!bookModal)}>
-          <p className="BookNameDisplay">{book}</p>
+          <p className="BookNameDisplay">{book?.name || "Select a Book"}</p>
           <GoTriangleDown className="BookVersionDownArrow" />
         </section>
 
@@ -22,7 +22,7 @@ const BibleVersions = ({ setChapter, book, setBook }) => {
           setVis={setVisibility}
           visibilityStatus={bookModal}
           versionId={currVersionID}
-          onBookSelect={setBook}
+          onBookSelect={(b) => { setBook(b); setChapter(null); }}   // clear chapter on new book
           onChapterSelect={setChapter}
         />
       </div>

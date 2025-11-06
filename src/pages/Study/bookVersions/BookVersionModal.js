@@ -59,7 +59,7 @@ const BookVersionModal = ({
 
   const handleBookClick = useCallback(({ id, name }) => {
     setSelectedBookId(id);
-    onBookSelect?.(id,name);
+    onBookSelect?.({id,name});
   }, [onBookSelect]);
 
   const handleChapterSelect = useCallback((chapter) => {

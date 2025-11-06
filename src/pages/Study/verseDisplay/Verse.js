@@ -2,7 +2,7 @@ import './Verse.css';
 import { useEffect, useState } from 'react';
 import API from "../../../component/Key";
 
-const Verse = ({ chapterId, currVersionId , book}) => {
+const Verse = ({ chapterId, currVersionId, book }) => {
   const [verses, setVerses] = useState([]);
   const [verseTexts, setVerseTexts] = useState({}); // { [verseId]: text }
   const [error, setError] = useState(null);
@@ -95,7 +95,7 @@ const Verse = ({ chapterId, currVersionId , book}) => {
   return (
     <section className="DisplaySection">
       <h2 className="bookChapterHeader">
-        {book} {chapterNumber}
+        {book?.name || ""} {chapterNumber}
       </h2>
 
       <div className="displayArea">

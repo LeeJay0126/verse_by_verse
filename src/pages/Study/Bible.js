@@ -5,21 +5,21 @@ import Verse from './verseDisplay/Verse';
 
 const Bible = () => {
     const [currChapterId, setCurrentChapterId] = useState(null); // e.g., "GEN.3"
-    const [currBookId, setCurrentBookId] = useState(null);       // e.g., "GEN"
+    const [currBook, setCurrBook] = useState({ id: null, name: "" });
     const [currVersion, setVersion] = useState('06125adad2d5898a-01');
     return (
         <section className="ReadBible">
             <BibleVersion
                 setChapter={setCurrentChapterId}
-                book={currBookId}
-                setBook={setCurrentBookId}
+                book={currBook}
+                setBook={setCurrBook}
                 currVersionId={currVersion}
                 setCurrentVersion={setVersion}
             />
             <Verse
                 chapterId={currChapterId}
                 currVersionId={currVersion}
-                book={currBookId}
+                book={currBook}
             />
         </section>
     );
