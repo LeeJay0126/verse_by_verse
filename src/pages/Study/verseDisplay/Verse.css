@@ -67,7 +67,7 @@
   position: fixed;
   top: 70%;
   transform: translateY(-50%);
-  z-index: 1000;              /* above page content, below modals if those use >1000 */
+  z-index: 800;              /* above page content, below modals if those use >1000 */
   width: var(--arrow-size);
   height: var(--arrow-size);
   display: inline-flex;

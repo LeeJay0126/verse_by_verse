@@ -19,6 +19,7 @@ const BibleVersions = ({ setChapter, book, setBook }) => {
         </section>
 
         <BookVersionModal
+          key={currVersionID}
           setVis={setVisibility}
           visibilityStatus={bookModal}
           versionId={currVersionID}
@@ -36,8 +37,18 @@ const BibleVersions = ({ setChapter, book, setBook }) => {
         <BibleVersionComponent
           setVis={setVersionVisibility}
           visibilityStatus={versionModal}
-          versionChange={setVersion}
-          setCurrentVersionId={setCurrentVersion}
+          versionChange={(newVersionName) => {
+            setVersion(newVersionName);
+            // clear selections because version changed
+            setBook(null);
+            setChapter(null);
+          }}
+          setCurrentVersionId={(newVersionId) => {
+            setCurrentVersion(newVersionId);
+            // clear selections because version changed
+            setBook(null);
+            setChapter(null);
+          }}
         />
       </div>
     </div>
