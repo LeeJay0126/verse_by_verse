@@ -37,7 +37,7 @@
 .versesList li {
   position: relative;
   padding-left: 0.5rem;
-  padding-bottom: 20px;
+  padding-bottom: 10px;
   counter-increment: verse;
 }
 
