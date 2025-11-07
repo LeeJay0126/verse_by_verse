@@ -4,11 +4,11 @@ import API from "../../../component/Key";
 
 const Verse = ({ chapterId, currVersionId, book, onPrev, onNext, canPrev, canNext }) => {
   const [verses, setVerses] = useState([]);
-  const [verseTexts, setVerseTexts] = useState({}); // { [verseId]: text }
+  const [verseTexts, setVerseTexts] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 1) Get the list of verses (ids + numbers)
+  // 1) Load verse list (or full chapter for KOR)
   useEffect(() => {
     if (!currVersionId || !chapterId) return;
     const controller = new AbortController();
@@ -20,6 +20,34 @@ const Verse = ({ chapterId, currVersionId, book, onPrev, onNext, canPrev, canNex
         setVerseTexts({});
         setLoading(true);
 
+        // KOR: fetch from ibibles.net
+        if (currVersionId === 'kor') {
+          const [bookCode, chapterNumber] = (chapterId || "").split(".");
+          if (!bookCode || !chapterNumber) {
+            throw new Error("Invalid KOR chapter id");
+          }
+
+          const res = await fetch(
+            `/api/kor/${bookCode}/${chapterNumber}`,
+            { signal: controller.signal }
+          );
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const html = await res.text();
+          const text = html
+            .replace(/<[^>]*>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+
+          const id = `${bookCode}.${chapterNumber}.1`;
+          setVerses([{ id }]);
+          setVerseTexts({ [id]: text });
+          setLoading(false);
+          return;
+        }
+
+
+        // Default: Scripture API (other versions)
         const url = new URL(
           `https://api.scripture.api.bible/v1/bibles/${currVersionId}/chapters/${chapterId}/verses`
         );
@@ -44,9 +72,9 @@ const Verse = ({ chapterId, currVersionId, book, onPrev, onNext, canPrev, canNex
     return () => controller.abort();
   }, [currVersionId, chapterId]);
 
-  // 2) Fetch verse text content
+  // 2) Load verse texts for non-KOR
   useEffect(() => {
-    if (!currVersionId || verses.length === 0) return;
+    if (!currVersionId || currVersionId === 'kor' || verses.length === 0) return;
     const controller = new AbortController();
 
     (async () => {
@@ -80,19 +108,19 @@ const Verse = ({ chapterId, currVersionId, book, onPrev, onNext, canPrev, canNex
     return () => controller.abort();
   }, [currVersionId, verses]);
 
-useEffect(() => {
-  const onKeyDown = (e) => {
-    const el = e.target;
-    const typing = el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
-    if (typing) return;
+  // Keyboard nav
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      const el = e.target;
+      const typing = el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+      if (typing) return;
 
-    if (e.key === "ArrowLeft" && canPrev) { e.preventDefault(); onPrev?.(); }
-    if (e.key === "ArrowRight" && canNext) { e.preventDefault(); onNext?.(); }
-  };
-  window.addEventListener("keydown", onKeyDown);
-  return () => window.removeEventListener("keydown", onKeyDown);
-}, [canPrev, canNext, onPrev, onNext]);
-
+      if (e.key === "ArrowLeft" && canPrev) { e.preventDefault(); onPrev?.(); }
+      if (e.key === "ArrowRight" && canNext) { e.preventDefault(); onNext?.(); }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [canPrev, canNext, onPrev, onNext]);
 
   if (error) return <div role="alert">Error: {error}</div>;
   if (loading && !verses.length) return <div>Loading verses…</div>;
@@ -117,8 +145,8 @@ useEffect(() => {
             </li>
           ))}
         </ol>
-        <section className='chapterNav'>
 
+        <section className='chapterNav'>
           {canPrev && (
             <button
               className="navArrow navArrowLeft"
