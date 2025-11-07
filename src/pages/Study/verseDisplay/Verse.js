@@ -1,16 +1,25 @@
-import './Verse.css';
-import { useEffect, useState } from 'react';
+import "./Verse.css";
+import { useEffect, useState } from "react";
 import API from "../../../component/Key";
 
-const Verse = ({ chapterId, currVersionId, book, onPrev, onNext, canPrev, canNext }) => {
+const Verse = ({
+  chapterId,
+  currVersionId,
+  book,
+  onPrev,
+  onNext,
+  canPrev,
+  canNext,
+}) => {
   const [verses, setVerses] = useState([]);
   const [verseTexts, setVerseTexts] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 1) Load verse list (or full chapter for KOR)
+  // Fetch verses whenever version or chapter changes
   useEffect(() => {
     if (!currVersionId || !chapterId) return;
+
     const controller = new AbortController();
 
     (async () => {
@@ -20,34 +29,41 @@ const Verse = ({ chapterId, currVersionId, book, onPrev, onNext, canPrev, canNex
         setVerseTexts({});
         setLoading(true);
 
-        // KOR: fetch from ibibles.net
-        if (currVersionId === 'kor') {
-          const [bookCode, chapterNumber] = (chapterId || "").split(".");
-          if (!bookCode || !chapterNumber) {
-            throw new Error("Invalid KOR chapter id");
-          }
-
+        // ---------- KOREAN (KOR via backend aggregator) ----------
+        if (currVersionId === "kor") {
           const res = await fetch(
-            `/api/kor/${bookCode}/${chapterNumber}`,
+            `/api/passage/${currVersionId}/${chapterId}`,
             { signal: controller.signal }
           );
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-          const html = await res.text();
-          const text = html
-            .replace(/<[^>]*>/g, " ")
-            .replace(/\s+/g, " ")
-            .trim();
+          const data = await res.json();
+          const list = Array.isArray(data.verses) ? data.verses : [];
 
-          const id = `${bookCode}.${chapterNumber}.1`;
-          setVerses([{ id }]);
-          setVerseTexts({ [id]: text });
-          setLoading(false);
-          return;
+          // backend already gives: { id, number, text } with no "chapter:verse" prefix
+          const normalized = list.map((v) => ({
+            id: v.id,
+            number: Number(v.number),
+            text: (v.text || "").toString().trim(),
+          }));
+
+          setVerses(
+            normalized.map((v) => ({
+              id: v.id,
+              number: v.number,
+            }))
+          );
+
+          setVerseTexts(
+            Object.fromEntries(
+              normalized.map((v) => [v.id, v.text])
+            )
+          );
+
+          return; // don't fall through to non-KOR logic
         }
 
-
-        // Default: Scripture API (other versions)
+        // ---------- NON-KOREAN (api.scripture.api.bible) ----------
         const url = new URL(
           `https://api.scripture.api.bible/v1/bibles/${currVersionId}/chapters/${chapterId}/verses`
         );
@@ -56,31 +72,41 @@ const Verse = ({ chapterId, currVersionId, book, onPrev, onNext, canPrev, canNex
         url.searchParams.set("include-verse-spans", "true");
 
         const res = await fetch(url.toString(), {
-          headers: { "api-key": API, "accept": "application/json" },
-          signal: controller.signal
+          headers: {
+            "api-key": API,
+            accept: "application/json",
+          },
+          signal: controller.signal,
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
         const { data } = await res.json();
-        setVerses(Array.isArray(data) ? data : []);
-      } catch (e) {
-        if (e.name !== "AbortError") setError(e.message || "Failed to load verses");
-      } finally {
-        setLoading(false);
-      }
-    })();
+        const raw = Array.isArray(data) ? data : [];
 
-    return () => controller.abort();
-  }, [currVersionId, chapterId]);
+        // ensure each verse has a numeric `number`
+        const withNumbers = raw.map((v, index) => {
+          let num = index + 1;
 
-  // 2) Load verse texts for non-KOR
-  useEffect(() => {
-    if (!currVersionId || currVersionId === 'kor' || verses.length === 0) return;
-    const controller = new AbortController();
+          if (v.reference) {
+            const parts = v.reference.split(":");
+            const last = parts[parts.length - 1];
+            const parsed = parseInt(last, 10);
+            if (!isNaN(parsed)) num = parsed;
+          }
 
-    (async () => {
-      try {
+          return { ...v, number: num };
+        });
+
+        setVerses(
+          withNumbers.map((v) => ({
+            id: v.id,
+            number: v.number,
+          }))
+        );
+
+        // fetch verse text (no verse numbers in payload)
         const entries = await Promise.all(
-          verses.map(async (v) => {
+          withNumbers.map(async (v) => {
             const vUrl = new URL(
               `https://api.scripture.api.bible/v1/bibles/${currVersionId}/verses/${v.id}`
             );
@@ -90,42 +116,76 @@ const Verse = ({ chapterId, currVersionId, book, onPrev, onNext, canPrev, canNex
             vUrl.searchParams.set("include-titles", "false");
 
             const r = await fetch(vUrl.toString(), {
-              headers: { "api-key": API, "accept": "application/json" },
-              signal: controller.signal
+              headers: {
+                "api-key": API,
+                accept: "application/json",
+              },
+              signal: controller.signal,
             });
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
             const { data } = await r.json();
-            const text = (data?.text ?? data?.content ?? "").toString().trim();
+            const text = (data?.text ?? data?.content ?? "")
+              .toString()
+              .trim();
+
             return [v.id, text];
           })
         );
+
         setVerseTexts(Object.fromEntries(entries));
       } catch (e) {
-        if (e.name !== "AbortError") setError(e.message || "Failed to load verse content");
+        if (e.name !== "AbortError") {
+          console.error(e);
+          setError(e.message || "Failed to load verses");
+        }
+      } finally {
+        setLoading(false);
       }
     })();
 
-    return () => controller.abort();
-  }, [currVersionId, verses]);
+    return () => {
+      controller.abort();
+    };
+  }, [currVersionId, chapterId]);
 
-  // Keyboard nav
+  // Keyboard navigation for chapters
   useEffect(() => {
     const onKeyDown = (e) => {
       const el = e.target;
-      const typing = el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+      const typing =
+        el &&
+        (el.tagName === "INPUT" ||
+          el.tagName === "TEXTAREA" ||
+          el.isContentEditable);
       if (typing) return;
 
-      if (e.key === "ArrowLeft" && canPrev) { e.preventDefault(); onPrev?.(); }
-      if (e.key === "ArrowRight" && canNext) { e.preventDefault(); onNext?.(); }
+      if (e.key === "ArrowLeft" && canPrev) {
+        e.preventDefault();
+        onPrev?.();
+      }
+      if (e.key === "ArrowRight" && canNext) {
+        e.preventDefault();
+        onNext?.();
+      }
     };
+
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [canPrev, canNext, onPrev, onNext]);
 
+  // --------- Render ---------
+  if (!chapterId) return null;
   if (error) return <div role="alert">Error: {error}</div>;
   if (loading && !verses.length) return <div>Loading verses…</div>;
 
-  const chapterNumber = chapterId?.split(".")[1] ?? "";
+  const chapterNumber = chapterId.split(".")[1] || "";
+
+  // Pair verses visually: 2 verses per line
+  const pairedVerses = [];
+  for (let i = 0; i < verses.length; i += 2) {
+    pairedVerses.push([verses[i], verses[i + 1]]);
+  }
 
   return (
     <section className="DisplaySection">
@@ -137,16 +197,25 @@ const Verse = ({ chapterId, currVersionId, book, onPrev, onNext, canPrev, canNex
 
       <div className="displayArea">
         <ol className="versesList">
-          {verses.map((v) => (
-            <li key={v.id} className="verseRow">
-              <span className="verseText">
-                {verseTexts[v.id] ?? "Loading…"}
-              </span>
+          {pairedVerses.map(([v1, v2], idx) => (
+            <li key={v1?.id || idx} className="verseRowPair">
+              {v1 && (
+                <span className="verseChunk">
+                  <sup className="verseNum">{v1.number}</sup>
+                  {verseTexts[v1.id] ?? ""}
+                </span>
+              )}
+              {v2 && (
+                <span className="verseChunk">
+                  <sup className="verseNum">{v2.number}</sup>
+                  {verseTexts[v2.id] ?? ""}
+                </span>
+              )}
             </li>
           ))}
         </ol>
 
-        <section className='chapterNav'>
+        <section className="chapterNav">
           {canPrev && (
             <button
               className="navArrow navArrowLeft"
