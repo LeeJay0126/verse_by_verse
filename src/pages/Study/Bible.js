@@ -1,173 +1,289 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo } from "react";
 import API from "../../component/Key";
 import GetBookVersions from "./bookVersions/GetBookVersions";
-import BibleVersion from './bibleVersions/BibleVersions';
-import Verse from './verseDisplay/Verse';
+import BibleVersion from "./bibleVersions/BibleVersions";
+import Verse from "./verseDisplay/Verse";
 
-// KOR chapter counts for ibibles.net mapping
+// KOR chapter counts keyed by ibibles-style codes
 const KOR_CHAPTER_COUNTS = {
-  ge: 50, exo: 40, lev: 27, num: 36, deu: 34,
-  josh: 24, jdgs: 21, ruth: 4, "1sm": 31, "2sm": 24,
-  "1ki": 22, "2ki": 25, "1chr": 29, "2chr": 36,
-  ezra: 10, neh: 13, est: 10, job: 42, psa: 150,
-  prv: 31, eccl: 12, ssol: 8, isa: 66, jer: 52,
-  lam: 5, eze: 48, dan: 12, hos: 14, joel: 3,
-  amos: 9, obad: 1, jonah: 4, mic: 7, nahum: 3,
-  hab: 3, zep: 3, hag: 2, zec: 14, mal: 4,
-  mat: 28, mark: 16, luke: 24, john: 21, acts: 28,
-  rom: 16, "1cor": 16, "2cor": 13, gal: 6, eph: 6,
-  phi: 4, col: 4, "1th": 5, "2th": 3,
-  "1tim": 6, "2tim": 4, titus: 3, phmn: 1,
-  heb: 13, jas: 5, "1pet": 5, "2pet": 3,
-  "1jn": 5, "2jn": 1, "3jn": 1, jude: 1, rev: 22,
+  gen: 50,
+  exo: 40,
+  lev: 27,
+  num: 36,
+  deu: 34,
+  jos: 24,
+  jdg: 21,
+  rut: 4,
+  "1sa": 31,
+  "2sa": 24,
+  "1ki": 22,
+  "2ki": 25,
+  "1ch": 29,
+  "2ch": 36,
+  ezr: 10,
+  neh: 13,
+  est: 10,
+  job: 42,
+  psa: 150,
+  pro: 31,
+  ecc: 12,
+  sng: 8,
+  isa: 66,
+  jer: 52,
+  lam: 5,
+  eze: 48,
+  dan: 12,
+  hos: 14,
+  joe: 3,
+  amo: 9,
+  oba: 1,
+  jon: 4,
+  mic: 7,
+  nah: 3,
+  hab: 3,
+  zep: 3,
+  hag: 2,
+  zec: 14,
+  mal: 4,
+  mat: 28,
+  mrk: 16,
+  luk: 24,
+  jhn: 21,
+  act: 28,
+  rom: 16,
+  "1co": 16,
+  "2co": 13,
+  gal: 6,
+  eph: 6,
+  php: 4,
+  col: 4,
+  "1th": 5,
+  "2th": 3,
+  "1ti": 6,
+  "2ti": 4,
+  tit: 3,
+  phm: 1,
+  heb: 13,
+  jas: 5,
+  "1pe": 5,
+  "2pe": 3,
+  "1jn": 5,
+  "2jn": 1,
+  "3jn": 1,
+  jud: 1,
+  rev: 22,
 };
 
 const Bible = () => {
-  const [currChapterId, setCurrentChapterId] = useState(null); // e.g., "GEN.3" or "ge.1"
+  const [currVersionId, setCurrVersionId] = useState("06125adad2d5898a-01"); // ASV
   const [currBook, setCurrBook] = useState({ id: null, name: "" });
-  const [currVersion, setVersion] = useState('06125adad2d5898a-01'); // default ASV
+  const [currChapterId, setCurrChapterId] = useState(null); // e.g. "GEN.1" or "gen.1"
 
-  // Ordered list of books for the current version
-  const [booksOrder, setBooksOrder] = useState([]); // [{ id, name }]
+  const [booksOrder, setBooksOrder] = useState([]);          // [{ id, name }]
+  const [chaptersByBook, setChaptersByBook] = useState({});  // { [bookId]: [{id, number}] }
 
+  // 1) Load books list whenever version changes
   useEffect(() => {
     let cancelled = false;
+
     (async () => {
-      const books = await GetBookVersions(currVersion);
-      if (!cancelled) setBooksOrder(books || []);
+      try {
+        const books = await GetBookVersions(currVersionId);
+        if (!cancelled) {
+          setBooksOrder(books || []);
+        }
+      } catch (err) {
+        console.error("Failed to load books for version", currVersionId, err);
+        if (!cancelled) setBooksOrder([]);
+      }
     })();
-    return () => { cancelled = true; };
-  }, [currVersion]);
 
-  // Cache chapters per book: { [bookId]: [{id, number}] }
-  const [chaptersByBook, setChaptersByBook] = useState({});
+    // reset selection when version changes
+    setCurrBook({ id: null, name: "" });
+    setCurrChapterId(null);
+    setChaptersByBook({});
 
-  const fetchChapters = useCallback(async (bookId) => {
-    if (!bookId) return [];
+    return () => {
+      cancelled = true;
+    };
+  }, [currVersionId]);
 
-    // KOR uses static chapter counts
-    if (currVersion === 'kor') {
-      const count = KOR_CHAPTER_COUNTS[bookId] || 0;
-      const list = Array.from({ length: count }, (_, i) => ({
-        number: i + 1,
-        id: `${bookId}.${i + 1}`,
-      }));
-      setChaptersByBook(prev => ({ ...prev, [bookId]: list }));
-      return list;
-    }
+  // 2) Fetch chapters for a given book (memoized to avoid infinite loops)
+  const fetchChapters = useCallback(
+    async (bookId) => {
+      if (!bookId) return [];
 
-    if (chaptersByBook[bookId]) return chaptersByBook[bookId];
+      // if we already have chapters cached, just return them
+      if (chaptersByBook[bookId]) {
+        return chaptersByBook[bookId];
+      }
 
-    const res = await fetch(
-      `https://api.scripture.api.bible/v1/bibles/${currVersion}/books/${bookId}/chapters`,
-      { headers: { "api-key": API } }
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { data } = await res.json();
-    const arr = (data || []).map(({ id, number }) => ({ id, number }));
-    setChaptersByBook(prev => ({ ...prev, [bookId]: arr }));
-    return arr;
-  }, [currVersion, chaptersByBook]);
+      // KOR: generate from static counts
+      if (currVersionId === "kor") {
+        const count = KOR_CHAPTER_COUNTS[bookId] || 0;
+        const list = Array.from({ length: count }, (_, i) => ({
+          number: i + 1,
+          id: `${bookId}.${i + 1}`,
+        }));
+        setChaptersByBook((prev) => ({ ...prev, [bookId]: list }));
+        return list;
+      }
 
-  // Ensure current book chapters are loaded
+      // Other versions: hit api.bible
+      try {
+        const res = await fetch(
+          `https://api.scripture.api.bible/v1/bibles/${currVersionId}/books/${bookId}/chapters`,
+          { headers: { "api-key": API } }
+        );
+        if (!res.ok) {
+          console.error("Chapters fetch failed", res.status, bookId);
+          return [];
+        }
+        const { data } = await res.json();
+        const list = (data || []).map(({ id, number }) => ({ id, number }));
+        setChaptersByBook((prev) => ({ ...prev, [bookId]: list }));
+        return list;
+      } catch (err) {
+        console.error("Chapters fetch error", err);
+        return [];
+      }
+    },
+    [currVersionId, chaptersByBook]
+  );
+
+  // 3) When current book changes, ensure its chapters are loaded once
   useEffect(() => {
-    if (currBook?.id) { fetchChapters(currBook.id); }
+    if (currBook?.id) {
+      fetchChapters(currBook.id);
+    }
   }, [currBook?.id, fetchChapters]);
 
+  // 4) Helpers for current chapter + book indices
   const currChapters = useMemo(
-    () => (currBook?.id ? (chaptersByBook[currBook.id] || []) : []),
+    () => (currBook?.id ? chaptersByBook[currBook.id] || [] : []),
     [chaptersByBook, currBook?.id]
   );
 
   const currChapterIndex = useMemo(
-    () => currChapters.findIndex(c => c.id === currChapterId),
+    () => currChapters.findIndex((c) => c.id === currChapterId),
     [currChapters, currChapterId]
   );
 
   const getBookIndex = useCallback(
-    (bookId) => booksOrder.findIndex(b => b.id === bookId),
+    (bookId) => booksOrder.findIndex((b) => b.id === bookId),
     [booksOrder]
   );
 
-  const goToFirstChapterOf = useCallback(async (bookObj) => {
-    const list = await fetchChapters(bookObj.id);
-    if (list.length) {
-      setCurrBook(bookObj);
-      setCurrentChapterId(list[0].id);
-    }
-  }, [fetchChapters]);
+  // 5) Navigation helpers
+  const goToFirstChapterOf = useCallback(
+    async (bookObj) => {
+      if (!bookObj) return;
+      const list = await fetchChapters(bookObj.id);
+      if (list.length) {
+        setCurrBook(bookObj);
+        setCurrChapterId(list[0].id);
+      }
+    },
+    [fetchChapters]
+  );
 
-  const goToLastChapterOf = useCallback(async (bookObj) => {
-    const list = await fetchChapters(bookObj.id);
-    if (list.length) {
-      setCurrBook(bookObj);
-      setCurrentChapterId(list[list.length - 1].id);
-    }
-  }, [fetchChapters]);
+  const goToLastChapterOf = useCallback(
+    async (bookObj) => {
+      if (!bookObj) return;
+      const list = await fetchChapters(bookObj.id);
+      if (list.length) {
+        setCurrBook(bookObj);
+        setCurrChapterId(list[list.length - 1].id);
+      }
+    },
+    [fetchChapters]
+  );
 
   const goNextChapter = useCallback(async () => {
     if (!currBook?.id) return;
 
     // within same book
-    if (currChapterIndex >= 0 && currChapterIndex < currChapters.length - 1) {
-      setCurrentChapterId(currChapters[currChapterIndex + 1].id);
+    if (
+      currChapterIndex >= 0 &&
+      currChapterIndex < currChapters.length - 1
+    ) {
+      setCurrChapterId(currChapters[currChapterIndex + 1].id);
       return;
     }
 
-    // next book's first chapter
+    // go to first chapter of next book
     const bi = getBookIndex(currBook.id);
     if (bi >= 0 && bi < booksOrder.length - 1) {
       const nextBook = booksOrder[bi + 1];
       await goToFirstChapterOf(nextBook);
     }
-  }, [currBook, currChapters, currChapterIndex, booksOrder, getBookIndex, goToFirstChapterOf]);
+  }, [
+    currBook,
+    currChapters,
+    currChapterIndex,
+    booksOrder,
+    getBookIndex,
+    goToFirstChapterOf,
+  ]);
 
   const goPrevChapter = useCallback(async () => {
     if (!currBook?.id) return;
 
     // within same book
     if (currChapterIndex > 0) {
-      setCurrentChapterId(currChapters[currChapterIndex - 1].id);
+      setCurrChapterId(currChapters[currChapterIndex - 1].id);
       return;
     }
 
-    // previous book's last chapter
+    // go to last chapter of previous book
     const bi = getBookIndex(currBook.id);
     if (bi > 0) {
       const prevBook = booksOrder[bi - 1];
       await goToLastChapterOf(prevBook);
     }
-  }, [currBook, currChapters, currChapterIndex, booksOrder, getBookIndex, goToLastChapterOf]);
+  }, [
+    currBook,
+    currChapters,
+    currChapterIndex,
+    booksOrder,
+    getBookIndex,
+    goToLastChapterOf,
+  ]);
 
-  const canPrev = !!currBook?.id && (
-    (currChapterIndex > 0) || (getBookIndex(currBook.id) > 0)
-  );
-  const canNext = !!currBook?.id && (
-    (currChapterIndex >= 0 && currChapterIndex < currChapters.length - 1) ||
-    (getBookIndex(currBook.id) < booksOrder.length - 1)
-  );
+  // 6) Arrow visibility
+  const canPrev =
+    !!currBook?.id &&
+    ((currChapterIndex > 0) || getBookIndex(currBook.id) > 0);
 
+  const canNext =
+    !!currBook?.id &&
+    (
+      (currChapterIndex >= 0 &&
+        currChapterIndex < currChapters.length - 1) ||
+      getBookIndex(currBook.id) < booksOrder.length - 1
+    );
+
+  // 7) Render
   return (
     <section className="ReadBible">
       <BibleVersion
-        setChapter={setCurrentChapterId}
+        setChapter={setCurrChapterId}
         book={currBook}
         setBook={(b) => {
+          // b is {id, name} from modal, or null when cleared
           setCurrBook(b || { id: null, name: "" });
-          setCurrentChapterId(null);
+          setCurrChapterId(null);
         }}
-        currVersionId={currVersion}
+        currVersionId={currVersionId}
         setCurrentVersion={(v) => {
-          setVersion(v);
-          setCurrBook({ id: null, name: "" });
-          setCurrentChapterId(null);
-          setChaptersByBook({});
-          setBooksOrder([]);
+          setCurrVersionId(v);
+          // the effect on currVersionId will handle clearing state
         }}
       />
+
       <Verse
         chapterId={currChapterId}
-        currVersionId={currVersion}
+        currVersionId={currVersionId}
         book={currBook}
         onPrev={goPrevChapter}
         onNext={goNextChapter}

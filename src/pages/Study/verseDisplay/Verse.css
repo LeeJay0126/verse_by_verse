@@ -1,73 +1,70 @@
 :root {
-  --content-width: 680px;     
-  --arrow-offset: 56px;      
-  --arrow-size: 44px;         
+  --content-width: 680px;
+  --arrow-offset: 56px;
+  --arrow-size: 44px;
 }
 
 .DisplaySection {
-    width: 680px;
-    padding-top: 30px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  width: 680px;
+  padding-top: 30px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .bookChapterHeader {
-    width: 100%;
-    text-align: center;
+  width: 100%;
+  text-align: center;
 }
 
 .displayArea {
-    padding-top: 30px;
-    width: 80%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  padding-top: 30px;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .versesList {
   list-style: none;
-  counter-reset: verse;
   padding-left: 0;
   padding-bottom: 200px;
+  margin: 0;
 }
 
-/* verse padding -- subjected to change */
-.versesList li {
-  position: relative;
-  padding-left: 0.5rem;
-  padding-bottom: 10px;
-  counter-increment: verse;
+/* Each row = up to 2 verses */
+.verseRowPair {
+  padding-bottom: 12px;
 }
 
-.versesList li::before {
-  content: counter(verse);
-  position: absolute;
-  left: 0;
-  top: -0.1em;  /* now this works */
-  font-size: 0.5rem;
+/* Container for each single verse inside the pair */
+.verseChunk {
+  display: inline;          /* seamless flow */
+  margin-right: 10px;       /* small gap between verse pairs */
+}
+
+/* Visual for the numbers we render in JSX */
+.verseNum {
+  font-size: 0.65rem;
+  vertical-align: top;
+  margin-right: 3px;
   color: #888;
   font-weight: 600;
 }
 
-.verseNumber {
-    font-size: 0.8em;
-    color: #4a90e2;
-    margin-right: 6px;
-    font-weight: bold;
+.versesList li::before {
+  content: none;
 }
 
-.verseText {
-    flex: 1;
-    color: #222;
-}
+
 
 .navArrow {
   position: fixed;
   top: 70%;
   transform: translateY(-50%);
-  z-index: 800;              /* above page content, below modals if those use >1000 */
+  z-index: 800;
+  /* above page content, below modals if those use >1000 */
   width: var(--arrow-size);
   height: var(--arrow-size);
   display: inline-flex;
@@ -75,8 +72,8 @@
   justify-content: center;
   border: none;
   border-radius: 999px;
-  background: rgba(0,0,0,0.08);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  background: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   font-size: 1.25rem;
   line-height: 1;
@@ -84,8 +81,13 @@
   transition: background 0.2s, transform 0.1s;
 }
 
-.navArrow:hover { background: rgba(0,0,0,0.12); }
-.navArrow:active { transform: translateY(-50%) scale(0.98); }
+.navArrow:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.navArrow:active {
+  transform: translateY(-50%) scale(0.98);
+}
 
 /* Place them near the content column. The content is centered, so its left edge is (50% - content/2) */
 .navArrowLeft {
@@ -99,13 +101,20 @@
 
 /* Hide arrows entirely when they’re not renderable (you already conditionally render them).
    If you ever keep them mounted, you can also visually hide with: */
-.navArrow[disabled] { display: none; }
+.navArrow[disabled] {
+  display: none;
+}
 
 /* Small screens: bring arrows closer to edges and make them slightly smaller */
 @media (max-width: 768px) {
   :root {
-    --content-width: 100vw;   /* content effectively full width on mobile */
+    --content-width: 100vw;
+    /* content effectively full width on mobile */
     --arrow-offset: 12px;
     --arrow-size: 40px;
+  }
+
+  .versesList {
+    grid-template-columns: 1fr;
   }
 }
