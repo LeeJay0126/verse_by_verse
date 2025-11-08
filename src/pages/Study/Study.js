@@ -1,3 +1,4 @@
+import Footer from "../../component/Footer";
 import PageHeader from "../../component/PageHeader";
 import Bible from "./Bible";
 import "./Study.css";
@@ -14,6 +15,7 @@ const Study = () => {
         </h2>
       </div>
       <Bible />
+      <Footer/>
     </section>
   );
 };
