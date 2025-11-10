@@ -16,6 +16,8 @@ const Verse = ({
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const hasChapter = !!chapterId;
+
   // Fetch verses whenever version or chapter changes
   useEffect(() => {
     if (!currVersionId || !chapterId) return;
@@ -29,7 +31,7 @@ const Verse = ({
         setVerseTexts({});
         setLoading(true);
 
-        // ---------- KOREAN (KOR via backend aggregator) ----------
+        // ---------- KOREAN ----------
         if (currVersionId === "kor") {
           const res = await fetch(
             `/api/passage/${currVersionId}/${chapterId}`,
@@ -40,7 +42,6 @@ const Verse = ({
           const data = await res.json();
           const list = Array.isArray(data.verses) ? data.verses : [];
 
-          // backend already gives: { id, number, text } with no "chapter:verse" prefix
           const normalized = list.map((v) => ({
             id: v.id,
             number: Number(v.number),
@@ -55,15 +56,13 @@ const Verse = ({
           );
 
           setVerseTexts(
-            Object.fromEntries(
-              normalized.map((v) => [v.id, v.text])
-            )
+            Object.fromEntries(normalized.map((v) => [v.id, v.text]))
           );
 
-          return; // don't fall through to non-KOR logic
+          return;
         }
 
-        // ---------- NON-KOREAN (api.scripture.api.bible) ----------
+        // ---------- NON-KOREAN ----------
         const url = new URL(
           `https://api.scripture.api.bible/v1/bibles/${currVersionId}/chapters/${chapterId}/verses`
         );
@@ -83,7 +82,6 @@ const Verse = ({
         const { data } = await res.json();
         const raw = Array.isArray(data) ? data : [];
 
-        // ensure each verse has a numeric `number`
         const withNumbers = raw.map((v, index) => {
           let num = index + 1;
 
@@ -104,7 +102,6 @@ const Verse = ({
           }))
         );
 
-        // fetch verse text (no verse numbers in payload)
         const entries = await Promise.all(
           withNumbers.map(async (v) => {
             const vUrl = new URL(
@@ -144,13 +141,13 @@ const Verse = ({
       }
     })();
 
-    return () => {
-      controller.abort();
-    };
+    return () => controller.abort();
   }, [currVersionId, chapterId]);
 
-  // Keyboard navigation for chapters
+  // Keyboard navigation for chapters (only when a chapter is active)
   useEffect(() => {
+    if (!hasChapter) return;
+
     const onKeyDown = (e) => {
       const el = e.target;
       const typing =
@@ -172,14 +169,9 @@ const Verse = ({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [canPrev, canNext, onPrev, onNext]);
+  }, [hasChapter, canPrev, canNext, onPrev, onNext]);
 
-  // --------- Render ---------
-  if (!chapterId) return null;
-  if (error) return <div role="alert">Error: {error}</div>;
-  if (loading && !verses.length) return <div>Loading verses…</div>;
-
-  const chapterNumber = chapterId.split(".")[1] || "";
+  const chapterNumber = hasChapter ? (chapterId.split(".")[1] || "") : "";
 
   // Pair verses visually: 2 verses per line
   const pairedVerses = [];
@@ -187,54 +179,76 @@ const Verse = ({
     pairedVerses.push([verses[i], verses[i + 1]]);
   }
 
+  const showArrows = hasChapter && (canPrev || canNext);
+
   return (
     <section className="DisplaySection">
       <h2 className="bookChapterHeader">
-        <span className="chapterTitle">
-          {book?.name || ""} {chapterNumber}
-        </span>
+        {hasChapter ? (
+          <span className="chapterTitle">
+            {book?.name || ""} {chapterNumber}
+          </span>
+        ) : (
+          <span className="chapterTitle placeholder">
+            Select a book and chapter to begin.
+          </span>
+        )}
       </h2>
 
       <div className="displayArea">
-        <ol className="versesList">
-          {pairedVerses.map(([v1, v2], idx) => (
-            <li key={v1?.id || idx} className="verseRowPair">
-              {v1 && (
-                <span className="verseChunk">
-                  <sup className="verseNum">{v1.number}</sup>
-                  {verseTexts[v1.id] ?? ""}
-                </span>
-              )}
-              {v2 && (
-                <span className="verseChunk">
-                  <sup className="verseNum">{v2.number}</sup>
-                  {verseTexts[v2.id] ?? ""}
-                </span>
-              )}
-            </li>
-          ))}
-        </ol>
+        {/* Content state */}
+        {error && hasChapter && (
+          <div role="alert">Error: {error}</div>
+        )}
 
-        <section className="chapterNav">
-          {canPrev && (
-            <button
-              className="navArrow navArrowLeft"
-              onClick={onPrev}
-              aria-label="Previous chapter"
-            >
-              ←
-            </button>
-          )}
-          {canNext && (
-            <button
-              className="navArrow navArrowRight"
-              onClick={onNext}
-              aria-label="Next chapter"
-            >
-              →
-            </button>
-          )}
-        </section>
+        {loading && hasChapter && !verses.length && (
+          <div>Loading verses…</div>
+        )}
+
+        {hasChapter && !loading && !error && (
+          <ol className="versesList">
+            {pairedVerses.map(([v1, v2], idx) => (
+              <li key={v1?.id || idx} className="verseRowPair">
+                {v1 && (
+                  <span className="verseChunk">
+                    <sup className="verseNum">{v1.number}</sup>
+                    {verseTexts[v1.id] ?? ""}
+                  </span>
+                )}
+                {v2 && (
+                  <span className="verseChunk">
+                    <sup className="verseNum">{v2.number}</sup>
+                    {verseTexts[v2.id] ?? ""}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
+
+        {/* Arrows: only when a chapter exists & nav is possible */}
+        {showArrows && (
+          <section className="chapterNav">
+            {canPrev && (
+              <button
+                className="navArrow navArrowLeft"
+                onClick={onPrev}
+                aria-label="Previous chapter"
+              >
+                ←
+              </button>
+            )}
+            {canNext && (
+              <button
+                className="navArrow navArrowRight"
+                onClick={onNext}
+                aria-label="Next chapter"
+              >
+                →
+              </button>
+            )}
+          </section>
+        )}
       </div>
     </section>
   );
