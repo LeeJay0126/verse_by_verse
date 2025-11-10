@@ -14,7 +14,7 @@ const BookVersionModal = ({
   currentBookId
 }) => {
   const [books, setBooks] = useState([]);
-  const [selectedBookId, setSelectedBookId] = useState(currentBookId !== undefined ? currentBookId : undefined);
+  const [selectedBookId, setSelectedBookId] = useState(currentBookId ?? null);
   const [error, setError] = useState(null);
 
   // Separate filters: one for books, one for chapters
@@ -55,29 +55,30 @@ const BookVersionModal = ({
 
   // When opening the modal, if a book is already chosen, start in Chapters view
   useEffect(() => {
-    if (visibilityStatus && currentBookId && selectedBookId === undefined) {
-      setSelectedBookId(currentBookId); // only on first open/init
+    if (visibilityStatus && currentBookId && selectedBookId == null) {
+      setSelectedBookId(currentBookId);
     }
-  }, [visibilityStatus, currentBookId, selectedBookId])
+  }, [visibilityStatus, currentBookId, selectedBookId]);
 
   // Allow Backspace to go back to Books when viewing Chapters
   useEffect(() => {
-    if (!visibilityStatus || !selectedBookId) return;
-    const onKeyDown = (e) => {
+    if (!visibilityStatus || selectedBookId == null) return;
 
+    const onKeyDown = (e) => {
       const el = e.target;
-      const isTypingTarget =
-        el && (
-          el.tagName === "INPUT" ||
+      const typing =
+        el &&
+        (el.tagName === "INPUT" ||
           el.tagName === "TEXTAREA" ||
-          el.isContentEditable
-        );
-      if (e.key === "Backspace" && !isTypingTarget) {
+          el.isContentEditable);
+
+      if (e.key === "Backspace" && !typing) {
         e.preventDefault();
         setSelectedBookId(null);
         setChapterFilterText("");
       }
     };
+
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [visibilityStatus, selectedBookId]);
@@ -102,12 +103,18 @@ const BookVersionModal = ({
   return (
     <div className={visibilityStatus ? "BookModal" : "ModalHidden"} role="dialog" aria-modal="true">
       <section className="ModalHeader">
-        {(selectedBookId !== null && selectedBookId !== undefined) && (
-          <button className="BookVersionBackButton" onClick={backToBooks} aria-label="Back to books">
+        {selectedBookId != null && (
+          <button
+            className="BookVersionBackButton"
+            onClick={backToBooks}
+            aria-label="Back to books"
+          >
             ←
           </button>
         )}
-        <h3 className="ModalTitle">{selectedBookId ? "Chapters" : "Books"}</h3>
+        <h3 className="ModalTitle">
+          {selectedBookId != null ? "Chapters" : "Books"}
+        </h3>
         <h4 className="ModalExitButton" onClick={modalCloseHandler} aria-label="Close modal">
           CANCEL
         </h4>
