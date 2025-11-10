@@ -19,6 +19,24 @@
   text-align: center;
 }
 
+/* --- Placeholder state when no chapter is selected --- */
+.chapterTitle {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.chapterTitle.placeholder {
+  color: #aaa;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+  text-align: center;
+  display: block;
+  margin-top: 40px;
+}
+
+
 .displayArea {
   padding-top: 30px;
   width: 80%;
@@ -41,8 +59,10 @@
 
 /* Container for each single verse inside the pair */
 .verseChunk {
-  display: inline;          /* seamless flow */
-  margin-right: 10px;       /* small gap between verse pairs */
+  display: inline;
+  /* seamless flow */
+  margin-right: 10px;
+  /* small gap between verse pairs */
 }
 
 /* Visual for the numbers we render in JSX */
@@ -57,8 +77,6 @@
 .versesList li::before {
   content: none;
 }
-
-
 
 .navArrow {
   position: fixed;
