@@ -4,6 +4,7 @@ import Community from "./pages/Community/Community";
 import Read from "./pages/Read/Read";
 import Account from "./pages/Account/Account";
 import Contact from "./pages/Contact/Contact";
+import SignUp from "./pages/Account/signUp/SignUp";
 import "./App.css";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -19,6 +20,7 @@ function App() {
           <Route path="/contact" exact element={<Contact />} />
           <Route path="/account" exact element={<Account />} />
           <Route path="/read" exact element={<Read />} />
+          <Route path="/signup" exact element={<SignUp/>}/>
         </Routes>
       </BrowserRouter>
     </div>

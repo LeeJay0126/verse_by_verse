@@ -65,6 +65,7 @@ export default function Account() {
           )}
 
           <form className="account-form" onSubmit={handleSubmit}>
+
             <label className="account-label">
               ID / Email
               <input
@@ -122,4 +123,5 @@ export default function Account() {
       <Footer />
     </section>
   );
-}
+};
+
