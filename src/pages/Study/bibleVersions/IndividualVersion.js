@@ -1,18 +1,19 @@
 import "./IndividualVersion.css";
 
-const IndividualVersion = (props) => {
+const IndividualVersion = ({ version, id, chVer, setId, setVis }) => {
+  const clickHandler = () => {
+    const abbr = version.abbreviation || version.id;
+    if (!abbr || !id) return;
 
-  const clickHandler = () =>{
-    props.chVer(props.version.abbreviation);
-    props.setId(props.id);
-    props.setVis(false);
+    chVer(abbr);     // e.g. "ASV" / "KOR"
+    setId(id);       // e.g. api.bible id / "kor"
+    setVis(false);
   };
 
   return (
-    // <li className="bibleItem" onClick={()=>chVer(version.id)}>
     <li className="bibleItem" onClick={clickHandler}>
       <p>
-        {props.version.abbreviation} - {props.version.name}
+        {version.abbreviation || version.id} - {version.name}
       </p>
     </li>
   );

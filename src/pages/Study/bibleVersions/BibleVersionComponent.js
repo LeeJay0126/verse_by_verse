@@ -25,7 +25,7 @@ const BookVersionComponent = (props) => {
       <section className="ModalFilter">
         <input
           className="ModalFilterInput"
-          placeholder="Filter Books..."
+          placeholder="Filter versions..."
           value={filterText}
           onChange={filterChangeHandler}
         />

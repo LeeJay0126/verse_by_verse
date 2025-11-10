@@ -1,21 +1,20 @@
-
+// SortVersionsByLanguage.js
 const sortVersionsByLanguage = (versionList) => {
   const sortedVersions = {};
 
   versionList.forEach((version) => {
-    const language = version.language?.name || 'Unknown';
-
+    const language = version.language?.name || "Unknown";
     if (!sortedVersions[language]) {
       sortedVersions[language] = [];
     }
-
     sortedVersions[language].push(version);
   });
 
-  // Sort versions alphabetically within each language group by abbreviation
   for (const language in sortedVersions) {
     sortedVersions[language].sort((a, b) => {
-      return a.abbreviation.localeCompare(b.abbreviation);
+      const aAbbr = a.abbreviation || a.id || "";
+      const bAbbr = b.abbreviation || b.id || "";
+      return aAbbr.localeCompare(bAbbr);
     });
   }
 
