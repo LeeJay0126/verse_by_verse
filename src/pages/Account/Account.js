@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import Header from '../../component/Header';
+import PageHeader from "../../component/PageHeader";
 import './Account.css';
-
+import Footer from '../../component/Footer';
+import { FaRegEyeSlash } from "react-icons/fa";
+import { FaRegEye } from "react-icons/fa";
 
 const API_URL = 'http://localhost:4000';
 
@@ -22,7 +24,7 @@ export default function Account() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    if (!isValid) return setError('아이디/비밀번호 형식을 확인해주세요.');
+    if (!isValid) return setError('Please check your ID/PW.');
 
     setLoading(true);
     try {
@@ -36,14 +38,14 @@ export default function Account() {
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data?.ok === false) {
-        throw new Error(data?.error || '로그인 실패');
+        throw new Error(data?.error || 'Failed to log in');
       }
 
       // succesful login situation
       console.log('Logged in:', data.user);
 
     } catch (err) {
-      setError(err.message || '네트워크 오류');
+      setError(err.message || 'Network Error');
     } finally {
       setLoading(false);
     }
@@ -51,66 +53,73 @@ export default function Account() {
 
   return (
     <section className="Account">
-      <Header />
-      <div className="account-card">
-        <h1 className="account-title">로그인</h1>
+      <PageHeader />
+      <div className='account-content'>
+        <div className="account-card">
+          <h1 className="account-title">Sign In</h1>
 
-        {error && (
-          <div className="account-error" role="alert">
-            {error}
-          </div>
-        )}
-
-        <form className="account-form" onSubmit={handleSubmit}>
-          <label className="account-label">
-            ID / Email
-            <input
-              ref={idRef}
-              type="text"
-              autoComplete="username"
-              value={id}
-              onChange={(e) => setId(e.target.value)}
-              className="account-input"
-              placeholder="아이디 또는 이메일"
-              aria-invalid={!!error && !isValid}
-            />
-          </label>
-
-          <label className="account-label">
-            Password
-            <div className="password-wrap">
-              <input
-                type={showPw ? 'text' : 'password'}
-                autoComplete="current-password"
-                value={pw}
-                onChange={(e) => setPw(e.target.value)}
-                className="account-input"
-                placeholder="비밀번호"
-              />
-              <button
-                type="button"
-                className="toggle-pw"
-                onClick={() => setShowPw((v) => !v)}
-                aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 보기'}
-              >
-                {showPw ? 'Hide' : 'Show'}
-              </button>
+          {error && (
+            <div className="account-error" role="alert">
+              {error}
             </div>
-          </label>
+          )}
 
-          <button
-            type="submit"
-            className="account-btn"
-            disabled={loading || !isValid}
-          >
-            {loading ? '로그인 중…' : '로그인'}
-          </button>
-        </form>
+          <form className="account-form" onSubmit={handleSubmit}>
+            <label className="account-label">
+              ID / Email
+              <input
+                ref={idRef}
+                type="text"
+                autoComplete="username"
+                value={id}
+                onChange={(e) => setId(e.target.value)}
+                className="account-input"
+                placeholder="Username or Email"
+                aria-invalid={!!error && !isValid}
+              />
+            </label>
 
-        <p className="account-help">
-          아직 계정이 없나요? <a href="/signup">회원가입</a>
-        </p>
+            <label className="account-label">
+              Password
+              <div className="password-wrap">
+                <input
+                  type={showPw ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  value={pw}
+                  onChange={(e) => setPw(e.target.value)}
+                  className="account-input"
+                  placeholder="Password"
+                />
+                <button
+                  type="button"
+                  className="toggle-pw"
+                  onClick={() => setShowPw((v) => !v)}
+                  aria-label={showPw ? 'Hide Password' : 'View Password'}
+                >
+                  {showPw ? <FaRegEyeSlash /> : <FaRegEye />}
+                </button>
+              </div>
+            </label>
+
+            <button
+              type="submit"
+              className="account-btn"
+              disabled={loading || !isValid}
+            >
+              {loading ? 'Logging in…' : 'Log In'}
+            </button>
+          </form>
+          <div className='account-signup-findpw'>
+            <p className="account-help">
+              아직 계정이 없나요? <a href="/signup">회원가입</a>
+            </p>
+            <p className="account-help">
+              <a href="/findpw">비밀번호를 잊었습니까?</a>
+            </p>
+          </div>
+        </div>
       </div>
+      <Footer />
     </section>
   );
 }
