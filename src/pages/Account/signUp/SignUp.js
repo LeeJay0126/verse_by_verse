@@ -23,7 +23,7 @@ const SignUp = () => {
             <PageHeader />
             <div className='account-content'>
                 <div className="account-card">
-                    <h1 className="account-title">Sign In</h1>
+                    <h1 className="account-title">Sign Up</h1>
 
                     {error && (
                         <div className="account-error" role="alert">

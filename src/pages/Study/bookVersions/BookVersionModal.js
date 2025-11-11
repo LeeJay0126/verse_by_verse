@@ -55,10 +55,10 @@ const BookVersionModal = ({
 
   // When opening the modal, if a book is already chosen, start in Chapters view
   useEffect(() => {
-    if (visibilityStatus && currentBookId && selectedBookId == null) {
+    if (visibilityStatus && currentBookId) {
       setSelectedBookId(currentBookId);
     }
-  }, [visibilityStatus, currentBookId, selectedBookId]);
+  }, [visibilityStatus, currentBookId]);
 
   // Allow Backspace to go back to Books when viewing Chapters
   useEffect(() => {
