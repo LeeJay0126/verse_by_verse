@@ -92,11 +92,12 @@
   border: none;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.08);
+  /* background: white; */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   font-size: 1.25rem;
   line-height: 1;
-  backdrop-filter: blur(2px);
+  /* backdrop-filter: blur(2px); */
   transition: background 0.2s, transform 0.1s;
 }
 
@@ -111,11 +112,11 @@
 /* Place them near the content column. The content is centered, so its left edge is (50% - content/2) */
 .navArrowLeft {
   /* keep at least 12px from the viewport edge; otherwise anchor to content edge minus offset */
-  left: max(12px, calc(50% - (var(--content-width) / 2) - var(--arrow-offset)));
+  left: max(12px, calc(45% - (var(--content-width) / 2) - var(--arrow-offset)));
 }
 
 .navArrowRight {
-  right: max(12px, calc(50% - (var(--content-width) / 2) - var(--arrow-offset)));
+  right: max(12px, calc(45% - (var(--content-width) / 2) - var(--arrow-offset)));
 }
 
 /* Hide arrows entirely when they’re not renderable (you already conditionally render them).
