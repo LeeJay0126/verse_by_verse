@@ -71,9 +71,9 @@
 
 .signup-name-flex {
   width: 100%;
-  gap: 20px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .signup-name-flex .account-input {
@@ -90,11 +90,11 @@
 }
 
 .toggle-pw {
-  color: black;
+  color: rgb(22, 0, 0);
   position: absolute;
   right: .3rem;
   top: 50%;
-  transform: translateY(-50%) translateX(-10px);
+  transform: translateY(-50%) translateX(-5px);
   border: 0;
   background: transparent;
   cursor: pointer;
