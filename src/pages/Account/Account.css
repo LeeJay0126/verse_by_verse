@@ -61,7 +61,7 @@
 }
 
 .account-input {
-  width: 90%;
+  width: 100%;
   padding: .7rem .9rem;
   border: 1px solid #cfd4dc;
   border-radius: 10px;
@@ -71,9 +71,9 @@
 
 .signup-name-flex {
   width: 100%;
-  display: flex;
-  justify-content: space-between;
-  padding-right: 50px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .signup-name-flex .account-input {
@@ -90,11 +90,11 @@
 }
 
 .toggle-pw {
-  color: #F5EAEA;
+  color: rgb(22, 0, 0);
   position: absolute;
-  right: .5rem;
+  right: .3rem;
   top: 50%;
-  transform: translateY(-50%) translateX(-10px);
+  transform: translateY(-50%) translateX(-5px);
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -137,4 +137,11 @@
 .account-help a:visited {
   color: #F5EAEA;
   text-decoration: underline;
+}
+
+.findpw-desc {
+  text-align: center;
+  color: #F5EAEA;
+  font-size: 16px;
+  padding-bottom: 5px;
 }
