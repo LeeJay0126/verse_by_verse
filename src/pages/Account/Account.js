@@ -1,64 +1,60 @@
-import { useEffect, useRef, useState } from 'react';
-import PageHeader from "../../component/PageHeader";
-import './Account.css';
-import Footer from '../../component/Footer';
-import { FaRegEyeSlash } from "react-icons/fa";
-import { FaRegEye } from "react-icons/fa";
+import "./Account.css";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const API_URL = 'http://localhost:4000';
+import PageHeader from "../../component/PageHeader";
+import Footer from "../../component/Footer";
+import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
+import { useAuth } from "../../component/context/AuthContext"; // ⬅ adjust path
 
 export default function Account() {
-  const [id, setId] = useState('');
-  const [pw, setPw] = useState('');
+  const [id, setId] = useState("");
+  const [pw, setPw] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const idRef = useRef(null);
 
   const navigate = useNavigate();
+  const { user, login } = useAuth();
 
   useEffect(() => {
     idRef.current?.focus();
   }, []);
 
-  const isValid = id.trim().length >= 3 && pw.length >= 4; // id password conditions
+  // If already logged in, optionally redirect away from login page
+  useEffect(() => {
+    if (user) {
+      navigate("/", { replace: true });
+    }
+  }, [user, navigate]);
+
+  const isValid = id.trim().length >= 3 && pw.length >= 4; // id/password conditions
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError('');
-    if (!isValid) return setError('Please check your ID/PW.');
+    setError("");
 
-    setLoading(true);
+    if (!isValid) {
+      setError("Please check your ID/PW.");
+      return;
+    }
+
+    setSubmitting(true);
+
     try {
-      // backend url to be added here
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: id, password: pw }), // have to match with backend field names
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data?.ok === false) {
-        throw new Error(data?.error || 'Failed to log in');
-      }
-
-      // succesful login situation
-      console.log('Logged in:', data.user);
-      navigate('/'); // Home redirect
-
+      await login(id, pw);    //calls /auth/login and sets global `user`
+      navigate("/", { replace: true }); // redirect to Home
     } catch (err) {
-      setError(err.message || 'Network Error');
+      setError(err.message || "Network Error");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   }
 
   return (
     <section className="Account">
       <PageHeader />
-      <div className='account-content'>
+      <div className="account-content">
         <div className="account-card">
           <h1 className="account-title">Sign In</h1>
 
@@ -69,7 +65,6 @@ export default function Account() {
           )}
 
           <form className="account-form" onSubmit={handleSubmit}>
-
             <label className="account-label">
               ID / Email
               <input
@@ -88,7 +83,7 @@ export default function Account() {
               Password
               <div className="password-wrap">
                 <input
-                  type={showPw ? 'text' : 'password'}
+                  type={showPw ? "text" : "password"}
                   autoComplete="current-password"
                   value={pw}
                   onChange={(e) => setPw(e.target.value)}
@@ -99,7 +94,7 @@ export default function Account() {
                   type="button"
                   className="toggle-pw"
                   onClick={() => setShowPw((v) => !v)}
-                  aria-label={showPw ? 'Hide Password' : 'View Password'}
+                  aria-label={showPw ? "Hide Password" : "View Password"}
                 >
                   {showPw ? <FaRegEyeSlash /> : <FaRegEye />}
                 </button>
@@ -109,12 +104,13 @@ export default function Account() {
             <button
               type="submit"
               className="account-btn"
-              disabled={loading || !isValid}
+              disabled={submitting || !isValid}
             >
-              {loading ? 'Logging in…' : 'Log In'}
+              {submitting ? "Logging in…" : "Log In"}
             </button>
           </form>
-          <div className='account-signup-findpw'>
+
+          <div className="account-signup-findpw">
             <p className="account-help">
               아직 계정이 없나요? <a href="/signup">회원가입</a>
             </p>
@@ -127,5 +123,4 @@ export default function Account() {
       <Footer />
     </section>
   );
-};
-
+}
