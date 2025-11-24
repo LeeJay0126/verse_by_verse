@@ -4,6 +4,7 @@ import './Account.css';
 import Footer from '../../component/Footer';
 import { FaRegEyeSlash } from "react-icons/fa";
 import { FaRegEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = 'http://localhost:4000';
 
@@ -14,6 +15,8 @@ export default function Account() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const idRef = useRef(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     idRef.current?.focus();
@@ -43,6 +46,7 @@ export default function Account() {
 
       // succesful login situation
       console.log('Logged in:', data.user);
+      navigate('/'); // Home redirect
 
     } catch (err) {
       setError(err.message || 'Network Error');

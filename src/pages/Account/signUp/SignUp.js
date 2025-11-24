@@ -3,6 +3,7 @@ import PageHeader from "../../../component/PageHeader";
 import '../Account.css';
 import Footer from '../../../component/Footer';
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = 'http://localhost:4000';
 
@@ -17,11 +18,91 @@ const SignUp = () => {
     const [loading, setLoading] = useState(false);
     const idRef = useRef(null);
 
+    return (
     const emailOk  = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id);
     const passOk   = pw.length >= 4; // need adjustment
     const matchOk  = pw === confirmPw;
     const nameOk   = firstName.trim().length > 0 && lastName.trim().length > 0;
     const isValid  = emailOk && passOk && matchOk && nameOk;  
+    const navigate = useNavigate();
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        setError('');
+        if (!isValid) {
+          setError('입력값을 확인해주세요 (필수/이메일/비번/일치).');
+          return;
+        }
+        setLoading(true);
+        try {
+          const res = await fetch(`${API_URL}/auth/signup`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              firstName,
+              lastName,
+              email: id,
+              password: pw
+            })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || data?.ok === false) {
+            throw new Error(data?.error || '회원가입 실패');
+          }
+          console.log('[signup success]', data.user);
+          navigate('/account');   // REDIRECT TO LOGIN PAGE
+        } catch (err) {
+          console.error('[signup error]', err);
+          setError(err.message || '네트워크 오류');
+        } finally {
+          setLoading(false);
+        }
+      }    
+
+      return (
+        <section className="Account">
+            <PageHeader />
+            <div className='account-content'>
+                <div className="account-card">
+                    <h1 className="account-title">Sign Up</h1>
+
+                    {error && (
+                        <div className="account-error" role="alert">
+                            {error}
+                        </div>
+                    )}
+
+                    <form className="account-form">
+                        <div className='signup-name-flex'>
+                            <div>
+                                {/* <label className='account-label'>
+                                    First Name
+                                </label> */}
+                                <input
+                                    // ref={idRef}
+                                    type="text"
+                                    autoComplete="firstName"
+                                    // value={id}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="account-input"
+                                    placeholder="First Name"
+                                />
+                            </div>
+                            <div>
+                                {/* <label className='account-label'>
+                                    Last Name
+                                </label> */}
+                                <input
+                                    // ref={idRef}
+                                    type="text"
+                                    autoComplete="firstName"
+                                    // value={id}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="account-input"
+                                    placeholder="Last Name"
+                                />
+                            </div>
 
     async function handleSubmit(e) {
         e.preventDefault();
