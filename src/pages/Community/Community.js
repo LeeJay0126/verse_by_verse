@@ -1,11 +1,11 @@
-import Header from '../../component/Header';
+import PageHeader from '../../component/PageHeader';
 import './Community.css';
 
 const Community =() => {
 
     return (
         <section className='Community'>
-            <Header/>
+            <PageHeader/>
         </section>
     );
 };
