@@ -1,12 +1,11 @@
 import './PageHeader.css';
-import './Header.css';
 import PageLogo from './PageLogo';
 import MenuOptions from './MenuOptions';
 
 const PageHeader = () => {
 
     return (
-        <header className='Header PageHeader'>
+        <header className='PageHeader'>
             <PageLogo />
             <MenuOptions page={false} />
         </header>
