@@ -37,12 +37,14 @@
     transform: translateX(0); 
 }
 
+
 /*
-    Study Cards
+Study Cards
 */
 
 .studyHowSection {
     margin-top: 40px;
+    width: 100%;
 }
 
 .studyHowCardContainer {
@@ -50,7 +52,13 @@
     padding: 0;
     margin: 0;
     display: flex;
-    gap: 30px;
+    justify-content: space-between;
+}
+
+.studyHowHeader {
+   padding-bottom: 25px;
+   font-size: 24px;
+   letter-spacing: 0.5px;
 }
 
 .studyCard {
@@ -60,11 +68,12 @@
 }
 
 .studyCardIcon {
-    font-size: 32px;
+    width: 84px;
+    height: 32px;
 }
 
 .studyCardHeader {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 600;
     margin: 0;
 }
