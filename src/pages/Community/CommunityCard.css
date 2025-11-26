@@ -1,0 +1,92 @@
+.CommunityCards {
+    border: 1px solid transparent;
+    border-image: linear-gradient(to right, #ecbc7a, transparent) 1;
+    background-color: #faf6f0;
+    box-shadow: inset;
+
+    padding: 20px;
+    height: 280px;
+
+    display: flex;
+    flex-direction: column;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    /* important for grid: allow card to shrink to its 1fr track */
+    min-width: 0;
+}
+
+/* Base text styles */
+.communityCardHeader {
+    font-size: 20px;
+    font-weight: 800;
+    padding-bottom: 5px;
+}
+
+.communityCardSubHeader {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    padding-bottom: 65px;
+}
+
+.communityCardContent {
+    font-size: 14px;
+    padding-bottom: 3px;
+}
+
+.communityCardContent:last-of-type {
+    padding-bottom: 5px;
+}
+
+/* line viewport: fixed width, hides overflow */
+.marqueeLine {
+    display: block;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+/* inner text that slides */
+.marqueeInner {
+    display: inline-block;
+    padding-right: 2rem; 
+}
+
+/* per-line hover: only this line animates when hovered */
+.marqueeScrollable:hover .marqueeInner {
+    animation: cardTextMarquee 15s linear infinite;
+    will-change: transform;
+    cursor: default;
+}
+
+/* right → left slow scroll */
+@keyframes cardTextMarquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.communityCardRole {
+    display: block;
+    width: fit-content;
+    background-color: #d6cfc6;
+    padding: 5px 8px;
+    margin-bottom: 15px;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.communityCardEnterButton {
+    background-color: black;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+}

@@ -43,7 +43,8 @@ Study Cards
 */
 
 .studyHowSection {
-    margin-top: 40px;
+    margin-top: 60px;
+    margin-bottom: 40px;
     width: 100%;
 }
 
@@ -81,4 +82,48 @@ Study Cards
 .studyCardContent {
     margin: 4px 0 0;
     color: #666;
+}
+
+.communityShowMoreWrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+/* Show More button styling */
+.communityShowMoreButton {
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #f3f0ea;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.communityShowMoreButton:hover {
+    background-color: #e6ded2;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+
+/* Will change the grid template to display 2 in smaller viewport and 1 in mobile */
+.communityCardGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 1024px) {
+    .communityCardGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .communityCardGrid {
+        grid-template-columns: 1fr;
+    }
 }

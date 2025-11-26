@@ -52,7 +52,7 @@
     font-size: 14px;
 }
 
-.buttonContainer{
+.buttonContainer {
     display: flex;
     margin-top: 25px;
     gap: 25px;
@@ -68,5 +68,4 @@
     font-weight: 500;
     cursor: pointer;
 }
-
 
