@@ -1,11 +1,12 @@
 .Community {
     width: 100vw;
+    background-color: #F4EEE6;
 }
 
 .CommunityHero {
     /* background-color: #27272780; */
     background-image: url('../../component/images/community/CommunityHero.png');
-    height: 600px;
+    height: 550px;
 
     /* background-blend-mode: saturation; */
     background-position: center;
@@ -45,7 +46,7 @@
 }
 
 .CommunityH3 {
-    margin-top: 100px;
+    margin-top: 90px;
     letter-spacing: 1px;
     font-weight: 100;
     font-size: 14px;

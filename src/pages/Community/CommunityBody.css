@@ -1,0 +1,75 @@
+.CommunityBody {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 50px 50px;
+}
+
+.communityBodyBC {
+    position: relative;
+    display: flex;
+    gap: 20px; 
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 25px;
+}
+
+.communityBodyB {
+    padding: 10px 0;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: #444;
+}
+
+.communityBodyB.active {
+    color: #000;
+}
+
+.underline {
+    position: absolute;
+    bottom: -1px;
+    height: 3px;
+    background-color: black;
+    border-radius: 3px;
+    transition: transform 0.35s ease, width 0.35s ease;
+    width: 0; 
+    transform: translateX(0); 
+}
+
+/*
+    Study Cards
+*/
+
+.studyHowSection {
+    margin-top: 40px;
+}
+
+.studyHowCardContainer {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 30px;
+}
+
+.studyCard {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.studyCardIcon {
+    font-size: 32px;
+}
+
+.studyCardHeader {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.studyCardContent {
+    margin: 4px 0 0;
+    color: #666;
+}

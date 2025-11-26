@@ -1,5 +1,6 @@
 import PageHeader from '../../component/PageHeader';
 import './Community.css';
+import CommunityBody from './CommunityBody';
 
 const Community = () => {
 
@@ -24,6 +25,7 @@ const Community = () => {
                     Share memos, comment on verses, and walk through Scripture together
                 </h2>
             </div>
+            <CommunityBody/>
         </section>
     );
 };
