@@ -59,7 +59,7 @@ const CommunityBody = () => {
                         <FaPlus className="studyCardIcon" />
                         <div>
                             <h3 className="studyCardHeader">Create or Join</h3>
-                            <p className="studyCardContent">Start</p>
+                            <p className="studyCardContent">Start your own study group or join a community that matches your interests. Connect quickly and begin studying together right away.</p>
                         </div>
                     </li>
 
@@ -67,7 +67,7 @@ const CommunityBody = () => {
                         <PiBookOpenLight className="studyCardIcon" />
                         <div>
                             <h3 className="studyCardHeader">Read Together</h3>
-                            <p className="studyCardContent">Walk through Scripture in sync</p>
+                            <p className="studyCardContent">Follow the same passages as your community and move through Scripture in sync, making study and discussion simple and unified.</p>
                         </div>
                     </li>
 
@@ -75,7 +75,7 @@ const CommunityBody = () => {
                         <LuNotebookPen className="studyCardIcon" />
                         <div>
                             <h3 className="studyCardHeader">Share Memos</h3>
-                            <p className="studyCardContent">Record insights visible to all</p>
+                            <p className="studyCardContent">Write reflections and insights in a shared memo space where everyone can see, contribute, and grow together.</p>
                         </div>
                     </li>
 
