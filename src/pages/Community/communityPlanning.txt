@@ -1,0 +1,18 @@
+커뮤니티 기능을 개발하면서 고민해봐야 할점들:
+
+지금까지 Hardwire를 짜면서 생각해본 properties list (추후 추가 예정) - 
+community title (header), subheader, content(설명란), # of members, last active, role (position)
+
+이중 포지션 측면에서 고려해야할 사항들은
+Owner - 커뮤니티를 창설한 사람. Leader 권한을 위임하거나 해임할수있다.
+Leader - 커뮤니티를 이끌어갈, Admin 권한을 갖고있는 사람. 가입 신청을 처리하고 상황에 따라 멤버 추방이 가능하다
+Member - 일반 멤버로써 Read, Write, Update 권한을 가지고 있다
+
+이정도라고 본다면, Owner 롤은 기본적으로 커뮤니티를 창설한 사람에게 주어지고 위임가능성은 추후 논의해봐야한다.
+Owner는 Leader 롤 과 같은 권한을 가지고 있고 Leader 들을 위임하거나 해임할수있다. 한번에 여러명의 leader 포지션이
+존재할수 있고 Leader 포지션이 없는 커뮤니티도 존재할수있다.
+
+이 포지션 관련된 정보들은 아마도 두개의 property로 나뉘어서 저장하면 좋을거같다.
+Community db 안에 Owner property, Leader property 로 나뉘어서 저장하고
+이에 해당하는 사람들에 대해서는 이에 해당돼는 권한을 부여하고 그렇지 않은 경우에는 member 권한을 부여하면 될듯.
+

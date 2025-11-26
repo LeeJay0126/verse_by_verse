@@ -1,3 +1,4 @@
+import Footer from '../../component/Footer';
 import PageHeader from '../../component/PageHeader';
 import './Community.css';
 import CommunityBody from './CommunityBody';
@@ -26,6 +27,7 @@ const Community = () => {
                 </h2>
             </div>
             <CommunityBody/>
+            <Footer/>
         </section>
     );
 };
