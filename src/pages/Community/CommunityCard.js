@@ -38,18 +38,16 @@ const CommunityCard = (props) => {
         <section className="CommunityCards">
             <h2
                 ref={headerRef}
-                className={`communityCardHeader marqueeLine ${
-                    overflow.header ? "marqueeScrollable" : ""
-                }`}
+                className={`communityCardHeader marqueeLine ${overflow.header ? "marqueeScrollable" : ""
+                    }`}
             >
                 <span className="marqueeInner">{props.header}</span>
             </h2>
 
             <h3
                 ref={subheaderRef}
-                className={`communityCardSubHeader marqueeLine ${
-                    overflow.subheader ? "marqueeScrollable" : ""
-                }`}
+                className={`communityCardSubHeader marqueeLine ${overflow.subheader ? "marqueeScrollable" : ""
+                    }`}
             >
                 <span className="marqueeInner">{props.subheader}</span>
             </h3>
@@ -57,9 +55,8 @@ const CommunityCard = (props) => {
             {props.content ? (
                 <p
                     ref={contentRef}
-                    className={`communityCardContent marqueeLine ${
-                        overflow.content ? "marqueeScrollable" : ""
-                    }`}
+                    className={`communityCardContent marqueeLine ${overflow.content ? "marqueeScrollable" : ""
+                        }`}
                 >
                     <span className="marqueeInner">{props.content}</span>
                 </p>
@@ -71,9 +68,14 @@ const CommunityCard = (props) => {
 
             <span className="communityCardRole">{props.role}</span>
 
-            <button className="communityCardEnterButton">
-                Enter Community
-            </button>
+            {/*Ternary for my community and discover community button */}
+            {props.my ?
+                <button className="communityCardEnterButton">
+                    Enter Community
+                </button> :
+                <button className="communityCardEnterButton">
+                    Join Community
+                </button>}
         </section>
     );
 };
