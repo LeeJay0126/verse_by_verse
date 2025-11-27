@@ -6,254 +6,286 @@ import { PiBookOpenLight } from "react-icons/pi";
 import { LuNotebookPen } from "react-icons/lu";
 import CommunityCard from "./CommunityCard";
 
+const MAX_DISCOVER_VISIBLE = 3;
+
 const CommunityBody = () => {
-    const [activeTab, setActiveTab] = useState("my");
-    const [showAllMyCommunities, setShowAllMyCommunities] = useState(false);
-    const [visibleCount, setVisibleCount] = useState(3);
+  const [activeTab, setActiveTab] = useState("my");
+  const [showAllMyCommunities, setShowAllMyCommunities] = useState(false);
+  const [showAllDiscover, setShowAllDiscover] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(3);
+  const [gridCols, setGridCols] = useState(3);
 
-    const myRef = useRef(null);
-    const discoverRef = useRef(null);
-    const underlineRef = useRef(null);
-    const gridRef = useRef(null);
+  const myRef = useRef(null);
+  const discoverRef = useRef(null);
+  const underlineRef = useRef(null);
+  const gridRef = useRef(null);
 
-    // Demo data – later to be replaced with data from API / props
-    const myCommunities = [
-        {
-            header: "Young Adults Group",
-            subheader: "Weekly Bible study with KTPC",
-            content: "Demo Community Card",
-            members: 6,
-            lastActive: "17 hours ago",
-            role: "Owner",
-            my: true
-        },
-        {
-            header: "Morning Devotionals Confirming the animation for length",
-            subheader: "Start the day in the Word Confirming the animation for length",
-            content: "Short daily readings and reflections. Confirming the animation for length",
-            members: 12,
-            lastActive: "2 hours ago",
-            role: "Member",
-            my: true
-        },
-        {
-            header: "Korean-English Study Group",
-            subheader: "Bilingual Bible reading and sharing",
-            content: "Share insights in both Korean and English.",
-            members: 8,
-            lastActive: "1 day ago",
-            role: "Owner",
-            my: true
-        },
-        {
-            header: "Friday Night Fellowship",
-            subheader: "End the week with worship and study",
-            content: "Hybrid in-person and online gatherings.",
-            members: 15,
-            lastActive: "3 days ago",
-            role: "Member",
-            my: true
-        },
-    ];
+  // Demo data – later to be replaced with data from API / props
+  const myCommunities = [
+    {
+      header: "Young Adults Group",
+      subheader: "Weekly Bible study with KTPC",
+      content: "Demo Community Card",
+      members: 6,
+      lastActive: "17 hours ago",
+      role: "Owner",
+      my: true,
+    },
+    {
+      header: "Morning Devotionals Confirming the animation for length",
+      subheader: "Start the day in the Word Confirming the animation for length",
+      content:
+        "Short daily readings and reflections. Confirming the animation for length",
+      members: 12,
+      lastActive: "2 hours ago",
+      role: "Member",
+      my: true,
+    },
+    {
+      header: "Korean-English Study Group",
+      subheader: "Bilingual Bible reading and sharing",
+      content: "Share insights in both Korean and English.",
+      members: 8,
+      lastActive: "1 day ago",
+      role: "Owner",
+      my: true,
+    },
+    {
+      header: "Friday Night Fellowship",
+      subheader: "End the week with worship and study",
+      content: "Hybrid in-person and online gatherings.",
+      members: 15,
+      lastActive: "3 days ago",
+      role: "Member",
+      my: true,
+    },
+  ];
 
-    const joinCommunities = [
-        {
-            header: "Young Adults Group",
-            subheader: "Weekly Bible study with KTPC",
-            content: "Demo Community Card",
-            members: 6,
-            lastActive: "17 hours ago",
-            role: "Owner",
-            my: false
-        },
-        {
-            header: "Morning Devotionals Confirming the animation for length",
-            subheader: "Start the day in the Word Confirming the animation for length",
-            content: "Short daily readings and reflections. Confirming the animation for length",
-            members: 12,
-            lastActive: "2 hours ago",
-            role: "Member",
-            my: false
-        },
-        {
-            header: "Korean-English Study Group",
-            subheader: "Bilingual Bible reading and sharing",
-            content: "Share insights in both Korean and English.",
-            members: 8,
-            lastActive: "1 day ago",
-            role: "Owner",
-            my: false
-        },
-        /* Last card to check to confirm discover cards display only up to 3 cards */
-        {
-            header: "Friday Night Fellowship",
-            subheader: "End the week with worship and study",
-            content: "Hybrid in-person and online gatherings.",
-            members: 15,
-            lastActive: "3 days ago",
-            role: "Member",
-            my: false
-        },
-    ];
+  const joinCommunities = [
+    {
+      header: "Young Adults Group",
+      subheader: "Weekly Bible study with KTPC",
+      content: "Demo Community Card",
+      members: 6,
+      lastActive: "17 hours ago",
+      role: "Owner",
+      my: false,
+    },
+    {
+      header: "Morning Devotionals Confirming the animation for length",
+      subheader: "Start the day in the Word Confirming the animation for length",
+      content:
+        "Short daily readings and reflections. Confirming the animation for length",
+      members: 12,
+      lastActive: "2 hours ago",
+      role: "Member",
+      my: false,
+    },
+    {
+      header: "Korean-English Study Group",
+      subheader: "Bilingual Bible reading and sharing",
+      content: "Share insights in both Korean and English.",
+      members: 8,
+      lastActive: "1 day ago",
+      role: "Owner",
+      my: false,
+    },
+    {
+      header: "Friday Night Fellowship",
+      subheader: "End the week with worship and study",
+      content: "Hybrid in-person and online gatherings.",
+      members: 15,
+      lastActive: "3 days ago",
+      role: "Member",
+      my: false,
+    },
+  ];
 
-    // Sync visibleCount with actual grid-template-columns
-    useEffect(() => {
-        const updateVisibleFromGrid = () => {
-            if (!gridRef.current) return;
+  // Sync visibleCount with actual grid-template-columns
+  useEffect(() => {
+    const updateVisibleFromGrid = () => {
+      if (!gridRef.current) return;
 
-            const styles = window.getComputedStyle(gridRef.current);
-            const templateColumns = styles.getPropertyValue("grid-template-columns");
+      const styles = window.getComputedStyle(gridRef.current);
+      const templateColumns = styles.getPropertyValue("grid-template-columns");
 
-            if (!templateColumns) return;
+      if (!templateColumns) return;
 
-            // "1fr 1fr 1fr" to ["1fr","1fr","1fr"] → 3
-            const cols = templateColumns
-                .trim()
-                .split(/\s+/)
-                .filter(Boolean).length;
+      // "1fr 1fr 1fr" → ["1fr", "1fr", "1fr"] → 3
+      const cols = templateColumns
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean).length;
 
-            // Safety: don't exceed number of communities
-            const count = Math.min(cols, myCommunities.length);
+      setGridCols(cols);
 
-            setVisibleCount(count);
-        };
+      // For "My Communities" we just match the column count (up to total length)
+      const count = Math.min(cols, myCommunities.length);
+      setVisibleCount(count);
+    };
 
-        updateVisibleFromGrid();
-        window.addEventListener("resize", updateVisibleFromGrid);
+    updateVisibleFromGrid();
+    window.addEventListener("resize", updateVisibleFromGrid);
 
-        return () => {
-            window.removeEventListener("resize", updateVisibleFromGrid);
-        };
-    }, [myCommunities.length]);
+    return () => {
+      window.removeEventListener("resize", updateVisibleFromGrid);
+    };
+  }, [myCommunities.length]);
 
-    const visibleMyCommunities = showAllMyCommunities
-        ? myCommunities
-        : myCommunities.slice(0, visibleCount);
+  const visibleMyCommunities = showAllMyCommunities
+    ? myCommunities
+    : myCommunities.slice(0, visibleCount);
 
-    const visibleDiscoverCommunities = joinCommunities.slice(0, 3);
+  // Discover: same logic, but capped at MAX_DISCOVER_VISIBLE
+  const maxDiscover = Math.min(MAX_DISCOVER_VISIBLE, joinCommunities.length);
+  const baseDiscoverVisible = Math.min(visibleCount, maxDiscover);
 
-    useEffect(() => {
-        const tabRef = activeTab === "my" ? myRef : discoverRef;
-        const underline = underlineRef.current;
+  const visibleDiscoverCommunities = showAllDiscover
+    ? joinCommunities.slice(0, maxDiscover)
+    : joinCommunities.slice(0, baseDiscoverVisible);
 
-        if (tabRef.current && underline) {
-            const { offsetLeft, offsetWidth } = tabRef.current;
+  const isSmallViewport = gridCols < 3;
 
-            underline.style.width = `${offsetWidth}px`;
-            underline.style.transform = `translateX(${offsetLeft}px)`;
-        }
-    }, [activeTab]);
+  useEffect(() => {
+    const tabRef = activeTab === "my" ? myRef : discoverRef;
+    const underline = underlineRef.current;
 
-    return (
-        <section className="CommunityBody">
-            <div className="communityBodyBC">
-                <button
-                    ref={myRef}
-                    className={`communityBodyB ${activeTab === "my" ? "active" : ""}`}
-                    onClick={() => setActiveTab("my")}
-                >
-                    My Communities
-                </button>
+    if (tabRef.current && underline) {
+      const { offsetLeft, offsetWidth } = tabRef.current;
 
-                <button
-                    ref={discoverRef}
-                    className={`communityBodyB ${activeTab === "discover" ? "active" : ""}`}
-                    onClick={() => setActiveTab("discover")}
-                >
-                    Discover
-                </button>
+      underline.style.width = `${offsetWidth}px`;
+      underline.style.transform = `translateX(${offsetLeft}px)`;
+    }
+  }, [activeTab]);
 
-                <span className="underline" ref={underlineRef} />
-            </div>
+  return (
+    <section className="CommunityBody">
+      <div className="communityBodyBC">
+        <button
+          ref={myRef}
+          className={`communityBodyB ${activeTab === "my" ? "active" : ""}`}
+          onClick={() => setActiveTab("my")}
+        >
+          My Communities
+        </button>
 
-            <div className="communityDisplayArea">
-                {activeTab === "my" ? (
-                    <>
-                        <section className="communityCardGrid" ref={gridRef}>
-                            {visibleMyCommunities.map((community, index) => (
-                                <CommunityCard
-                                    key={index}
-                                    header={community.header}
-                                    subheader={community.subheader}
-                                    content={community.content}
-                                    members={community.members}
-                                    lastActive={community.lastActive}
-                                    role={community.role}
-                                    my={community.my}
+        <button
+          ref={discoverRef}
+          className={`communityBodyB ${
+            activeTab === "discover" ? "active" : ""
+          }`}
+          onClick={() => setActiveTab("discover")}
+        >
+          Discover
+        </button>
 
-                                />
-                            ))}
-                        </section>
+        <span className="underline" ref={underlineRef} />
+      </div>
 
-                        {!showAllMyCommunities &&
-                            myCommunities.length > visibleCount && (
-                                <div className="communityShowMoreWrapper">
-                                    <button
-                                        className="communityShowMoreButton"
-                                        onClick={() => setShowAllMyCommunities(true)}
-                                    >
-                                        Show More
-                                    </button>
-                                </div>
-                            )}
-                    </>
-                ) : (
-                    <section className="communityCardGrid" ref={gridRef}>
-                        {visibleDiscoverCommunities.map((community, index) => (
-                            <CommunityCard
-                                key={index}
-                                header={community.header}
-                                subheader={community.subheader}
-                                content={community.content}
-                                members={community.members}
-                                lastActive={community.lastActive}
-                                role={community.role}
-                                my={community.my}
-                            />
-                        ))}
-                    </section>
-                )}
-            </div>
-
-            <section className="studyHowSection">
-                <h3 className="studyHowHeader">How Community Study Works</h3>
-                <ul className="studyHowCardContainer">
-                    <li className="studyCard">
-                        <FaPlus className="studyCardIcon" />
-                        <div>
-                            <h3 className="studyCardHeader">Create or Join</h3>
-                            <p className="studyCardContent">
-                                Start your own study group or join a community that matches your
-                                interests. Connect quickly and begin studying together right away.
-                            </p>
-                        </div>
-                    </li>
-
-                    <li className="studyCard">
-                        <PiBookOpenLight className="studyCardIcon" />
-                        <div>
-                            <h3 className="studyCardHeader">Read Together</h3>
-                            <p className="studyCardContent">
-                                Follow the same passages as your community and move through
-                                Scripture in sync, making study and discussion simple and unified.
-                            </p>
-                        </div>
-                    </li>
-
-                    <li className="studyCard">
-                        <LuNotebookPen className="studyCardIcon" />
-                        <div>
-                            <h3 className="studyCardHeader">Share Memos</h3>
-                            <p className="studyCardContent">
-                                Write reflections and insights in a shared memo space where
-                                everyone can see, contribute, and grow together.
-                            </p>
-                        </div>
-                    </li>
-                </ul>
+      <div className="communityDisplayArea">
+        {activeTab === "my" ? (
+          <>
+            <section className="communityCardGrid" ref={gridRef}>
+              {visibleMyCommunities.map((community, index) => (
+                <CommunityCard
+                  key={index}
+                  header={community.header}
+                  subheader={community.subheader}
+                  content={community.content}
+                  members={community.members}
+                  lastActive={community.lastActive}
+                  role={community.role}
+                  my={community.my}
+                />
+              ))}
             </section>
-        </section>
-    );
+
+            {!showAllMyCommunities &&
+              myCommunities.length > visibleCount && (
+                <div className="communityShowMoreWrapper">
+                  <button
+                    className="communityShowMoreButton"
+                    onClick={() => setShowAllMyCommunities(true)}
+                  >
+                    Show More
+                  </button>
+                </div>
+              )}
+          </>
+        ) : (
+          <>
+            <section className="communityCardGrid" ref={gridRef}>
+              {visibleDiscoverCommunities.map((community, index) => (
+                <CommunityCard
+                  key={index}
+                  header={community.header}
+                  subheader={community.subheader}
+                  content={community.content}
+                  members={community.members}
+                  lastActive={community.lastActive}
+                  role={community.role}
+                  my={community.my}
+                />
+              ))}
+            </section>
+
+            {!showAllDiscover &&
+              isSmallViewport &&
+              maxDiscover > baseDiscoverVisible && (
+                <div className="communityShowMoreWrapper">
+                  <button
+                    className="communityShowMoreButton"
+                    onClick={() => setShowAllDiscover(true)}
+                  >
+                    Show More
+                  </button>
+                </div>
+              )}
+          </>
+        )}
+      </div>
+
+      <section className="studyHowSection">
+        <h3 className="studyHowHeader">How Community Study Works</h3>
+        <ul className="studyHowCardContainer">
+          <li className="studyCard">
+            <FaPlus className="studyCardIcon" />
+            <div>
+              <h3 className="studyCardHeader">Create or Join</h3>
+              <p className="studyCardContent">
+                Start your own study group or join a community that matches your
+                interests. Connect quickly and begin studying together right
+                away.
+              </p>
+            </div>
+          </li>
+
+          <li className="studyCard">
+            <PiBookOpenLight className="studyCardIcon" />
+            <div>
+              <h3 className="studyCardHeader">Read Together</h3>
+              <p className="studyCardContent">
+                Follow the same passages as your community and move through
+                Scripture in sync, making study and discussion simple and
+                unified.
+              </p>
+            </div>
+          </li>
+
+          <li className="studyCard">
+            <LuNotebookPen className="studyCardIcon" />
+            <div>
+              <h3 className="studyCardHeader">Share Memos</h3>
+              <p className="studyCardContent">
+                Write reflections and insights in a shared memo space where
+                everyone can see, contribute, and grow together.
+              </p>
+            </div>
+          </li>
+        </ul>
+      </section>
+    </section>
+  );
 };
 
 export default CommunityBody;
