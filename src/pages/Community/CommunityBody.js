@@ -9,7 +9,7 @@ import CommunityCard from "./CommunityCard";
 const CommunityBody = () => {
     const [activeTab, setActiveTab] = useState("my");
     const [showAllMyCommunities, setShowAllMyCommunities] = useState(false);
-    const [visibleCount, setVisibleCount] = useState(3); 
+    const [visibleCount, setVisibleCount] = useState(3);
 
     const myRef = useRef(null);
     const discoverRef = useRef(null);
@@ -25,6 +25,7 @@ const CommunityBody = () => {
             members: 6,
             lastActive: "17 hours ago",
             role: "Owner",
+            my: true
         },
         {
             header: "Morning Devotionals Confirming the animation for length",
@@ -33,6 +34,7 @@ const CommunityBody = () => {
             members: 12,
             lastActive: "2 hours ago",
             role: "Member",
+            my: true
         },
         {
             header: "Korean-English Study Group",
@@ -41,6 +43,7 @@ const CommunityBody = () => {
             members: 8,
             lastActive: "1 day ago",
             role: "Owner",
+            my: true
         },
         {
             header: "Friday Night Fellowship",
@@ -49,6 +52,47 @@ const CommunityBody = () => {
             members: 15,
             lastActive: "3 days ago",
             role: "Member",
+            my: true
+        },
+    ];
+
+    const joinCommunities = [
+        {
+            header: "Young Adults Group",
+            subheader: "Weekly Bible study with KTPC",
+            content: "Demo Community Card",
+            members: 6,
+            lastActive: "17 hours ago",
+            role: "Owner",
+            my: false
+        },
+        {
+            header: "Morning Devotionals Confirming the animation for length",
+            subheader: "Start the day in the Word Confirming the animation for length",
+            content: "Short daily readings and reflections. Confirming the animation for length",
+            members: 12,
+            lastActive: "2 hours ago",
+            role: "Member",
+            my: false
+        },
+        {
+            header: "Korean-English Study Group",
+            subheader: "Bilingual Bible reading and sharing",
+            content: "Share insights in both Korean and English.",
+            members: 8,
+            lastActive: "1 day ago",
+            role: "Owner",
+            my: false
+        },
+        /* Last card to check to confirm discover cards display only up to 3 cards */
+        {
+            header: "Friday Night Fellowship",
+            subheader: "End the week with worship and study",
+            content: "Hybrid in-person and online gatherings.",
+            members: 15,
+            lastActive: "3 days ago",
+            role: "Member",
+            my: false
         },
     ];
 
@@ -85,6 +129,8 @@ const CommunityBody = () => {
     const visibleMyCommunities = showAllMyCommunities
         ? myCommunities
         : myCommunities.slice(0, visibleCount);
+
+    const visibleDiscoverCommunities = joinCommunities.slice(0, 3);
 
     useEffect(() => {
         const tabRef = activeTab === "my" ? myRef : discoverRef;
@@ -133,6 +179,8 @@ const CommunityBody = () => {
                                     members={community.members}
                                     lastActive={community.lastActive}
                                     role={community.role}
+                                    my={community.my}
+
                                 />
                             ))}
                         </section>
@@ -150,7 +198,20 @@ const CommunityBody = () => {
                             )}
                     </>
                 ) : (
-                    "Discover communities…"
+                    <section className="communityCardGrid" ref={gridRef}>
+                        {visibleDiscoverCommunities.map((community, index) => (
+                            <CommunityCard
+                                key={index}
+                                header={community.header}
+                                subheader={community.subheader}
+                                content={community.content}
+                                members={community.members}
+                                lastActive={community.lastActive}
+                                role={community.role}
+                                my={community.my}
+                            />
+                        ))}
+                    </section>
                 )}
             </div>
 
