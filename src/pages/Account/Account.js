@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import PageHeader from "../../component/PageHeader";
 import Footer from "../../component/Footer";
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
-import { useAuth } from "../../component/context/AuthContext"; // ⬅ adjust path
+import { useAuth } from "../../component/context/AuthContext";
 
 export default function Account() {
   const [id, setId] = useState("");
@@ -21,14 +21,13 @@ export default function Account() {
     idRef.current?.focus();
   }, []);
 
-  // If already logged in, optionally redirect away from login page
   useEffect(() => {
     if (user) {
       navigate("/", { replace: true });
     }
   }, [user, navigate]);
 
-  const isValid = id.trim().length >= 3 && pw.length >= 4; // id/password conditions
+  const isValid = id.trim().length >= 3 && pw.length >= 4;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -42,8 +41,8 @@ export default function Account() {
     setSubmitting(true);
 
     try {
-      await login(id, pw);    //calls /auth/login and sets global `user`
-      navigate("/", { replace: true }); // redirect to Home
+      await login(id, pw); // `id` can be email OR username
+      navigate("/", { replace: true });
     } catch (err) {
       setError(err.message || "Network Error");
     } finally {
@@ -66,7 +65,7 @@ export default function Account() {
 
           <form className="account-form" onSubmit={handleSubmit}>
             <label className="account-label">
-              ID / Email
+              Username / Email
               <input
                 ref={idRef}
                 type="text"

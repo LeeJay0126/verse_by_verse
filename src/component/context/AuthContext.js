@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-const API_URL = "http://localhost:4000"; 
+const API_URL = "http://localhost:4000";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [initializing, setInitializing] = useState(true); 
+  const [initializing, setInitializing] = useState(true);
 
   // On mount: ask the server if we already have a session
   useEffect(() => {
@@ -45,13 +45,12 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // Login: call /auth/login, set `user` if successful
-  async function login(email, password) {
+  async function login(identifier, password) {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ identifier, password }),
     });
 
     const data = await res.json().catch(() => ({}));
@@ -63,6 +62,7 @@ export function AuthProvider({ children }) {
     setUser(data.user);
     return data.user;
   }
+
 
   // Logout: call /auth/logout, clear `user`
   async function logout() {
@@ -80,8 +80,8 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
-    setUser,          
-    initializing,     
+    setUser,
+    initializing,
     login,
     logout,
   };
