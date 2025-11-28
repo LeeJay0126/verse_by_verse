@@ -1,0 +1,126 @@
+
+.createCommunity {
+    background-color: #F4EEE6;
+    width: 100vw;
+}
+
+/* HERO SECTION */
+.createCommunityHero {
+    background-image: url(../../../component/images/community/CreateCommunity.png);
+    height: 480px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.createCommunityHeader {
+    margin-top: 120px;
+    font-size: 48px;
+    font-weight: 400;
+    color: white;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.createCommunitySubHeader {
+    font-size: 18px;
+    font-weight: 200;
+    color: white;
+    text-align: center;
+    margin-top: 5px;
+}
+
+/* FORM SECTION */
+.createCommunityFormWrapper {
+    max-width: 750px;
+    margin: 70px auto;
+    padding: 0 25px;
+}
+
+.createCommunityForm {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.createLabel {
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.createInput,
+.createTextarea {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    background-color: #faf6f0;
+}
+
+.createInput:focus,
+.createTextarea:focus {
+    outline: none;
+    border-color: black;
+}
+
+.createCommunityButton {
+    margin-top: 10px;
+    background-color: black;
+    color: white;
+    padding: 14px;
+    font-size: 17px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    border: none;
+}
+
+.createCommunityButton:hover {
+    background-color: #222;
+}
+
+
+.createSelect {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  background-color: #faf6f0;
+  appearance: none; 
+}
+
+.createSelect:focus {
+  outline: none;
+  border-color: black;
+}
+
+.createSelect {
+    width: 100%;
+    padding: 12px 15px;
+    padding-right: 40px;    
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    background-color: #faf6f0;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='black' width='14' height='14' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'><path d='M5 7l5 5 5-5'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 14px;
+    cursor: pointer;
+}
+
+.createSelect:focus {
+    outline: none;
+    border-color: black;
+}

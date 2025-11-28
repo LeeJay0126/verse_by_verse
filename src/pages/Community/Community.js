@@ -1,7 +1,9 @@
+import { Link } from 'react-router-dom';
 import Footer from '../../component/Footer';
 import PageHeader from '../../component/PageHeader';
 import './Community.css';
 import CommunityBody from './CommunityBody';
+import CreateCommunity from './createCommunity/CreateCommunity';
 
 const Community = () => {
 
@@ -16,18 +18,22 @@ const Community = () => {
                 </h2>
                 <div className='buttonContainer'>
                     <button className='communityButton'>
-                        Browse Communities
+                        <Link to="/">
+                            Browse Communities
+                        </Link>
                     </button>
                     <button className='communityButton'>
-                        Create a Community
+                        <Link to="/create-community" >
+                            Create a Community
+                        </Link>
                     </button>
                 </div>
                 <h2 className="CommunityH3">
                     Share memos, comment on verses, and walk through Scripture together
                 </h2>
             </div>
-            <CommunityBody/>
-            <Footer/>
+            <CommunityBody />
+            <Footer />
         </section>
     );
 };
