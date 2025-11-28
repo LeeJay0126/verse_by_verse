@@ -18,7 +18,7 @@ const Community = () => {
                 </h2>
                 <div className='buttonContainer'>
                     <button className='communityButton'>
-                        <Link to="/">
+                        <Link to="/browse-community">
                             Browse Communities
                         </Link>
                     </button>
