@@ -69,3 +69,8 @@
     cursor: pointer;
 }
 
+.communityButton a, .communityButton:visited {
+    text-decoration: none;
+    color: black;
+}
+

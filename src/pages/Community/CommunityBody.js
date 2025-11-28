@@ -30,6 +30,7 @@ const CommunityBody = () => {
       lastActive: "17 hours ago",
       role: "Owner",
       my: true,
+      type: "Bible Study",
     },
     {
       header: "Morning Devotionals Confirming the animation for length",
@@ -40,6 +41,7 @@ const CommunityBody = () => {
       lastActive: "2 hours ago",
       role: "Member",
       my: true,
+      type: "Read Through",
     },
     {
       header: "Korean-English Study Group",
@@ -49,6 +51,7 @@ const CommunityBody = () => {
       lastActive: "1 day ago",
       role: "Owner",
       my: true,
+      type: "Organization",
     },
     {
       header: "Friday Night Fellowship",
@@ -58,6 +61,7 @@ const CommunityBody = () => {
       lastActive: "3 days ago",
       role: "Member",
       my: true,
+      type: "Bible Study",
     },
   ];
 
@@ -70,6 +74,7 @@ const CommunityBody = () => {
       lastActive: "17 hours ago",
       role: "Owner",
       my: false,
+      type: "Bible Study",
     },
     {
       header: "Morning Devotionals Confirming the animation for length",
@@ -80,6 +85,7 @@ const CommunityBody = () => {
       lastActive: "2 hours ago",
       role: "Member",
       my: false,
+      type: "Read Through",
     },
     {
       header: "Korean-English Study Group",
@@ -89,6 +95,7 @@ const CommunityBody = () => {
       lastActive: "1 day ago",
       role: "Owner",
       my: false,
+      type: "Organization",
     },
     {
       header: "Friday Night Fellowship",
@@ -98,6 +105,7 @@ const CommunityBody = () => {
       lastActive: "3 days ago",
       role: "Member",
       my: false,
+      type: "Bible Study",
     },
   ];
 
@@ -171,9 +179,8 @@ const CommunityBody = () => {
 
         <button
           ref={discoverRef}
-          className={`communityBodyB ${
-            activeTab === "discover" ? "active" : ""
-          }`}
+          className={`communityBodyB ${activeTab === "discover" ? "active" : ""
+            }`}
           onClick={() => setActiveTab("discover")}
         >
           Discover
@@ -196,6 +203,7 @@ const CommunityBody = () => {
                   lastActive={community.lastActive}
                   role={community.role}
                   my={community.my}
+                  type={community.type}
                 />
               ))}
             </section>
@@ -225,6 +233,7 @@ const CommunityBody = () => {
                   lastActive={community.lastActive}
                   role={community.role}
                   my={community.my}
+                  type={community.type}
                 />
               ))}
             </section>

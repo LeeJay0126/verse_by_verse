@@ -52,7 +52,7 @@
 /* inner text that slides */
 .marqueeInner {
     display: inline-block;
-    padding-right: 2rem; 
+    padding-right: 2rem;
 }
 
 /* per-line hover: only this line animates when hovered */
@@ -67,6 +67,7 @@
     0% {
         transform: translateX(0);
     }
+
     100% {
         transform: translateX(-100%);
     }
@@ -77,7 +78,7 @@
     width: fit-content;
     background-color: #d6cfc6;
     padding: 5px 8px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 
     font-size: 14px;
     font-weight: 600;
@@ -90,4 +91,63 @@
     padding: 10px;
     border-radius: 5px;
     font-size: 16px;
+}
+
+.communityCardTags {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.communityCardRole {
+    display: block;
+    width: fit-content;
+    background-color: #d6cfc6;
+    padding: 5px 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* new type tag, slightly lighter */
+.communityCardType {
+    display: block;
+    width: fit-content;
+    background-color: #ece5da;
+    padding: 5px 8px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* base styling */
+.communityCardType {
+    display: block;
+    width: fit-content;
+    padding: 5px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 4px;
+    color: #2b2b2b;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+/* Stronger, more visible colors */
+.type-bible-study {
+    background-color: #e3c48f;   /* warm golden beige */
+}
+
+.type-read-through {
+    background-color: #d3a78c;   /* clay / terracotta tint */
+}
+
+.type-church-org {
+    background-color: #cfc8bf;   /* warm greige */
+}
+
+.type-prayer-group {
+    background-color: #c8d1b2;   /* olive pastel */
+}
+
+.type-other {
+    background-color: #bfb7aa;   /* darker neutral taupe */
 }
