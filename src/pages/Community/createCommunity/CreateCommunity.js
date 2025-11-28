@@ -2,14 +2,18 @@ import Footer from "../../../component/Footer";
 import PageHeader from "../../../component/PageHeader";
 import "./CreateCommunity.css";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa6";
 
 const CreateCommunity = () => {
   const [form, setForm] = useState({
     header: "",
     subheader: "",
     content: "",
-    type: "",        
+    type: "",
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,19 +22,32 @@ const CreateCommunity = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     console.log("Submitting community:", form);
-    // Later: API call goes here
+  };
+
+  const handleBack = () => {
+    navigate(-1); // or navigate("/community")
   };
 
   return (
     <section className="createCommunity">
+      {/* HERO SECTION */}
       <section className="createCommunityHero">
         <PageHeader />
-        {/* Left this in for design purposes. Might remove later */}
         <h1 className="createCommunityHeader">Create a Community</h1>
       </section>
 
+      <div className="createCommunityBackWrapper">
+        <button
+          type="button"
+          className="createCommunityBackButton"
+          onClick={handleBack}
+        >
+          <FaArrowLeft className="createCommunityBackIcon" />
+        </button>
+      </div>
+
+      {/* FORM SECTION */}
       <section className="createCommunityFormWrapper">
         <form className="createCommunityForm" onSubmit={handleSubmit}>
           <label className="createLabel">
@@ -71,7 +88,7 @@ const CreateCommunity = () => {
               <option value="">Select a type…</option>
               <option value="Church Organization">Church organization</option>
               <option value="Bible Study">Bible study</option>
-              <option value="Read Through">Read-through plan</option>
+              <option value="Read Through">Read Through</option>
               <option value="Prayer Group">Prayer group</option>
               <option value="Other">Other</option>
             </select>
@@ -95,7 +112,8 @@ const CreateCommunity = () => {
           </button>
         </form>
       </section>
-      <Footer/>
+
+      <Footer />
     </section>
   );
 };

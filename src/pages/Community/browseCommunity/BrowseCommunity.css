@@ -1,0 +1,161 @@
+.JoinCommunity {
+    min-height: 100vh;
+    background-color: #f7f2ea;
+}
+
+/* HERO */
+.joinHero {
+    position: relative;
+    width: 100%;
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    /* Replace this URL with your own hero image */
+    background-image:
+        linear-gradient(120deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.25)),
+        url("../../../component/images/community/CommunityBrowse.png");
+    background-size: cover;
+    background-position: top;
+    background-repeat: no-repeat;
+}
+
+.joinHeroOverlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.joinHeroContent {
+    position: relative;
+    max-width: 1280px;
+    padding: 20px 50px;
+    width: 100%;
+    color: #fff;
+}
+
+.joinHeroTag {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    opacity: 0.85;
+}
+
+.joinHeroTitle {
+    font-size: 34px;
+    font-weight: 700;
+    margin: 0 0 10px;
+}
+
+.joinHeroSubtitle {
+    max-width: 560px;
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0 0 20px;
+    opacity: 0.95;
+}
+
+.joinHeroActions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.joinHeroSearch {
+    max-width: 420px;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.joinHeroFilters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.joinHeroSelect {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: none;
+    font-size: 13px;
+    font-family: inherit;
+    background-color: rgba(250, 246, 240, 0.95);
+}
+
+/* MAIN CONTENT */
+.joinCommunityMain {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
+}
+
+.joinCommunityHeaderRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.joinCommunityHeading {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.joinCommunityCount {
+    font-size: 13px;
+    color: #777;
+    margin: 0;
+}
+
+/* reuse your existing grid concept */
+.joinCommunityGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+@media (max-width: 1024px) {
+    .joinHero {
+        padding: 40px 16px;
+    }
+
+    .joinCommunityGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .joinHeroTitle {
+        font-size: 26px;
+    }
+
+    .joinHeroSubtitle {
+        font-size: 14px;
+    }
+
+    .joinCommunityMain {
+        padding: 24px 16px 48px;
+    }
+
+    .joinCommunityGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .joinCommunityHeaderRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

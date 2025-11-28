@@ -7,6 +7,7 @@ import Contact from "./pages/Contact/Contact";
 import SignUp from "./pages/Account/signUp/SignUp";
 import FindPw from "./pages/Account/findUser/FindPw";
 import CreateCommunity from "./pages/Community/createCommunity/CreateCommunity";
+import BrowseCommunity from "./pages/Community/browseCommunity/BrowseCommunity";
 import { AuthProvider } from "./component/context/AuthContext";
 import "./App.css";
 
@@ -27,6 +28,7 @@ function App() {
             <Route path="/signup" exact element={<SignUp />} />
             <Route path="/findpw" exact element={<FindPw />} />
             <Route path="/create-community" exact element={<CreateCommunity />} />
+            <Route path="/browse-community" exact element={<BrowseCommunity />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
