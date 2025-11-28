@@ -1,5 +1,3 @@
-// src/account/signup/SignUp.js (path may differ in your project)
-
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../../component/PageHeader";
@@ -7,40 +5,41 @@ import "../Account.css";
 import Footer from "../../../component/Footer";
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
 
-const API_URL = "http://localhost:4000"; // TODO: move to env (e.g., import.meta.env.VITE_API_URL)
+const API_URL = "http://localhost:4000";
 
 const SignUp = () => {
   const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [id, setId] = useState(""); // email/ID
-  const [pw, setPw] = useState("");
+  const [lastName, setLastName]   = useState("");
+  const [username, setUsername]   = useState("");
+  const [email, setEmail]         = useState("");
+  const [pw, setPw]               = useState("");
   const [confirmPw, setConfirmPw] = useState("");
-  const [showPw, setShowPw] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [showPw, setShowPw]       = useState(false);
+  const [error, setError]         = useState("");
+  const [loading, setLoading]     = useState(false);
 
-  const idRef = useRef(null);
+  const emailRef = useRef(null);
   const navigate = useNavigate();
 
-  // Autofocus email field on mount
   useEffect(() => {
-    idRef.current?.focus();
+    emailRef.current?.focus();
   }, []);
 
-  // Validation
-  const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id);
-  const passOk = pw.length >= 4; // TODO: strengthen password rules later
-  const matchOk = pw === confirmPw;
+  const emailOk    = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  const usernameOk = username.trim().length >= 4;
+  const passOk     = pw.length >= 4;
+  const matchOk    = pw === confirmPw;
   const nameOk =
     firstName.trim().length > 0 && lastName.trim().length > 0;
-  const isValid = emailOk && passOk && matchOk && nameOk;
+
+  const isValid = emailOk && usernameOk && passOk && matchOk && nameOk;
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
     if (!isValid) {
-      setError("입력값을 확인해주세요 (필수/이메일/비번/일치).");
+      setError("입력값을 확인해주세요 (필수/이메일/아이디/비번/일치).");
       return;
     }
 
@@ -53,9 +52,10 @@ const SignUp = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           firstName: firstName.trim(),
-          lastName: lastName.trim(),
-          email: id.trim(),
-          password: pw,
+          lastName:  lastName.trim(),
+          email:     email.trim(),
+          username:  username.trim(),
+          password:  pw,
         }),
       });
 
@@ -66,8 +66,6 @@ const SignUp = () => {
       }
 
       console.log("[signup success]", data.user);
-
-      // After successful signup, redirect to login page
       navigate("/account", { replace: true });
     } catch (err) {
       console.error("[signup error]", err);
@@ -116,16 +114,29 @@ const SignUp = () => {
             </div>
 
             <label className="account-label">
-              ID / Email
+              Email
               <input
-                ref={idRef}
+                ref={emailRef}
                 type="email"
                 autoComplete="email"
-                value={id}
-                onChange={(e) => setId(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="account-input"
-                placeholder="Username or Email"
+                placeholder="Email Address"
                 aria-invalid={!emailOk}
+              />
+            </label>
+
+            <label className="account-label">
+              Username
+              <input
+                type="text"
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="account-input"
+                placeholder="Username"
+                aria-invalid={!usernameOk}
               />
             </label>
 
