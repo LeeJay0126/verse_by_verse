@@ -5,8 +5,11 @@ import { FaPlus } from "react-icons/fa6";
 import { PiBookOpenLight } from "react-icons/pi";
 import { LuNotebookPen } from "react-icons/lu";
 import CommunityCard from "./CommunityCard";
+import Time from "../../component/utils/Time";
 
 const MAX_DISCOVER_VISIBLE = 3;
+
+const formatLastActive = Time;
 
 const CommunityBody = () => {
   const [activeTab, setActiveTab] = useState("my");
@@ -20,50 +23,26 @@ const CommunityBody = () => {
   const underlineRef = useRef(null);
   const gridRef = useRef(null);
 
-  // Demo data – later to be replaced with data from API / props
-  const myCommunities = [
-    {
-      header: "Young Adults Group",
-      subheader: "Weekly Bible study with KTPC",
-      content: "Demo Community Card",
-      members: 6,
-      lastActive: "17 hours ago",
-      role: "Owner",
-      my: true,
-      type: "Bible Study",
-    },
-    {
-      header: "Morning Devotionals Confirming the animation for length",
-      subheader: "Start the day in the Word Confirming the animation for length",
-      content:
-        "Short daily readings and reflections. Confirming the animation for length",
-      members: 12,
-      lastActive: "2 hours ago",
-      role: "Member",
-      my: true,
-      type: "Read Through",
-    },
-    {
-      header: "Korean-English Study Group",
-      subheader: "Bilingual Bible reading and sharing",
-      content: "Share insights in both Korean and English.",
-      members: 8,
-      lastActive: "1 day ago",
-      role: "Owner",
-      my: true,
-      type: "Organization",
-    },
-    {
-      header: "Friday Night Fellowship",
-      subheader: "End the week with worship and study",
-      content: "Hybrid in-person and online gatherings.",
-      members: 15,
-      lastActive: "3 days ago",
-      role: "Member",
-      my: true,
-      type: "Bible Study",
-    },
-  ];
+  const [myCommunities, setMyCommunities] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:4000/community/my", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.ok) return;
+        const mapped = data.communities.map((c) => ({
+          ...c,
+          // accept either lastActivityAt (timestamp) or lastActive (server-side covenience)
+          lastActive: formatLastActive(c.lastActivityAt || c.lastActive),
+          my: true, // ensure cards see this
+        }));
+        setMyCommunities(mapped);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
 
   const joinCommunities = [
     {
@@ -195,7 +174,7 @@ const CommunityBody = () => {
             <section className="communityCardGrid" ref={gridRef}>
               {visibleMyCommunities.map((community, index) => (
                 <CommunityCard
-                  key={index}
+                  key={community.id}
                   header={community.header}
                   subheader={community.subheader}
                   content={community.content}

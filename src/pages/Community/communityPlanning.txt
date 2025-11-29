@@ -1,7 +1,7 @@
 커뮤니티 기능을 개발하면서 고민해봐야 할점들:
 
 지금까지 Hardwire를 짜면서 생각해본 properties list (추후 추가 예정) - 
-community title (header), subheader, content(설명란), # of members, last active, role (position)
+community title (header), subheader, content(설명란), # of members, last active, role (position), community type
 
 이중 포지션 측면에서 고려해야할 사항들은
 Owner - 커뮤니티를 창설한 사람. Leader 권한을 위임하거나 해임할수있다.
@@ -51,3 +51,34 @@ Community db 안에 Owner property, Leader property 로 나뉘어서 저장하�
 
 예상치 못한 수순이긴 하지만, Join community 를 찾을떄 최대 50개 까지, 페이지당 viewport에 따라 4줄 정도 (Desktop 12개, Tablet 8 개, 모바일 4개씩)
 보여주고 Pager 로 navigate 하면 좋을듯. 이건 우선 community db가 확정돼고 기능 개발할떄 추가하면 될듯.
+
+
+추후에 추가하면 좋을듯한 기능들:
+
+Join policy (later)
+
+Add joinPolicy to Community:
+
+"open": anyone can join immediately
+
+"request": must be approved by Owner/Leader
+
+Add status to CommunityMembership: "pending" | "active" | "banned".
+
+Community visibility
+
+Simple field like visibility: "public" | "unlisted" | "private".
+
+discover only returns public (and maybe some unlisted with direct links).
+
+LastActivity updates
+
+Whenever a post/memo/thread is added, update community.lastActivityAt = now.
+
+That keeps your lastActive labels meaningful.
+
+Basic limits
+
+Limit how many communities a user can create (for spam).
+
+Later: limit join/leave spam per minute.
