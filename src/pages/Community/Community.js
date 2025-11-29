@@ -3,7 +3,6 @@ import Footer from '../../component/Footer';
 import PageHeader from '../../component/PageHeader';
 import './Community.css';
 import CommunityBody from './CommunityBody';
-import CreateCommunity from './createCommunity/CreateCommunity';
 
 const Community = () => {
 

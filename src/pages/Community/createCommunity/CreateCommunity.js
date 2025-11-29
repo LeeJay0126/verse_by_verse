@@ -13,6 +13,8 @@ const CreateCommunity = () => {
     type: "",
   });
 
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -20,18 +22,61 @@ const CreateCommunity = () => {
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Submitting community:", form);
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+
+  try {
+    setSubmitting(true);
+
+    const res = await fetch("http://localhost:4000/community", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // important for session
+      body: JSON.stringify(form),
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (parseErr) {
+      console.error("Failed to parse JSON from /community:", parseErr);
+      data = {};
+    }
+
+    console.log("[create community response]", res.status, data);
+
+    if (!res.ok || !data.ok) {
+      // common case: not logged in
+      if (res.status === 401) {
+        setError("You need to be logged in to create a community.");
+        // optional: kick them to login page
+        // navigate("/login");
+        return;
+      }
+
+      throw new Error(data.error || `Failed to create community (status ${res.status})`);
+    }
+
+    // success: redirect to /community
+    navigate("/community");
+  } catch (err) {
+    console.error(err);
+    setError(err.message || "Something went wrong");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   const handleBack = () => {
-    navigate(-1); // or navigate("/community")
+    navigate(-1);
   };
 
   return (
     <section className="createCommunity">
-      {/* HERO SECTION */}
       <section className="createCommunityHero">
         <PageHeader />
         <h1 className="createCommunityHeader">Create a Community</h1>
@@ -47,7 +92,6 @@ const CreateCommunity = () => {
         </button>
       </div>
 
-      {/* FORM SECTION */}
       <section className="createCommunityFormWrapper">
         <form className="createCommunityForm" onSubmit={handleSubmit}>
           <label className="createLabel">
@@ -107,8 +151,14 @@ const CreateCommunity = () => {
             />
           </label>
 
-          <button className="createCommunityButton" type="submit">
-            Create Community
+          {error && <p className="createCommunityError">{error}</p>}
+
+          <button
+            className="createCommunityButton"
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting ? "Creating…" : "Create Community"}
           </button>
         </form>
       </section>
