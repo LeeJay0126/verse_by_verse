@@ -24,15 +24,10 @@ const MenuOptions = ({ page = true, onNavigate }) => {
         <Link to="/study" onClick={onNavigate}>STUDY &amp; REFLECT</Link>
       </li>
 
-      <li className={item}>
-        <Link to="/community" onClick={onNavigate}>COMMUNITIES</Link>
-      </li>
-
-      {/* After development, we should hide community tab when user is not logged in */}
-      {/* {user ? (
+      {user ? (
         <li className={item}>
-          <Link to="/community" onClick={onNavigate}>COMMUNITIES</Link>
-        </li>) : <></>} */}
+          <Link to="/community" onClick={onNavigate}>COMMUNITIES</Link></li>) : 
+          <li className={item}><Link to="/community-how" onClick={onNavigate}>COMMUNITIES</Link></li>}
 
       <li className={item}>
         <Link to="/contact" onClick={onNavigate}>CONTACT</Link>

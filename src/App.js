@@ -12,6 +12,7 @@ import { AuthProvider } from "./component/context/AuthContext";
 import "./App.css";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import CommunityWalkthrough from "./pages/Community/CommunityWalkthrough";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="/findpw" exact element={<FindPw />} />
             <Route path="/create-community" exact element={<CreateCommunity />} />
             <Route path="/browse-community" exact element={<BrowseCommunity />} />
+            <Route path="/community-how" exact element={<CommunityWalkthrough />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
