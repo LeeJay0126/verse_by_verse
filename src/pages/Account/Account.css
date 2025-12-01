@@ -144,3 +144,159 @@
   font-size: 16px;
   padding-bottom: 5px;
 }
+
+/* Shared subtitle for account/notifications/profile cards */
+.account-subtitle {
+  text-align: center;
+  margin-top: 0.25rem;
+  margin-bottom: 1.1rem;
+  font-size: 0.95rem;
+  color: #f5eaea;
+  opacity: 0.9;
+}
+
+/* ===== NOTIFICATIONS PAGE ===== */
+
+.notifications-list {
+  list-style: none;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  background-color: rgb(35, 6, 6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #f5eaea;
+  font-size: 0.92rem;
+}
+
+.notification-item--unread {
+  border-color: rgba(255, 255, 255, 0.18);
+  border-style: inset;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.notification-main {
+  flex: 1;
+  margin-right: 0.75rem;
+}
+
+.notification-title {
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.notification-body {
+  opacity: 0.9;
+}
+
+.notification-meta {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.notification-time {
+  display: inline-block;
+}
+
+/* ===== PROFILE PAGE ===== */
+
+.profile-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.profile-field {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.55rem 0.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.profile-label {
+  font-size: 0.9rem;
+  color: #f5eaea;
+  opacity: 0.85;
+}
+
+.profile-value {
+  font-size: 0.95rem;
+  color: #f5eaea;
+  font-weight: 500;
+}
+
+.profile-note {
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  color: #f5eaea;
+  opacity: 0.75;
+}
+
+/* Change password panel (collapsed by default) */
+.password-change-panel {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+/* When open, allow room for form + fade in */
+.password-change-panel--open {
+  max-height: 500px; /* enough to fit 3 inputs + button */
+  opacity: 1;
+  margin-top: 0.5rem;
+}
+
+/* Inner form layout */
+.password-change-form {
+  margin-top: 0.4rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  gap: 0.6rem;
+}
+
+/* Change password link/button in profile row */
+.profile-change-btn {
+  background: none;
+  border: none;
+  color: #f5eaea;
+  text-decoration: underline;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.profile-change-btn:hover {
+  opacity: 0.85;
+}
+
+/* Slightly smaller submit + helper text */
+.password-change-btn {
+  margin-top: 0.4rem;
+}
+
+.password-change-help {
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  color: #f5eaea;
+  opacity: 0.75;
+}
+
+/* Small tweak for mobile: stack profile labels/values */
+@media (max-width: 480px) {
+  .profile-field {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

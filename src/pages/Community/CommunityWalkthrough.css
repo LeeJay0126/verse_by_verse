@@ -176,6 +176,86 @@
   opacity: 0.9;
 }
 
+/* Wrapper for the user menu item */
+.UserMenuWrapper {
+  position: relative;
+}
+
+/* Icon button (reset default button styling) */
+.UserMenuButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* Icon wrapper to position notification dot */
+.UserIconWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Person icon size */
+.UserIcon {
+  font-size: 1.6rem; /* tweak as needed */
+}
+
+/* Small red circle for unread notifications */
+.NotificationDot {
+  position: absolute;
+  top: -3px;
+  left: -3px;     /* top-left corner */
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background-color: #e53935;
+  border: 1px solid #ffffff; /* makes it visible on light bg */
+}
+
+/* Dropdown panel */
+.UserDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  min-width: 160px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  padding: 4px 0;
+  z-index: 1000;
+}
+
+/* Dropdown items */
+.UserDropdownItem {
+  width: 100%;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.UserDropdownItem:hover {
+  background-color: #f3f3f3;
+}
+
+/* Logout style */
+.UserDropdownItem--danger {
+  color: #c62828;
+}
+
+.UserDropdownItem--danger:hover {
+  background-color: #ffebee;
+}
+
+
 /* TABLET+ (mobile-first → enhance on larger screens) */
 @media (min-width: 768px) {
   .communityWalkthroughHero {

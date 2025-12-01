@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import "./MenuOptions.css";
-import { useAuth } from "./context/AuthContext"; // adjust path if needed
+import { useAuth } from "./context/AuthContext";
+import UserMenu from "./UserMenu";
 
 const MenuOptions = ({ page = true, onNavigate }) => {
   const item = page ? "MenuOptionList" : "MenuOptionListPage";
@@ -8,11 +9,11 @@ const MenuOptions = ({ page = true, onNavigate }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  async function handleLogout() {
-    await logout();
-    onNavigate?.();
-    navigate("/", { replace: true });
-  }
+  // async function handleLogout() {
+  //   await logout();
+  //   onNavigate?.();
+  //   navigate("/", { replace: true });
+  // }
 
   return (
     <ul className="MenuOptions">
@@ -38,11 +39,7 @@ const MenuOptions = ({ page = true, onNavigate }) => {
           <Link to="/account" onClick={onNavigate}>LOGIN</Link>
         </li>
       ) : (
-        <li className={item}>
-          <div className="logout-btn" onClick={handleLogout}>
-            LOG OUT
-          </div>
-        </li>
+         <UserMenu itemClass={item} onNavigate={onNavigate} />
       )}
     </ul>
   );
