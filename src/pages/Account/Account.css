@@ -293,6 +293,137 @@
   opacity: 0.75;
 }
 
+/* in Account.css or Notifications.css */
+.notifications-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.notifications-action-button {
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.notifications-action-button--danger {
+  border-color: #e57373;
+  color: #b71c1c;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.notification-action-btn {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+
+.notification-action-btn--primary {
+  border-color: #4a6;
+  font-weight: 500;
+}
+
+.notification-status {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.notification-status--accepted {
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+
+.notification-status--declined {
+  border-color: #e57373;
+  color: #b71c1c;
+}
+
+/* CSS For Profile Notification buttons */
+
+.notifications-toolbar {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+.notifications-toolbar-btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #d0c4b4;
+  background-color: #f4eee6;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.notifications-toolbar-btn--danger {
+  border-color: #c62828;
+}
+
+.notifications-toolbar-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.notification-action-btn {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.notification-action-btn--accept {
+  background-color: #2e7d32;
+  color: white;
+}
+
+.notification-action-btn--decline {
+  background-color: white;
+  color: #c62828;
+  border-color: #c62828;
+}
+
+.notification-status {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  text-transform: capitalize;
+}
+
+.notification-status--accepted {
+  background-color: #e0f2f1;
+  color: #00695c;
+}
+
+.notification-status--declined {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+
 /* Small tweak for mobile: stack profile labels/values */
 @media (max-width: 480px) {
   .profile-field {

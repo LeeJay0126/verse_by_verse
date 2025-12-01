@@ -159,6 +159,33 @@ h3 {
   font-size: 14px;
 }
 
+.Toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #333;
+  color: #fff;
+  z-index: 9999;
+  cursor: pointer;
+  max-width: 280px;
+}
+
+.Toast--success {
+  background-color: #2e7d32; /* green-ish */
+}
+
+.Toast--error {
+  background-color: #c62828; /* red-ish */
+}
+
+.Toast--info {
+  background-color: #424242; /* neutral */
+}
+
 /* =================================================================
    ≤ 768px — MOBILE SIDEBAR DRAWER (fills width inside the drawer)
    ================================================================= */

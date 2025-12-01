@@ -1,37 +1,34 @@
-// src/component/context/NotificationContext.jsx
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
 const NotificationContext = createContext(null);
 
 export const NotificationProvider = ({ children }) => {
-  // For now: simple unread count. Later you can fetch from API.
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const hasUnread = unreadCount > 0;
+  const refreshUnreadCount = useCallback(async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:4000/notifications?unread=true",
+        { credentials: "include" }
+      );
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load unread notifications");
 
-  // Example: fake initial fetch (replace with real API later)
-  useEffect(() => {
-    // TODO: replace with fetch(`/api/notifications/unread-count`)
-    // For now, just pretend there are 3 unread
-    setUnreadCount(3);
+      setUnreadCount((data.notifications || []).length);
+    } catch (err) {
+      console.error("[refreshUnreadCount error]", err);
+      // optional: keep previous count
+    }
   }, []);
 
-  function markAllRead() {
-    setUnreadCount(0);
-    // TODO: call backend to mark all as read
-  }
-
-  function addDummyNotification() {
-    // helper for testing
-    setUnreadCount((c) => c + 1);
-  }
+  useEffect(() => {
+    refreshUnreadCount();
+  }, [refreshUnreadCount]);
 
   const value = {
     unreadCount,
-    hasUnread,
-    setUnreadCount,
-    markAllRead,
-    addDummyNotification,
+    hasUnread: unreadCount > 0,
+    refreshUnreadCount,
   };
 
   return (
@@ -41,10 +38,4 @@ export const NotificationProvider = ({ children }) => {
   );
 };
 
-export function useNotifications() {
-  const ctx = useContext(NotificationContext);
-  if (!ctx) {
-    throw new Error("useNotifications must be used within NotificationProvider");
-  }
-  return ctx;
-}
+export const useNotifications = () => useContext(NotificationContext);
