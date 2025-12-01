@@ -1,0 +1,223 @@
+/* Page wrapper */
+.communityWalkthrough {
+  min-height: 100vh;
+  background-color: #f4eee6;
+  color: #2f261d;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HERO */
+.communityWalkthroughHero {
+  position: relative;
+  background-image: url("../../component/images/community/CommuntyWalkthrough.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.communityWalkthroughHeroOverlay {
+  width: 100%;
+  padding: 32px 20px 24px;
+  background: linear-gradient(to top,
+      rgba(0, 0, 0, 0.55),
+      rgba(0, 0, 0, 0.1));
+  box-sizing: border-box;
+}
+
+.communityWalkthroughHeroEyebrow {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #f4eee6;
+  margin-bottom: 6px;
+  opacity: 0.85;
+}
+
+.communityWalkthroughHeroTitle {
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0 0 6px;
+}
+
+.communityWalkthroughHeroSubtitle {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #f9f3ea;
+  margin: 0;
+}
+
+/* BODY */
+.communityWalkthroughBody {
+  flex: 1;
+  padding: 20px 16px 80px;
+  /* extra bottom padding so footer buttons don’t feel cramped on mobile */
+  box-sizing: border-box;
+}
+
+.communityWalkthroughIntro {
+  margin-bottom: 16px;
+}
+
+.communityWalkthroughIntro h2 {
+  font-size: 18px;
+  margin: 0 0 6px;
+  font-weight: 500;
+}
+
+.communityWalkthroughIntro p {
+  font-size: 14px;
+  margin: 0;
+  color: #5b4b3c;
+}
+
+/* Steps list */
+.communityWalkthroughSteps {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.communityWalkthroughStepCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(47, 38, 29, 0.09);
+}
+
+.communityWalkthroughStepNumber {
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #d7c7b1;
+  color: #2f261d;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.communityWalkthroughStepContent h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.communityWalkthroughStepContent p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #5b4b3c;
+}
+
+/* FOOTER CTA */
+.communityWalkthroughFooter {
+  position: sticky;
+  bottom: 0;
+  background-color: #f4eee6;
+  padding: 12px 16px 20px;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+.communityWalkthroughFooterText {
+  font-size: 14px;
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.communityWalkthroughFooterButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.communityWalkthroughBtnPrimary,
+.communityWalkthroughBtnSecondary {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.08s ease;
+}
+
+.communityWalkthroughBtnPrimary {
+  background-color: #8c7b6a;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(47, 38, 29, 0.18);
+}
+
+.communityWalkthroughBtnSecondary {
+  background-color: #ffffff;
+  color: #2f261d;
+  border: 1px solid #d7c7b1;
+}
+
+.communityWalkthroughBtnPrimary:active,
+.communityWalkthroughBtnSecondary:active {
+  transform: translateY(1px);
+  box-shadow: none;
+  opacity: 0.9;
+}
+
+/* TABLET+ (mobile-first → enhance on larger screens) */
+@media (min-width: 768px) {
+  .communityWalkthroughHero {
+    min-height: 400px;
+    background-position: 5% 15%;
+  }
+
+  .communityWalkthroughHeroTitle {
+    font-size: 30px;
+  }
+
+  .communityWalkthroughIntro h2 {
+    padding-top: 30px;
+    font-size: 24px;
+  }
+
+  .communityWalkthroughHeroSubtitle {
+    font-size: 15px;
+    max-width: 420px;
+  }
+
+  .communityWalkthroughBody {
+    padding: 24px 40px 96px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .communityWalkthroughFooter {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+}
+
+/* DESKTOP */
+@media (min-width: 1024px) {
+  .communityWalkthroughHero {
+    position: relative;
+    background-position: 0% 20%;
+    min-height: 500px;
+  }
+
+  .communityWalkthroughBody {
+    max-width: 860px;
+  }
+}
