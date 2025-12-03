@@ -40,6 +40,7 @@
   background: #ffe8e8;
   color: #b00020;
   border: 1px solid #ffc5c5;
+  text-align: center;
   padding: .75rem;
   border-radius: 8px;
   margin-bottom: .75rem;
@@ -167,6 +168,7 @@
 
 .notification-item {
   display: flex;
+  text-align: center;
   justify-content: space-between;
   align-items: flex-start;
   padding: 0.7rem 0.9rem;
@@ -236,6 +238,7 @@
 }
 
 .profile-note {
+  text-align: center;
   margin-top: 0.9rem;
   font-size: 0.85rem;
   color: #f5eaea;
@@ -244,6 +247,7 @@
 
 /* Change password panel (collapsed by default) */
 .password-change-panel {
+  text-align: center;
   max-height: 0;
   overflow: hidden;
   opacity: 0;
@@ -357,7 +361,9 @@
 /* CSS For Profile Notification buttons */
 
 .notifications-toolbar {
-  display: flex;
+  padding-top: 15px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin: 12px 0 16px;
 }

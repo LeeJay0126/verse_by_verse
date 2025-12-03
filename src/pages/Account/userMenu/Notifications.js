@@ -154,25 +154,6 @@ const Notifications = () => {
             Stay up-to-date with your communities and studies.
           </p>
 
-          <div className="notifications-toolbar">
-            <button
-              type="button"
-              className="notifications-toolbar-btn"
-              onClick={handleMarkAllRead}
-              disabled={bulkLoading || notifications.length === 0}
-            >
-              Mark all as read
-            </button>
-            <button
-              type="button"
-              className="notifications-toolbar-btn notifications-toolbar-btn--danger"
-              onClick={handleDeleteAll}
-              disabled={bulkLoading || notifications.length === 0}
-            >
-              Delete all
-            </button>
-          </div>
-
           {loading && <p>Loading notifications…</p>}
           {error && <p className="account-error">{error}</p>}
 
@@ -226,6 +207,24 @@ const Notifications = () => {
               );
             })}
           </ul>
+          <div className="notifications-toolbar">
+            <button
+              type="button"
+              className="notifications-toolbar-btn"
+              onClick={handleMarkAllRead}
+              disabled={bulkLoading || notifications.length === 0}
+            >
+              Mark all as read
+            </button>
+            <button
+              type="button"
+              className="notifications-toolbar-btn notifications-toolbar-btn--danger"
+              onClick={handleDeleteAll}
+              disabled={bulkLoading || notifications.length === 0}
+            >
+              Delete all
+            </button>
+          </div>
         </div>
       </div>
       <Footer />

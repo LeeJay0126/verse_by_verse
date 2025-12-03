@@ -82,3 +82,25 @@ Basic limits
 Limit how many communities a user can create (for spam).
 
 Later: limit join/leave spam per minute.
+
+
+
+Dev / small beta
+
+MongoDB Atlas shared tier: $0–$10
+
+EC2 t3.micro/small: $8–$15
+
+Storage + bandwidth: $2–$5
+
+Total: ~$10–$30/month
+
+🚀 Small production (hundreds–few thousand users)
+
+MongoDB Atlas small dedicated: $60–$80
+
+EC2 t3.medium (or two small instances behind a load balancer): $25–$50
+
+Storage + bandwidth + misc: $10–$20
+
+Total: ~$100–$150/month ballpark.
