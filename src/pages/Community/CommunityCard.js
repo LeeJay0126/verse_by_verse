@@ -1,11 +1,12 @@
 import { useRef, useEffect, useState } from "react";
 import "./CommunityCard.css";
-import { useToast } from "../../component/context/ToastContext";
+import { useNavigate } from "react-router-dom";
 
 const CommunityCard = (props) => {
   const headerRef = useRef(null);
   const subheaderRef = useRef(null);
   const contentRef = useRef(null);
+  const navigate = useNavigate();
 
   const [overflow, setOverflow] = useState({
     header: false,
@@ -13,9 +14,17 @@ const CommunityCard = (props) => {
     content: false,
   });
 
-  const [joinStatus, setJoinStatus] = useState("idle"); // "idle" | "loading" | "requested" | "error"
-
-  const { showToast } = useToast();
+  const {
+    id,
+    header,
+    subheader,
+    content,
+    members,
+    lastActive,
+    role,
+    type,
+    my,
+  } = props;
 
   useEffect(() => {
     const isOverflowing = (el) => {
@@ -39,18 +48,6 @@ const CommunityCard = (props) => {
     };
   }, []);
 
-  const {
-    id,
-    header,
-    subheader,
-    content,
-    members,
-    lastActive,
-    role,
-    type,
-    my,
-  } = props;
-
   const getTypeClass = (type) => {
     switch (type) {
       case "Bible Study":
@@ -66,49 +63,30 @@ const CommunityCard = (props) => {
     }
   };
 
-  async function handleJoinClick() {
-    if (my) return; // already a member
+  const handleEnterClick = () => {
     if (!id) return;
-    if (joinStatus === "loading" || joinStatus === "requested") return;
 
-    try {
-      setJoinStatus("loading");
-
-      const res = await fetch(
-        `http://localhost:4000/community/${id}/request-join`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
+    if (my) {
+      // TODO: this will be your "member community main page" later
+      navigate(`/community/${id}`);
+    } else {
+      // Non-member → community info page
+      navigate(`/community/${id}/info`, {
+        state: {
+          community: {
+            id,
+            header,
+            subheader,
+            content,
+            members,
+            lastActive,
+            role,
+            type,
           },
-        }
-      );
-
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || "Failed to request join");
-      }
-
-      setJoinStatus("requested");
-      showToast("Join request sent to the community owner", "success");
-    } catch (err) {
-      console.error("[join community error]", err);
-      setJoinStatus("error");
-      showToast(
-        err.message || "Could not send join request. Please try again.",
-        "error"
-      );
+        },
+      });
     }
-  }
-
-  const joinButtonLabel = my
-    ? "Enter Community"
-    : joinStatus === "loading"
-    ? "Requesting…"
-    : joinStatus === "requested"
-    ? "Requested"
-    : "Join Community";
+  };
 
   return (
     <section className="CommunityCards">
@@ -157,12 +135,9 @@ const CommunityCard = (props) => {
       <button
         className="communityCardEnterButton"
         type="button"
-        onClick={my ? undefined : handleJoinClick}
-        disabled={
-          !my && (joinStatus === "loading" || joinStatus === "requested")
-        }
+        onClick={handleEnterClick}
       >
-        {joinButtonLabel}
+        Enter Community
       </button>
     </section>
   );

@@ -1,8 +1,7 @@
-// BrowseCommunity.jsx
 import { useEffect, useState, useCallback } from "react";
 import "./BrowseCommunity.css";
-import CommunityCard from "../CommunityCard";
 import PageHeader from "../../../component/PageHeader";
+import CommunityCard from "../CommunityCard";
 import Footer from "../../../component/Footer";
 import Time from "../../../component/utils/Time";
 
@@ -126,6 +125,7 @@ const BrowseCommunity = () => {
             <CommunityCard key={community.id} {...community} />
           ))}
         </section>
+
       </main>
       <Footer />
     </section>

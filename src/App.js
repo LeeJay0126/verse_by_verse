@@ -13,6 +13,7 @@ import BrowseCommunity from "./pages/Community/browseCommunity/BrowseCommunity";
 import CommunityWalkthrough from "./pages/Community/CommunityWalkthrough";
 import Notifications from "./pages/Account/userMenu/Notifications";
 import Profile from "./pages/Account/userMenu/Profile";
+import CommunityInfo from "./pages/Community/browseCommunity/CommunityInfo";
 
 import { AuthProvider } from "./component/context/AuthContext";
 import { NotificationProvider } from "./component/context/NotificationContext";
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/community-how" exact element={<CommunityWalkthrough />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/community/:communityId/info" element={<CommunityInfo />} />
               </Routes>
             </ToastProvider>
           </NotificationProvider>

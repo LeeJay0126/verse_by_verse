@@ -7,7 +7,7 @@ import { LuNotebookPen } from "react-icons/lu";
 import CommunityCard from "./CommunityCard";
 import Time from "../../component/utils/Time";
 
-const MAX_DISCOVER_VISIBLE = 3;
+const MAX_DISCOVER_VISIBLE = 15;
 
 const formatLastActive = Time;
 
@@ -15,8 +15,11 @@ const CommunityBody = () => {
   const [activeTab, setActiveTab] = useState("my");
   const [showAllMyCommunities, setShowAllMyCommunities] = useState(false);
   const [showAllDiscover, setShowAllDiscover] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(3);
   const [gridCols, setGridCols] = useState(3);
+
+  // separate visible counts for each tab
+  const [visibleMyCount, setVisibleMyCount] = useState(0);
+  const [visibleDiscoverCount, setVisibleDiscoverCount] = useState(0);
 
   const myRef = useRef(null);
   const discoverRef = useRef(null);
@@ -24,7 +27,9 @@ const CommunityBody = () => {
   const gridRef = useRef(null);
 
   const [myCommunities, setMyCommunities] = useState([]);
+  const [discoverCommunities, setDiscoverCommunities] = useState([]);
 
+  // --- My Communities ---
   useEffect(() => {
     fetch("http://localhost:4000/community/my", {
       credentials: "include",
@@ -34,71 +39,41 @@ const CommunityBody = () => {
         if (!data.ok) return;
         const mapped = data.communities.map((c) => ({
           ...c,
-          // accept either lastActivityAt (timestamp) or lastActive (server-side covenience)
           lastActive: formatLastActive(c.lastActivityAt || c.lastActive),
-          my: true, // ensure cards see this
+          my: true,
         }));
         setMyCommunities(mapped);
       })
       .catch((err) => console.error(err));
   }, []);
 
+  // --- Discover Communities ---
+  useEffect(() => {
+    fetch("http://localhost:4000/community/discover", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.ok) return;
+        const mapped = data.communities.map((c) => ({
+          ...c,
+          lastActive: formatLastActive(c.lastActivityAt || c.lastActive),
+        }));
+        setDiscoverCommunities(mapped);
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
-  const joinCommunities = [
-    {
-      header: "Young Adults Group",
-      subheader: "Weekly Bible study with KTPC",
-      content: "Demo Community Card",
-      members: 6,
-      lastActive: "17 hours ago",
-      role: "Owner",
-      my: false,
-      type: "Bible Study",
-    },
-    {
-      header: "Morning Devotionals Confirming the animation for length",
-      subheader: "Start the day in the Word Confirming the animation for length",
-      content:
-        "Short daily readings and reflections. Confirming the animation for length",
-      members: 12,
-      lastActive: "2 hours ago",
-      role: "Member",
-      my: false,
-      type: "Read Through",
-    },
-    {
-      header: "Korean-English Study Group",
-      subheader: "Bilingual Bible reading and sharing",
-      content: "Share insights in both Korean and English.",
-      members: 8,
-      lastActive: "1 day ago",
-      role: "Owner",
-      my: false,
-      type: "Organization",
-    },
-    {
-      header: "Friday Night Fellowship",
-      subheader: "End the week with worship and study",
-      content: "Hybrid in-person and online gatherings.",
-      members: 15,
-      lastActive: "3 days ago",
-      role: "Member",
-      my: false,
-      type: "Bible Study",
-    },
-  ];
-
-  // Sync visibleCount with actual grid-template-columns
+  // Sync visible counts with actual grid-template-columns
   useEffect(() => {
     const updateVisibleFromGrid = () => {
       if (!gridRef.current) return;
 
       const styles = window.getComputedStyle(gridRef.current);
       const templateColumns = styles.getPropertyValue("grid-template-columns");
-
       if (!templateColumns) return;
 
-      // "1fr 1fr 1fr" → ["1fr", "1fr", "1fr"] → 3
+      // "1fr 1fr" → 2
       const cols = templateColumns
         .trim()
         .split(/\s+/)
@@ -106,40 +81,38 @@ const CommunityBody = () => {
 
       setGridCols(cols);
 
-      // For "My Communities" we just match the column count (up to total length)
-      const count = Math.min(cols, myCommunities.length);
-      setVisibleCount(count);
+      // My tab: show up to cols or total communities
+      setVisibleMyCount((prev) => Math.min(cols, myCommunities.length || cols));
+
+      // Discover tab: initial visible count = cols (we'll cap to 15 later)
+      setVisibleDiscoverCount((prev) => cols);
     };
 
     updateVisibleFromGrid();
     window.addEventListener("resize", updateVisibleFromGrid);
-
-    return () => {
-      window.removeEventListener("resize", updateVisibleFromGrid);
-    };
+    return () => window.removeEventListener("resize", updateVisibleFromGrid);
   }, [myCommunities.length]);
 
+  // --- My tab visible list ---
   const visibleMyCommunities = showAllMyCommunities
     ? myCommunities
-    : myCommunities.slice(0, visibleCount);
+    : myCommunities.slice(0, visibleMyCount);
 
-  // Discover: same logic, but capped at MAX_DISCOVER_VISIBLE
-  const maxDiscover = Math.min(MAX_DISCOVER_VISIBLE, joinCommunities.length);
-  const baseDiscoverVisible = Math.min(visibleCount, maxDiscover);
+  // --- Discover tab visible list ---
+  const maxDiscover = Math.min(MAX_DISCOVER_VISIBLE, discoverCommunities.length);
+  const initialDiscoverCount = Math.min(visibleDiscoverCount, maxDiscover);
 
   const visibleDiscoverCommunities = showAllDiscover
-    ? joinCommunities.slice(0, maxDiscover)
-    : joinCommunities.slice(0, baseDiscoverVisible);
+    ? discoverCommunities.slice(0, maxDiscover)
+    : discoverCommunities.slice(0, initialDiscoverCount);
 
-  const isSmallViewport = gridCols < 3;
-
+  // underline animation for active tab
   useEffect(() => {
     const tabRef = activeTab === "my" ? myRef : discoverRef;
     const underline = underlineRef.current;
 
     if (tabRef.current && underline) {
       const { offsetLeft, offsetWidth } = tabRef.current;
-
       underline.style.width = `${offsetWidth}px`;
       underline.style.transform = `translateX(${offsetLeft}px)`;
     }
@@ -174,7 +147,8 @@ const CommunityBody = () => {
             <section className="communityCardGrid" ref={gridRef}>
               {visibleMyCommunities.map((community, index) => (
                 <CommunityCard
-                  key={community.id}
+                  key={community.id || index}
+                  id={community.id}
                   header={community.header}
                   subheader={community.subheader}
                   content={community.content}
@@ -188,7 +162,7 @@ const CommunityBody = () => {
             </section>
 
             {!showAllMyCommunities &&
-              myCommunities.length > visibleCount && (
+              myCommunities.length > visibleMyCount && (
                 <div className="communityShowMoreWrapper">
                   <button
                     className="communityShowMoreButton"
@@ -204,7 +178,8 @@ const CommunityBody = () => {
             <section className="communityCardGrid" ref={gridRef}>
               {visibleDiscoverCommunities.map((community, index) => (
                 <CommunityCard
-                  key={index}
+                  key={community.id || index}
+                  id={community.id}
                   header={community.header}
                   subheader={community.subheader}
                   content={community.content}
@@ -217,18 +192,16 @@ const CommunityBody = () => {
               ))}
             </section>
 
-            {!showAllDiscover &&
-              isSmallViewport &&
-              maxDiscover > baseDiscoverVisible && (
-                <div className="communityShowMoreWrapper">
-                  <button
-                    className="communityShowMoreButton"
-                    onClick={() => setShowAllDiscover(true)}
-                  >
-                    Show More
-                  </button>
-                </div>
-              )}
+            {!showAllDiscover && maxDiscover > initialDiscoverCount && (
+              <div className="communityShowMoreWrapper">
+                <button
+                  className="communityShowMoreButton"
+                  onClick={() => setShowAllDiscover(true)}
+                >
+                  Show More
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>
