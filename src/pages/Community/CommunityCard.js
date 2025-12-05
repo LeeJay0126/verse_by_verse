@@ -23,7 +23,7 @@ const CommunityCard = (props) => {
     lastActive,
     role,
     type,
-    my,
+    my, // true if user is already a member
   } = props;
 
   useEffect(() => {
@@ -63,14 +63,14 @@ const CommunityCard = (props) => {
     }
   };
 
-  const handleEnterClick = () => {
+  const handlePrimaryClick = () => {
     if (!id) return;
 
     if (my) {
-      // TODO: this will be your "member community main page" later
+      // Member → go straight into the community main page
       navigate(`/community/${id}`);
     } else {
-      // Non-member → community info page
+      // Non-member → go to the community info/join page
       navigate(`/community/${id}/info`, {
         state: {
           community: {
@@ -135,9 +135,9 @@ const CommunityCard = (props) => {
       <button
         className="communityCardEnterButton"
         type="button"
-        onClick={handleEnterClick}
+        onClick={handlePrimaryClick}
       >
-        Enter Community
+        {my ? "Enter Community" : "Join Community"}
       </button>
     </section>
   );
