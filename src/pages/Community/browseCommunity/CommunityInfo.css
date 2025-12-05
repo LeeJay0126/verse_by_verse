@@ -40,13 +40,40 @@
 
 .CommunityInfoMeta {
   display: grid;
+  width: 100%;
   grid-template-columns: 1fr;
   gap: 12px;
-  padding: 16px;
+  padding: 16px 32px;
   border-radius: 12px;
   background: #fffdf9;
   margin-bottom: 24px;
 }
+
+.CommunityInfoDescription {
+  max-width: 1280px;
+  width: 100%;
+  min-height: 125px;
+  padding: 16px 32px;
+  margin: 0 auto;
+}
+
+.CommunityInfoPeople {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.CommunityInfoPeopleBlock {
+  min-height: 125px;
+  display: flex;
+  flex-direction: column;
+}
+
+.CommunityInfoUserList {
+  display: inline;
+}
+
+
 
 @media (min-width: 640px) {
   .CommunityInfoMeta {
@@ -93,12 +120,15 @@
   gap: 12px;
   flex-wrap: wrap;
   margin-top: 8px;
+  align-items: center;
+  justify-content: space-evenly;
+  margin-bottom: 30px;
 }
 
 .CommunityInfoPrimaryButton,
 .CommunityInfoSecondaryButton {
   border-radius: 999px;
-  padding: 10px 20px;
+  padding: 15px 30px;
   font-size: 14px;
   border: none;
   cursor: pointer;
@@ -133,6 +163,33 @@
   display: grid;
   gap: 16px;
 }
+
+.CommunityInfoUserItem {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* pill-style tags for owner / leaders */
+.CommunityInfoUserTag {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #2b2b2b;
+}
+
+/* Owner: #c8d1b2 */
+.CommunityInfoOwnerTag {
+  background-color: #c8d1b2;
+}
+
+/* Leader: #d3a78c */
+.CommunityInfoLeaderTag {
+  background-color: #d3a78c;
+}
+
 
 @media (min-width: 768px) {
   .CommunityInfoPeopleGrid {
