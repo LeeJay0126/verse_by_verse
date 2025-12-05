@@ -138,15 +138,15 @@ const CommunityInfo = () => {
     typeof community.membersCount === "number"
       ? community.membersCount
       : typeof rawMembers === "number"
-      ? rawMembers
-      : memberList.length;
+        ? rawMembers
+        : memberList.length;
 
   const joinButtonLabel =
     joinStatus === "loading"
       ? "Requesting…"
       : joinStatus === "requested"
-      ? "Requested"
-      : "Request to Join";
+        ? "Requested"
+        : "Request to Join";
 
   const joinDisabled =
     joinStatus === "loading" || joinStatus === "requested";
@@ -216,7 +216,13 @@ const CommunityInfo = () => {
           <div className="CommunityInfoPeopleBlock">
             <span className="CommunityInfoMetaLabel">Owner</span>
             <span className="CommunityInfoMetaValue">
-              {owner ? formatUserLabel(owner) : "—"}
+              {owner ? (
+                <span className="CommunityInfoUserTag CommunityInfoOwnerTag">
+                  {formatUserLabel(owner)}
+                </span>
+              ) : (
+                "—"
+              )}
             </span>
           </div>
 
@@ -229,7 +235,9 @@ const CommunityInfo = () => {
               <ul className="CommunityInfoUserList">
                 {displayedLeaders.map((user) => (
                   <li key={user.id} className="CommunityInfoUserItem">
-                    {formatUserLabel(user)}
+                    <span className="CommunityInfoUserTag CommunityInfoLeaderTag">
+                      {formatUserLabel(user)}
+                    </span>
                   </li>
                 ))}
                 {hasMoreLeaders && (
