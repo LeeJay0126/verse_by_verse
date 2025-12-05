@@ -119,3 +119,44 @@
   margin: 32px 0;
   color: #b00020;
 }
+
+.CommunityInfoPeople {
+  margin: 32px 24px;
+}
+
+.CommunityInfoPeopleTitle {
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+}
+
+.CommunityInfoPeopleGrid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .CommunityInfoPeopleGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.CommunityInfoPeopleBlock {
+  padding: 12px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.CommunityInfoUserList {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.CommunityInfoUserItem {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.CommunityInfoUserMore {
+  font-size: 1.2rem;
+  line-height: 1;
+}
