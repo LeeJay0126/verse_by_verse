@@ -169,6 +169,18 @@
   line-height: 1.4;
 }
 
+.joinInputBox {
+  display: flex;
+  gap: 15px;
+}
+
+.joinHeroSearchButton {
+  padding: 5px 20px;
+  border-radius: 5px;
+  background-color: rgba(250,246,240);
+  cursor: pointer;
+}
+
 /* pill-style tags for owner / leaders */
 .CommunityInfoUserTag {
   display: inline-block;
