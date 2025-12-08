@@ -13,6 +13,7 @@ const BrowseCommunity = () => {
   const [typeFilter, setTypeFilter] = useState("");
   const [sizeFilter, setSizeFilter] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lastActiveFilter, setLastActiveFilter] = useState("");
   const [error, setError] = useState("");
 
   const fetchCommunities = useCallback(async () => {
@@ -24,6 +25,7 @@ const BrowseCommunity = () => {
       if (search.trim()) params.append("q", search.trim());
       if (typeFilter) params.append("type", typeFilter);
       if (sizeFilter) params.append("size", sizeFilter);
+      if (lastActiveFilter) params.append("lastActive", lastActiveFilter); // 👈 NEW
 
       const res = await fetch(
         `http://localhost:4000/community/discover?${params.toString()}`,
@@ -47,7 +49,7 @@ const BrowseCommunity = () => {
     } finally {
       setLoading(false);
     }
-  }, [search, typeFilter, sizeFilter]);
+  }, [search, typeFilter, sizeFilter, lastActiveFilter]);
 
   // initial load
   useEffect(() => {
@@ -67,16 +69,21 @@ const BrowseCommunity = () => {
           </p>
 
           <div className="joinHeroActions">
-            <input
-              type="text"
-              className="joinHeroSearch"
-              placeholder="Search by name, topic, or church…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") fetchCommunities();
-              }}
-            />
+            <div className="joinInputBox">
+              <input
+                type="text"
+                className="joinHeroSearch"
+                placeholder="Search by name, topic, or church…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") fetchCommunities();
+                }}
+              />
+              <button className="joinHeroSearchButton" onClick={fetchCommunities}>
+                Search
+              </button>
+            </div>
             <div className="joinHeroFilters">
               <select
                 className="joinHeroSelect"
@@ -90,6 +97,7 @@ const BrowseCommunity = () => {
                 <option value="Prayer Group">Prayer group</option>
                 <option value="Other">Other</option>
               </select>
+
               <select
                 className="joinHeroSelect"
                 value={sizeFilter}
@@ -100,10 +108,18 @@ const BrowseCommunity = () => {
                 <option value="medium">Medium (11–30)</option>
                 <option value="large">Large (31+)</option>
               </select>
+
+              <select
+                className="joinHeroSelect"
+                value={lastActiveFilter}
+                onChange={(e) => setLastActiveFilter(e.target.value)}
+              >
+                <option value="">Any activity</option>
+                <option value="7d">Active in last 7 days</option>
+                <option value="30d">Active in last 30 days</option>
+                <option value="90d">Active in last 90 days</option>
+              </select>
             </div>
-            <button className="joinHeroSearchButton" onClick={fetchCommunities}>
-              Search
-            </button>
           </div>
         </div>
       </header>
