@@ -1,0 +1,55 @@
+/* --- Layout container --- */
+.CommunityLayout {
+  background: #F4EEE6;   /* matches your community pages */
+  min-height: 100vh;
+  padding: 40px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* --- Page header --- */
+.communityLayoutHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.communityLayoutTitle {
+  font-family: Georgia, serif;
+  font-size: 40px;
+  font-weight: 500;
+  color: #2c2c2c;
+  margin: 0;
+}
+
+/* --- Tabs navigation --- */
+.communityLayoutTabs {
+  display: flex;
+  gap: 32px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 12px;
+}
+
+.tabLink {
+  font-size: 18px;
+  font-weight: 400;
+  color: #5a5a5a;
+  text-decoration: none;
+  padding-bottom: 6px;
+  transition: color 0.2s ease;
+}
+
+.tabLink:hover {
+  color: #000;
+}
+
+.tabLink.active {
+  color: #000;
+  font-weight: 600;
+  border-bottom: 2px solid #000;
+}
+
+/* --- Outlet body --- */
+.communityLayoutBody {
+  background: white;

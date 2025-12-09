@@ -1,0 +1,119 @@
+.ForumContainer {
+    background: #F4EEE6;
+    min-height: 100vh;
+    font-family: "Inter", sans-serif;
+}
+
+.ForumHeader,
+.ForumSubHeader {
+    color: white;
+    font-family: "Georgia", serif;
+    letter-spacing: 1px;
+}
+
+.ForumHeader {
+    font-size: 42px;
+}
+
+.ForumSubHeader {
+    font-size: 24px;
+}
+
+.ForumHero {
+    background-image: url("../../../component/images/community/CommunityDefaultHero.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 400px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    padding: 24px 48px;
+    gap: 12px;
+}
+
+.ForumTabs {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.ForumTabs button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    padding-bottom: 6px;
+    cursor: pointer;
+    color: #5A5A5A;
+}
+
+.ForumTabs .active {
+    border-bottom: 2px solid #000;
+    color: #000;
+}
+
+.NewPostButton {
+    background: black;
+    color: white;
+    padding: 10px 22px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 24px;
+}
+
+.ForumTable {
+    width: 100%;
+    background: white;
+    border-radius: 10px;
+    padding: 0;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.ForumTable th {
+    text-align: left;
+    padding: 18px;
+    font-weight: 600;
+    background: #fafafa;
+}
+
+.ForumTable td {
+    padding: 16px 18px;
+    border-top: 1px solid #e6e6e6;
+    vertical-align: top;
+}
+
+.topic .title {
+    font-weight: 600;
+}
+
+.topic .subtitle {
+    margin-top: 4px;
+    color: #6a6a6a;
+    font-size: 14px;
+}
+
+.Tag {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.Tag.general {
+    background: #c8d1b2;
+}
+
+.Tag.questions {
+    background: #8BBF7F;
+}
+
+.Tag.announcements {
+    background: #d3a78c;
+}
+
+.Tag.feedback {
+    background: #b9a5d6;
+}

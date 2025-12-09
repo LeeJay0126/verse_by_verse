@@ -18,6 +18,7 @@ import CommunityInfo from "./pages/Community/browseCommunity/CommunityInfo";
 import { AuthProvider } from "./component/context/AuthContext";
 import { NotificationProvider } from "./component/context/NotificationContext";
 import { ToastProvider } from "./component/context/ToastContext";
+import MyCommunity from "./pages/Community/myCommunity/MyCommunity";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/community/:communityId/info" element={<CommunityInfo />} />
+                <Route path="/community/:communityId/my-posts" element={<MyCommunity/>}/>
               </Routes>
             </ToastProvider>
           </NotificationProvider>

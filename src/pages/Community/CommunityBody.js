@@ -29,23 +29,39 @@ const CommunityBody = () => {
   const [myCommunities, setMyCommunities] = useState([]);
   const [discoverCommunities, setDiscoverCommunities] = useState([]);
 
-  // --- My Communities ---
   useEffect(() => {
     fetch("http://localhost:4000/community/my", {
       credentials: "include",
     })
-      .then((res) => res.json())
+      .then((res) => {
+        console.log("GET /community/my status:", res.status);
+        return res.json();
+      })
       .then((data) => {
-        if (!data.ok) return;
-        const mapped = data.communities.map((c) => ({
-          ...c,
-          lastActive: formatLastActive(c.lastActivityAt || c.lastActive),
-          my: true,
+        console.log("GET /community/my data:", data);
+
+        if (!data.ok) {
+          console.warn("/community/my returned not ok:", data.error);
+          return;
+        }
+
+        const mapped = (data.communities || []).map((c) => ({
+          id: c.id,                                  // from server
+          header: c.header,
+          subheader: c.subheader,
+          content: c.content,
+          type: c.type,
+          members: c.members,                        // number from membersCount
+          lastActive: formatLastActive(c.lastActivityAt),
+          role: c.role,
+          my: true,                                  // force true on My tab
         }));
+
         setMyCommunities(mapped);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => console.error("[/community/my fetch error]", err));
   }, []);
+
 
   // --- Discover Communities ---
   useEffect(() => {
