@@ -67,10 +67,10 @@ const CommunityCard = (props) => {
     if (!id) return;
 
     if (my) {
-      // Member → go straight into the community main page
-      navigate(`/community/${id}`);
+      // Member → go to my-posts in this community
+      navigate(`/community/${id}/my-posts`);
     } else {
-      // Non-member → go to the community info/join page
+      // Non-member → info/join page
       navigate(`/community/${id}/info`, {
         state: {
           community: {
@@ -88,22 +88,21 @@ const CommunityCard = (props) => {
     }
   };
 
+
   return (
     <section className="CommunityCards">
       <h2
         ref={headerRef}
-        className={`communityCardHeader marqueeLine ${
-          overflow.header ? "marqueeScrollable" : ""
-        }`}
+        className={`communityCardHeader marqueeLine ${overflow.header ? "marqueeScrollable" : ""
+          }`}
       >
         <span className="marqueeInner">{header}</span>
       </h2>
 
       <h3
         ref={subheaderRef}
-        className={`communityCardSubHeader marqueeLine ${
-          overflow.subheader ? "marqueeScrollable" : ""
-        }`}
+        className={`communityCardSubHeader marqueeLine ${overflow.subheader ? "marqueeScrollable" : ""
+          }`}
       >
         <span className="marqueeInner">{subheader}</span>
       </h3>
@@ -111,9 +110,8 @@ const CommunityCard = (props) => {
       {content ? (
         <p
           ref={contentRef}
-          className={`communityCardContent marqueeLine ${
-            overflow.content ? "marqueeScrollable" : ""
-          }`}
+          className={`communityCardContent marqueeLine ${overflow.content ? "marqueeScrollable" : ""
+            }`}
         >
           <span className="marqueeInner">{content}</span>
         </p>
