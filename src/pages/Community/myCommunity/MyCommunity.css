@@ -6,7 +6,7 @@
     flex-direction: column;
 }
 
-.ForumContainer > :last-child {
+.ForumContainer> :last-child {
     margin-top: auto;
 }
 
@@ -124,6 +124,134 @@
     margin: 0 auto;
 }
 
+/* ===========================
+   New Post Modal
+   =========================== */
+
+.NewPostOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 4000;
+}
+
+.NewPostModal {
+    background: #f4eee6;
+    border-radius: 12px;
+    width: min(520px, 92vw);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    padding: 20px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.NewPostHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.NewPostHeader h2 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.NewPostCloseButton {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 4px;
+    color: #222;
+}
+
+.NewPostForm {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.NewPostField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.NewPostField label {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #333;
+}
+
+.NewPostField input,
+.NewPostField select,
+.NewPostField textarea {
+    border-radius: 6px;
+    border: 1px solid #c7b9a4;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fffdf9;
+}
+
+.NewPostField input:focus,
+.NewPostField select:focus,
+.NewPostField textarea:focus {
+    outline: 2px solid #0f0f0f;
+    outline-offset: 1px;
+}
+
+.NewPostField textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* Modal actions */
+.NewPostActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.NewPostPrimaryButton {
+    background: #000;
+    color: #fff;
+    font-size: 14px;
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.NewPostSecondaryButton {
+    background: transparent;
+    color: #333;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #c7b9a4;
+    cursor: pointer;
+}
+
+.NewPostPrimaryButton:hover {
+    opacity: 0.9;
+}
+
+.NewPostSecondaryButton:hover {
+    background: #f0e4d4;
+}
+
 .Tag.general {
     background: #c8d1b2;
 }
@@ -138,4 +266,194 @@
 
 .Tag.feedback {
     background: #b9a5d6;
+}
+
+/* ===========================
+   New Post Modal – base styles
+   =========================== */
+
+.NewPostOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4000;
+}
+
+.NewPostModal {
+  background: #f4eee6;
+  border-radius: 12px;
+  width: min(520px, 94vw);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.NewPostHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.NewPostHeader h2 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.NewPostCloseButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  color: #222;
+}
+
+.NewPostCloseButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.NewPostForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.NewPostField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.NewPostField label {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #333;
+}
+
+.NewPostField input,
+.NewPostField select,
+.NewPostField textarea {
+  border-radius: 6px;
+  border: 1px solid #c7b9a4;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fffdf9;
+}
+
+.NewPostField input:focus,
+.NewPostField select:focus,
+.NewPostField textarea:focus {
+  outline: 2px solid #0f0f0f;
+  outline-offset: 1px;
+}
+
+.NewPostField textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* Validation styling */
+.NewPostField.has-error input,
+.NewPostField.has-error textarea {
+  border-color: #c04747;
+}
+
+.NewPostErrorText {
+  font-size: 12px;
+  color: #c04747;
+}
+
+/* Global submit error */
+.NewPostGlobalError {
+  background: #fbe4e4;
+  color: #6b2020;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+/* Modal actions */
+.NewPostActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.NewPostPrimaryButton {
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.NewPostSecondaryButton {
+  background: transparent;
+  color: #333;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #c7b9a4;
+  cursor: pointer;
+}
+
+.NewPostPrimaryButton:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.NewPostSecondaryButton:hover:not(:disabled) {
+  background: #f0e4d4;
+}
+
+.NewPostPrimaryButton:disabled,
+.NewPostSecondaryButton:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* ===========================
+   Mobile tweaks
+   =========================== */
+
+@media (max-width: 600px) {
+  .ForumBody {
+    width: 100%;
+    padding: 0 12px 24px;
+  }
+
+  .NewPostModal {
+    width: 94vw;
+    padding: 16px 14px 18px;
+  }
+
+  .NewPostHeader h2 {
+    font-size: 18px;
+  }
+
+  .NewPostField label {
+    font-size: 12px;
+  }
+
+  .NewPostPrimaryButton,
+  .NewPostSecondaryButton {
+    font-size: 13px;
+    padding: 7px 14px;
+  }
 }
