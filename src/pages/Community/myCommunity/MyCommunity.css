@@ -2,6 +2,12 @@
     background: #F4EEE6;
     min-height: 100vh;
     font-family: "Inter", sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.ForumContainer > :last-child {
+    margin-top: auto;
 }
 
 .ForumHeader,
@@ -9,14 +15,24 @@
     color: white;
     font-family: "Georgia", serif;
     letter-spacing: 1px;
+    padding: 0 48px;
 }
 
 .ForumHeader {
     font-size: 42px;
+    padding-bottom: 18px;
 }
 
 .ForumSubHeader {
+    padding-bottom: 24px;
     font-size: 24px;
+    font-weight: 400;
+}
+
+.ForumActions {
+    padding-top: 20px;
+    display: flex;
+    justify-content: end;
 }
 
 .ForumHero {
@@ -28,8 +44,7 @@
 
     display: flex;
     flex-direction: column;
-    justify-content: end;
-    padding: 24px 48px;
+    justify-content: space-between;
     gap: 12px;
 }
 
@@ -56,6 +71,7 @@
 .NewPostButton {
     background: black;
     color: white;
+    font-size: 16px;
     padding: 10px 22px;
     border-radius: 6px;
     border: none;
@@ -100,6 +116,12 @@
     border-radius: 6px;
     font-size: 13px;
     font-weight: 500;
+}
+
+.ForumBody {
+    max-width: 1280px;
+    width: 80%;
+    margin: 0 auto;
 }
 
 .Tag.general {
