@@ -428,6 +428,85 @@
   cursor: default;
 }
 
+/* Tag color for Poll posts */
+.Tag.poll {
+  background: #b9a5d6; /* similar vibe to feedback color */
+}
+
+/* Poll options list */
+.PollOptionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.PollOptionRow {
+  display: flex;
+  gap: 6px;
+}
+
+.PollOptionRow input {
+  flex: 1;
+}
+
+.PollOptionRemoveButton {
+  border-radius: 6px;
+  border: 1px solid #c7b9a4;
+  background: #fffdf9;
+  font-size: 13px;
+  padding: 0 8px;
+  cursor: pointer;
+}
+
+.PollOptionRemoveButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.PollAddOptionButton {
+  margin-top: 6px;
+  border-radius: 6px;
+  border: 1px dashed #c7b9a4;
+  background: #fffaf2;
+  font-size: 13px;
+  padding: 6px 10px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.PollAddOptionButton:hover {
+  background: #f0e4d4;
+}
+
+/* Poll settings */
+.PollSettingsField label {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.PollSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.PollSettingOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.PollSettingOption input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+}
+
+
 /* ===========================
    Mobile tweaks
    =========================== */

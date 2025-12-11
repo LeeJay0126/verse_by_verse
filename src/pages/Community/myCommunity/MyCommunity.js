@@ -86,6 +86,8 @@ const MyCommunity = () => {
                         title: newPostPayload.title,
                         body: newPostPayload.description,
                         type: newPostPayload.typeValue,
+                        // Poll config (optional; backend will ignore it until we support it)
+                        poll: newPostPayload.poll,
                     }),
                 }
             );
@@ -106,6 +108,7 @@ const MyCommunity = () => {
             return { ok: false, message: error.message || "Failed to create post." };
         }
     };
+
 
     const hasRealPosts = posts.length > 0;
 
@@ -220,6 +223,23 @@ const MyCommunity = () => {
                                 <td>1</td>
                                 <td>1d ago</td>
                             </tr>
+                            <tbody>
+                                {posts.map((post) => (
+                                    <tr key={post.id}>
+                                        <td className="topic">
+                                            <div className="title">{post.title}</div>
+                                            <div className="subtitle">{post.subtitle}</div>
+                                        </td>
+                                        <td>
+                                            <span className={`Tag ${post.categoryClass || "general"}`}>
+                                                {post.category === "Poll" ? "📊 Poll" : post.category}
+                                            </span>
+                                        </td>
+                                        <td>{post.replyCount}</td>
+                                        <td>{formatActivity(post)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
                         </tbody>
                     </table>
                 )}
