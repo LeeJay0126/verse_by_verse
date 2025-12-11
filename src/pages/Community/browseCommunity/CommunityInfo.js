@@ -19,6 +19,13 @@ const CommunityInfo = () => {
   const [error, setError] = useState("");
   const [joinStatus, setJoinStatus] = useState("idle"); // idle | loading | requested | error
 
+  const API_BASE =
+    process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
+
+  const DEFAULT_HERO =
+    "/static/community/CommunityDefaultHero.png";
+
+
   // Always fetch full community detail so we get owner, leaders, members, etc.
   useEffect(() => {
     if (!communityId) return;
@@ -128,6 +135,7 @@ const CommunityInfo = () => {
     members = [],
     owner,
     leaders = [],
+    heroImageUrl,
   } = community;
 
   // Normalize members for display (array vs number)
@@ -160,6 +168,19 @@ const CommunityInfo = () => {
     return "Unknown";
   };
 
+  const heroBackgroundUrl = heroImageUrl
+    ? `${API_BASE}${heroImageUrl}` // if backend returns "/uploads/..."
+    : DEFAULT_HERO;
+
+  const heroStyle = {
+    backgroundImage: `url("${heroBackgroundUrl}")`,
+    backgroundColor: "#00000800",
+    backgroundBlendMode: "saturation",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
+  };
+
   const displayedLeaders = leaders.slice(0, MAX_DISPLAY_USERS);
   const hasMoreLeaders = leaders.length > MAX_DISPLAY_USERS;
 
@@ -168,7 +189,7 @@ const CommunityInfo = () => {
 
   return (
     <section className="CommunityInfo">
-      <div className="CommunityInfoHero">
+      <div className="CommunityInfoHero" style={heroStyle}>
         <PageHeader />
         <header className="CommunityInfoHeader">
           <h1 className="CommunityInfoTitle">{header}</h1>

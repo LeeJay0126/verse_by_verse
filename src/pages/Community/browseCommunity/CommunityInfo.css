@@ -6,8 +6,8 @@
 }
 
 .CommunityInfoHero {
-  background-image: url("../../../component/images/community/CommunityDefaultHero.png");
-  background-color: #00000800;
+  /* background-image: url("../../../component/images/community/CommunityDefaultHero.png"); */
+  background-color: #00000080;
 
   background-blend-mode: saturation;
   background-position: center;

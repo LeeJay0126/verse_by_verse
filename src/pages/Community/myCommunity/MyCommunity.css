@@ -1,127 +1,183 @@
 .ForumContainer {
-    background: #F4EEE6;
-    min-height: 100vh;
-    font-family: "Inter", sans-serif;
-    display: flex;
-    flex-direction: column;
+  background: #F4EEE6;
+  min-height: 100vh;
+  font-family: "Inter", sans-serif;
+  display: flex;
+  flex-direction: column;
 }
 
 .ForumContainer> :last-child {
-    margin-top: auto;
+  margin-top: auto;
 }
 
 .ForumHeader,
 .ForumSubHeader {
-    color: white;
-    font-family: "Georgia", serif;
-    letter-spacing: 1px;
-    padding: 0 48px;
+  color: white;
+  font-family: "Georgia", serif;
+  letter-spacing: 1px;
+  padding: 0 48px;
 }
 
 .ForumHeader {
-    font-size: 42px;
-    padding-bottom: 18px;
+  font-size: 42px;
+  padding-bottom: 18px;
 }
 
 .ForumSubHeader {
-    padding-bottom: 24px;
-    font-size: 24px;
-    font-weight: 400;
+  padding-bottom: 24px;
+  font-size: 24px;
+  font-weight: 400;
 }
 
 .ForumActions {
-    padding-top: 20px;
-    display: flex;
-    justify-content: end;
+  padding-top: 20px;
+  display: flex;
+  justify-content: end;
 }
 
 .ForumHero {
-    background-image: url("../../../component/images/community/CommunityDefaultHero.png");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    min-height: 400px;
+  /* background-image: url("../../../component/images/community/CommunityDefaultHero.png"); */
+  background-color: #00000080;
+  background-blend-mode: saturation;
 
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 12px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 400px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+}
+
+/* Container for the small "+" box */
+.HeroUploadControl {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  pointer-events: none;
+  /* until hover */
+}
+
+/* Show it on hover over hero */
+.ForumHero:hover .HeroUploadControl {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.HeroUploadButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #f5ebde;
+  background: rgba(0, 0, 0, 0.55);
+  color: #f5ebde;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.HeroUploadButton:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.HeroUploadButton:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* hide actual input */
+.HeroUploadInput {
+  display: none;
+}
+
+.HeroUploadError {
+  max-width: 1280px;
+  width: 80%;
+  margin: 12px auto 0;
 }
 
 .ForumTabs {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 32px;
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
 }
 
 .ForumTabs button {
-    background: none;
-    border: none;
-    font-size: 18px;
-    padding-bottom: 6px;
-    cursor: pointer;
-    color: #5A5A5A;
+  background: none;
+  border: none;
+  font-size: 18px;
+  padding-bottom: 6px;
+  cursor: pointer;
+  color: #5A5A5A;
 }
 
 .ForumTabs .active {
-    border-bottom: 2px solid #000;
-    color: #000;
+  border-bottom: 2px solid #000;
+  color: #000;
 }
 
 .NewPostButton {
-    background: black;
-    color: white;
-    font-size: 16px;
-    padding: 10px 22px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    margin-bottom: 24px;
+  background: black;
+  color: white;
+  font-size: 16px;
+  padding: 10px 22px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 24px;
 }
 
 .ForumTable {
-    width: 100%;
-    background: white;
-    border-radius: 10px;
-    padding: 0;
-    border-collapse: collapse;
-    overflow: hidden;
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+  padding: 0;
+  border-collapse: collapse;
+  overflow: hidden;
 }
 
 .ForumTable th {
-    text-align: left;
-    padding: 18px;
-    font-weight: 600;
-    background: #fafafa;
+  text-align: left;
+  padding: 18px;
+  font-weight: 600;
+  background: #fafafa;
 }
 
 .ForumTable td {
-    padding: 16px 18px;
-    border-top: 1px solid #e6e6e6;
-    vertical-align: top;
+  padding: 16px 18px;
+  border-top: 1px solid #e6e6e6;
+  vertical-align: top;
 }
 
 .topic .title {
-    font-weight: 600;
+  font-weight: 600;
 }
 
 .topic .subtitle {
-    margin-top: 4px;
-    color: #6a6a6a;
-    font-size: 14px;
+  margin-top: 4px;
+  color: #6a6a6a;
+  font-size: 14px;
 }
 
 .Tag {
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .ForumBody {
-    max-width: 1280px;
-    width: 80%;
-    margin: 0 auto;
+  max-width: 1280px;
+  width: 80%;
+  margin: 0 auto;
 }
 
 /* ===========================
@@ -129,143 +185,143 @@
    =========================== */
 
 .NewPostOverlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 4000;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4000;
 }
 
 .NewPostModal {
-    background: #f4eee6;
-    border-radius: 12px;
-    width: min(520px, 92vw);
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
-    padding: 20px 24px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  background: #f4eee6;
+  border-radius: 12px;
+  width: min(520px, 92vw);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .NewPostHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
 }
 
 .NewPostHeader h2 {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 .NewPostCloseButton {
-    background: none;
-    border: none;
-    font-size: 24px;
-    line-height: 1;
-    cursor: pointer;
-    padding: 2px 4px;
-    color: #222;
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  color: #222;
 }
 
 .NewPostForm {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .NewPostField {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .NewPostField label {
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: #333;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #333;
 }
 
 .NewPostField input,
 .NewPostField select,
 .NewPostField textarea {
-    border-radius: 6px;
-    border: 1px solid #c7b9a4;
-    padding: 8px 10px;
-    font-size: 14px;
-    font-family: inherit;
-    background: #fffdf9;
+  border-radius: 6px;
+  border: 1px solid #c7b9a4;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fffdf9;
 }
 
 .NewPostField input:focus,
 .NewPostField select:focus,
 .NewPostField textarea:focus {
-    outline: 2px solid #0f0f0f;
-    outline-offset: 1px;
+  outline: 2px solid #0f0f0f;
+  outline-offset: 1px;
 }
 
 .NewPostField textarea {
-    resize: vertical;
-    min-height: 120px;
+  resize: vertical;
+  min-height: 120px;
 }
 
 /* Modal actions */
 .NewPostActions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 6px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 .NewPostPrimaryButton {
-    background: #000;
-    color: #fff;
-    font-size: 14px;
-    padding: 8px 18px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
 }
 
 .NewPostSecondaryButton {
-    background: transparent;
-    color: #333;
-    font-size: 14px;
-    padding: 8px 14px;
-    border-radius: 6px;
-    border: 1px solid #c7b9a4;
-    cursor: pointer;
+  background: transparent;
+  color: #333;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #c7b9a4;
+  cursor: pointer;
 }
 
 .NewPostPrimaryButton:hover {
-    opacity: 0.9;
+  opacity: 0.9;
 }
 
 .NewPostSecondaryButton:hover {
-    background: #f0e4d4;
+  background: #f0e4d4;
 }
 
 .Tag.general {
-    background: #c8d1b2;
+  background: #c8d1b2;
 }
 
 .Tag.questions {
-    background: #8BBF7F;
+  background: #8BBF7F;
 }
 
 .Tag.announcements {
-    background: #d3a78c;
+  background: #d3a78c;
 }
 
 .Tag.feedback {
-    background: #b9a5d6;
+  background: #b9a5d6;
 }
 
 /* ===========================
@@ -430,7 +486,8 @@
 
 /* Tag color for Poll posts */
 .Tag.poll {
-  background: #b9a5d6; /* similar vibe to feedback color */
+  background: #b9a5d6;
+  /* similar vibe to feedback color */
 }
 
 /* Poll options list */
