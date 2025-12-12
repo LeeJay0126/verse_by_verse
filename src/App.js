@@ -14,6 +14,7 @@ import CommunityWalkthrough from "./pages/Community/CommunityWalkthrough";
 import Notifications from "./pages/Account/userMenu/Notifications";
 import Profile from "./pages/Account/userMenu/Profile";
 import CommunityInfo from "./pages/Community/browseCommunity/CommunityInfo";
+import PostDetail from "./pages/Community/myCommunity/PostDetail";
 
 import { AuthProvider } from "./component/context/AuthContext";
 import { NotificationProvider } from "./component/context/NotificationContext";
@@ -42,7 +43,8 @@ function App() {
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/community/:communityId/info" element={<CommunityInfo />} />
-                <Route path="/community/:communityId/my-posts" element={<MyCommunity/>}/>
+                <Route path="/community/:communityId/my-posts" element={<MyCommunity />} />
+                <Route path="/community/:communityId/posts/:postId" element={<PostDetail />} />
               </Routes>
             </ToastProvider>
           </NotificationProvider>

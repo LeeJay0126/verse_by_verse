@@ -1,0 +1,56 @@
+.ForumHero--small {
+  min-height: 220px;
+}
+
+.PostDetailBody {
+  max-width: 800px;
+  width: 80%;
+  margin: 0 auto 40px;
+}
+
+.PostDetailHeader {
+  margin-bottom: 16px;
+}
+
+.PostDetailTitle {
+  font-size: 24px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.PostDetailMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.PostDetailMetaText {
+  font-size: 13px;
+  color: #666;
+}
+
+.PostDetailContent p {
+  white-space: pre-line;
+  line-height: 1.6;
+  font-size: 15px;
+  color: #333;
+}
+
+.PostDetailSubTitle {
+  font-size: 16px;
+  margin-top: 20px;
+  margin-bottom: 8px;
+}
+
+.PostDetailRepliesEmpty {
+  font-size: 14px;
+  color: #777;
+}
+
+.PostDetailBreadcrumb {
+  color: #f9f4ea;
+  font-size: 14px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
