@@ -4,6 +4,7 @@ import PageHeader from "../../../component/PageHeader";
 import Footer from "../../../component/Footer";
 import Time from "../../../component/utils/Time";
 import "./MyCommunity.css";
+import "./PostDetail.css"
 
 const API_BASE =
     process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
@@ -242,12 +243,12 @@ const PostDetail = () => {
                                     onClick={() => handleVote(idx)}
                                 >
                                     <span className="PostDetailPollLabel">{opt.text}</span>
-                                    {totalVotes > 0 && (
-                                        <span className="PostDetailPollStats">
-                                            {count} vote{count === 1 ? "" : "s"} ({percentage}%)
-                                        </span>
-                                    )}
                                 </button>
+                                {totalVotes > 0 && (
+                                    <span className="PostDetailPollStats">
+                                        {count} vote{count === 1 ? "" : "s"} ({percentage}%)
+                                    </span>
+                                )}
                             </li>
                         );
                     })}
@@ -257,6 +258,7 @@ const PostDetail = () => {
                     {post.poll.allowMultiple
                         ? "You can vote for more than one option."
                         : "You can vote for one option."}{" "}
+                    <br />
                     {post.poll.anonymous
                         ? "Votes are anonymous."
                         : "Votes may be visible per user."}
@@ -299,19 +301,18 @@ const PostDetail = () => {
                     </div>
 
                     <h1 className="PostDetailTitle">{title}</h1>
+                    {body && (
+                        <article className="PostDetailContent">
+                            <p>{body}</p>
+                        </article>
+                    )}
                 </header>
 
                 {type === "poll" && renderPollSection()}
 
-                {body && (
-                    <article className="PostDetailContent">
-                        <p>{body}</p>
-                    </article>
-                )}
-
                 <section className="PostDetailReplies">
                     <h2 className="PostDetailSubTitle">
-                        Replies ({post.replyCount ?? replies.length})
+                        Replies   ( {post.replyCount ?? replies.length} )
                     </h2>
 
                     {replyError && (
@@ -325,7 +326,7 @@ const PostDetail = () => {
                             No replies yet. Be the first to respond.
                         </p>
                     ) : (
-                        <ul className="PostDetailRepliesList">
+                        <ol className="PostDetailRepliesList">
                             {replies.map((r) => (
                                 <li key={r.id} className="PostDetailReplyItem">
                                     <div className="PostDetailReplyHeader">
@@ -339,13 +340,13 @@ const PostDetail = () => {
                                     <p className="PostDetailReplyBody">{r.body}</p>
                                 </li>
                             ))}
-                        </ul>
+                        </ol>
                     )}
 
                     <form className="PostDetailReplyForm" onSubmit={handleSubmitReply}>
-                        <label htmlFor="reply-body" className="PostDetailSubTitle">
+                        <h2 htmlFor="reply-body" className="PostDetailSubTitle">
                             Add a reply
-                        </label>
+                        </h2>
                         <textarea
                             id="reply-body"
                             rows={3}
@@ -353,6 +354,7 @@ const PostDetail = () => {
                             onChange={(e) => setReplyBody(e.target.value)}
                             placeholder="Share your thoughts or encouragement…"
                             disabled={replySubmitting}
+                            className="replyInputBox"
                         />
                         <button
                             type="submit"

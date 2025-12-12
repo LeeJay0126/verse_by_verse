@@ -9,19 +9,30 @@
 }
 
 .PostDetailHeader {
-  margin-bottom: 16px;
+  padding-top: 30px;
+  padding-bottom: 5px;
+}
+
+.PostDetailBreadcrumb {
+  color: #f9f4ea;
+  font-size: 14px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
 }
 
 .PostDetailTitle {
-  font-size: 24px;
+  font-size: 32px;
   margin-top: 8px;
   margin-bottom: 12px;
 }
+
+/* Post Body Header */
 
 .PostDetailMetaRow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
 }
 
@@ -31,26 +42,118 @@
 }
 
 .PostDetailContent p {
+  padding: 15px 0;
   white-space: pre-line;
   line-height: 1.6;
   font-size: 15px;
   color: #333;
 }
 
+/* Post Body */
+
 .PostDetailSubTitle {
-  font-size: 16px;
-  margin-top: 20px;
-  margin-bottom: 8px;
+  font-size: 18px;
+  padding-bottom: 20px;
+  padding-top: 20px;
 }
+
+/* Replies section */
 
 .PostDetailRepliesEmpty {
   font-size: 14px;
   color: #777;
 }
 
-.PostDetailBreadcrumb {
-  color: #f9f4ea;
+.PostDetailRepliesList {
+  padding: 5px 10px;
+  padding-bottom: 10px;
+  list-style: none;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.PostDetailReplyItem {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 10px;
+}
+
+.PostDetailReplyHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.008);
+}
+
+.PostDetailReplyAuthor {
+  text-transform: uppercase;
+  font-weight: 400;
   font-size: 14px;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
+  letter-spacing: 1px;
+}
+
+.PostDetailReplyTime {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.PostDetailReplyBody {
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Poll Related styling  */
+/* Poll options */
+
+.PostDetailPollList {
+  padding-bottom: 20px;
+}
+
+.PostDetailPollMeta,
+.PostDetailRepliesEmpty {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+/* For Mobile, This should be changed to flex-direction: column */
+.PostDetailPollOption {
+  padding-bottom: 10px;
+  width: 90%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.PostDetailPollButton {
+  min-width: 50px;
+  padding: 5px 10px;
+  border: none;
+  font-style: bold;
+  background-color: transparent;
+  font-size: 14px;
+}
+
+.PostDetailPollStats {
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* Add Reply Section */
+
+.PostDetailReplyForm {
+  padding-top: 25px;
+  display: flex;
+  flex-direction: column;
+}
+
+.replyInputBox {
+  height: 100px;
+  padding: 5px 10px;
+}
+.NewPostPrimaryButton {
+  padding: 10px 10px;
+  border-radius: 0;
 }
