@@ -563,6 +563,14 @@
   height: 14px;
 }
 
+.ForumRow {
+  cursor: pointer;
+}
+
+.ForumRow:hover {
+  background-color: #faf5ec;
+}
+
 
 /* ===========================
    Mobile tweaks

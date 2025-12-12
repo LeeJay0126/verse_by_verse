@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "../../../component/context/AuthContext";
 import "./MyCommunity.css";
@@ -12,10 +12,10 @@ const API_BASE =
 
 const DEFAULT_HERO =
     "/community/CommunityDefaultHero.png";
-// or require(...) / your existing relative path exposed via public
 
 const MyCommunity = () => {
     const { communityId } = useParams();
+    const navigate = useNavigate();
     const { user } = useAuth();
 
     const [community, setCommunity] = useState(null);
@@ -29,6 +29,10 @@ const MyCommunity = () => {
     const fileInputRef = useRef(null);
     const [uploadingHero, setUploadingHero] = useState(false);
     const [uploadError, setUploadError] = useState("");
+
+    const handleRowClick = (postId) => {
+        navigate(`/community/${communityId}/posts/${postId}`);
+    };
 
     const fetchCommunity = useCallback(async () => {
         try {
@@ -281,7 +285,11 @@ const MyCommunity = () => {
                         </thead>
                         <tbody>
                             {posts.map((post) => (
-                                <tr key={post.id}>
+                                <tr
+                                    key={post.id}
+                                    className="ForumRow"
+                                    onClick={() => handleRowClick(post.id)}
+                                >
                                     <td className="topic">
                                         <div className="title">{post.title}</div>
                                         <div className="subtitle">{post.subtitle}</div>
@@ -296,6 +304,7 @@ const MyCommunity = () => {
                                 </tr>
                             ))}
                         </tbody>
+
                     </table>
                 )}
 
