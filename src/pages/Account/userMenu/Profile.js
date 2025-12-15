@@ -6,8 +6,7 @@ import Footer from "../../../component/Footer";
 import { useAuth } from "../../../component/context/AuthContext";
 import "../Account.css";
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
-
-const API_URL = "http://localhost:4000";
+import { apiFetch } from "../../../component/utils/ApiFetch";
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -22,6 +21,7 @@ const Profile = () => {
   const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  
 
   async function handleChangePassword(e) {
     e.preventDefault();
@@ -42,7 +42,7 @@ const Profile = () => {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`${API_URL}/auth/change-password`, {
+      const res = await apiFetch(`/auth/change-password`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

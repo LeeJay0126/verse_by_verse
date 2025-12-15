@@ -8,6 +8,7 @@
 .CommunityInfoHero {
   /* background-image: url("../../../component/images/community/CommunityDefaultHero.png"); */
   background-color: #00000080;
+  position: relative;
 
   background-blend-mode: saturation;
   background-position: center;
@@ -228,4 +229,30 @@
 .CommunityInfoUserMore {
   font-size: 1.2rem;
   line-height: 1;
+}
+
+.CommunityBackArrow {
+  position: absolute;
+  top: 84px;          /* tweak if PageHeader overlaps */
+  left: 18px;
+
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(245, 235, 222, 0.9);
+  background: rgba(0, 0, 0, 0.55);
+  color: #f5ebde;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.CommunityBackArrow:hover {
+  background: rgba(0, 0, 0, 0.75);
 }

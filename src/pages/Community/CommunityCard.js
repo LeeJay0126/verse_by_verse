@@ -46,7 +46,7 @@ const CommunityCard = (props) => {
     return () => {
       window.removeEventListener("resize", checkOverflow);
     };
-  }, []);
+  }, [header, subheader, content]);
 
   const getTypeClass = (type) => {
     switch (type) {

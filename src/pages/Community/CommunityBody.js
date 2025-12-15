@@ -6,6 +6,7 @@ import { PiBookOpenLight } from "react-icons/pi";
 import { LuNotebookPen } from "react-icons/lu";
 import CommunityCard from "./CommunityCard";
 import Time from "../../component/utils/Time";
+import { apiFetch } from "../../component/utils/ApiFetch";
 
 const MAX_DISCOVER_VISIBLE = 15;
 
@@ -30,38 +31,30 @@ const CommunityBody = () => {
   const [discoverCommunities, setDiscoverCommunities] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:4000/community/my", {
-      credentials: "include",
-    })
-      .then((res) => {
-        console.log("GET /community/my status:", res.status);
-        return res.json();
-      })
-      .then((data) => {
-        console.log("GET /community/my data:", data);
-
-        if (!data.ok) {
-          console.warn("/community/my returned not ok:", data.error);
-          return;
-        }
+    (async () => {
+      try {
+        const res = await apiFetch("/community/my");
+        const data = await res.json();
+        if (!data.ok) return;
 
         const mapped = (data.communities || []).map((c) => ({
-          id: c.id,                                  // from server
+          id: c.id,
           header: c.header,
           subheader: c.subheader,
           content: c.content,
           type: c.type,
-          members: c.members,                        // number from membersCount
+          members: c.members,
           lastActive: formatLastActive(c.lastActivityAt),
           role: c.role,
-          my: true,                                  // force true on My tab
+          my: true,
         }));
 
         setMyCommunities(mapped);
-      })
-      .catch((err) => console.error("[/community/my fetch error]", err));
+      } catch (err) {
+        console.error("[/community/my]", err);
+      }
+    })();
   }, []);
-
 
   // --- Discover Communities ---
   useEffect(() => {

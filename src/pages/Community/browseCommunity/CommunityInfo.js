@@ -23,7 +23,7 @@ const CommunityInfo = () => {
     process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
 
   const DEFAULT_HERO =
-    "/static/community/CommunityDefaultHero.png";
+    "/community/CommunityDefaultHero.png";
 
 
   // Always fetch full community detail so we get owner, leaders, members, etc.
@@ -191,13 +191,23 @@ const CommunityInfo = () => {
     <section className="CommunityInfo">
       <div className="CommunityInfoHero" style={heroStyle}>
         <PageHeader />
+
+        <button
+          type="button"
+          className="CommunityBackArrow"
+          onClick={() => navigate("/community")}
+          aria-label="Back to Communities"
+          title="Back to Communities"
+        >
+          ←
+        </button>
+
         <header className="CommunityInfoHeader">
           <h1 className="CommunityInfoTitle">{header}</h1>
-          {subheader && (
-            <p className="CommunityInfoSubtitle">{subheader}</p>
-          )}
+          {subheader && <p className="CommunityInfoSubtitle">{subheader}</p>}
         </header>
       </div>
+
 
       <section className="CommunityInfoMeta">
         <div className="CommunityInfoMetaItem">

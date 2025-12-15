@@ -3,18 +3,22 @@ import PageHeader from "../../../component/PageHeader";
 import Footer from "../../../component/Footer";
 import { useNotifications } from "../../../component/context/NotificationContext";
 import "../Account.css";
+import { FaTrash } from "react-icons/fa";
+import { apiFetch } from "../../../component/utils/ApiFetch";
 
 const Notifications = () => {
   const {
     unreadCount,
-    refreshUnreadCount,   
+    refreshUnreadCount,
   } = useNotifications();
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [actingId, setActingId] = useState(null); 
+  const [actingId, setActingId] = useState(null);
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
 
   // --- Load notifications from server ---
   const fetchNotifications = useCallback(async () => {
@@ -22,7 +26,7 @@ const Notifications = () => {
       setLoading(true);
       setError("");
 
-      const res = await fetch("http://localhost:4000/notifications", {
+      const res = await apiFetch("/notifications", {
         credentials: "include",
       });
       const data = await res.json();
@@ -44,6 +48,37 @@ const Notifications = () => {
     fetchNotifications();
   }, [fetchNotifications]);
 
+ async function handleDeleteOne(id) {
+  if (!id) return;
+
+  try {
+    setDeletingId(id);
+    setError("");
+
+    const res = await apiFetch(`/notifications/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : {};
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || `Failed to delete (${res.status})`);
+    }
+
+    setNotifications((prev) => prev.filter((n) => (n._id || n.id) !== id));
+    refreshUnreadCount();
+  } catch (err) {
+    console.error("[notification delete error]", err);
+    setError(err.message || "Failed to delete notification");
+  } finally {
+    setDeletingId(null);
+  }
+}
+
+
+
   // --- Per-notification action (accept / decline) ---
   async function handleNotificationAction(id, action) {
     if (!id) return;
@@ -52,7 +87,7 @@ const Notifications = () => {
     try {
       setActingId(id);
 
-      const res = await fetch(`http://localhost:4000/notifications/${id}/act`, {
+      const res = await apiFetch(`/notifications/${id}/act`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -85,7 +120,7 @@ const Notifications = () => {
       setBulkLoading(true);
       setError("");
 
-      const res = await fetch("http://localhost:4000/notifications/read-all", {
+      const res = await apiFetch("/notifications/read-all", {
         method: "POST",
         credentials: "include",
       });
@@ -120,7 +155,7 @@ const Notifications = () => {
       setBulkLoading(true);
       setError("");
 
-      const res = await fetch("http://localhost:4000/notifications", {
+      const res = await apiFetch("/notifications", {
         method: "DELETE",
         credentials: "include",
       });
@@ -167,9 +202,8 @@ const Notifications = () => {
               return (
                 <li
                   key={id}
-                  className={`notification-item ${
-                    isUnread(n) ? "notification-item--unread" : ""
-                  }`}
+                  className={`notification-item ${isUnread(n) ? "notification-item--unread" : ""
+                    }`}
                 >
                   <div className="notification-main">
                     <div className="notification-title">{n.message}</div>
@@ -202,6 +236,16 @@ const Notifications = () => {
                         </button>
                       </div>
                     )}
+                    <button
+                      type="button"
+                      className="notification-delete-btn"
+                      onClick={() => handleDeleteOne(id)}
+                      disabled={deletingId === id}
+                      aria-label="Delete notification"
+                      title="Delete notification"
+                    >
+                      {deletingId === id ? "…" : <FaTrash />}
+                    </button>
                   </div>
                 </li>
               );

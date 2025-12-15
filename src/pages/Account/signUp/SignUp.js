@@ -4,8 +4,7 @@ import PageHeader from "../../../component/PageHeader";
 import "../Account.css";
 import Footer from "../../../component/Footer";
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
-
-const API_URL = "http://localhost:4000";
+import { apiFetch } from "../../../component/utils/ApiFetch";
 
 const SignUp = () => {
   const [firstName, setFirstName] = useState("");
@@ -46,7 +45,7 @@ const SignUp = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/auth/signup`, {
+      const res = await apiFetch(`/auth/signup`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
