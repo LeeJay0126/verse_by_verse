@@ -167,6 +167,7 @@
 }
 
 .notification-item {
+  position: relative;
   display: flex;
   text-align: center;
   justify-content: space-between;
@@ -203,6 +204,9 @@
   font-size: 0.8rem;
   opacity: 0.8;
   white-space: nowrap;
+  position: relative;
+  padding-right: 22px;
+  /* reserve space for trash icon */
 }
 
 .notification-time {
@@ -256,7 +260,8 @@
 
 /* When open, allow room for form + fade in */
 .password-change-panel--open {
-  max-height: 500px; /* enough to fit 3 inputs + button */
+  max-height: 500px;
+  /* enough to fit 3 inputs + button */
   opacity: 1;
   margin-top: 0.5rem;
 }
@@ -428,6 +433,49 @@
   background-color: #ffebee;
   color: #c62828;
 }
+
+.notification-delete-btn {
+  background: none;
+  border: none;
+
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  color: rgba(245, 234, 234, 0.6);
+  font-size: 18px;
+
+  /* hide by default */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, color 0.15s ease, transform 0.15s ease;
+
+  /* position top-right of notification */
+  position: absolute;
+  top: 6px;
+  right: -14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.notification-item:hover .notification-delete-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.notification-delete-btn:hover:not(:disabled) {
+  color: #ff8a80;
+  /* soft destructive red */
+}
+
+.notification-delete-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 
 
 /* Small tweak for mobile: stack profile labels/values */

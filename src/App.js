@@ -20,12 +20,14 @@ import { AuthProvider } from "./component/context/AuthContext";
 import { NotificationProvider } from "./component/context/NotificationContext";
 import { ToastProvider } from "./component/context/ToastContext";
 import MyCommunity from "./pages/Community/myCommunity/MyCommunity";
+import SessionListener from "./component/utils/SessionListener";
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
         <AuthProvider>
+          <SessionListener />
           <NotificationProvider>
             <ToastProvider>
               <Routes>

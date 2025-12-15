@@ -218,6 +218,15 @@ const MyCommunity = () => {
         <section className="ForumContainer">
             <div className="ForumHero" style={heroStyle}>
                 <PageHeader />
+                <button
+                    type="button"
+                    className="CommunityBackArrow"
+                    onClick={() => navigate("/community")}
+                    aria-label="Back to Communities"
+                    title="Back to Communities"
+                >
+                    ←
+                </button>
                 <div className="ForumHeaderContainer">
                     <h1 className="ForumHeader">
                         {community?.header || "Temporary Header"}

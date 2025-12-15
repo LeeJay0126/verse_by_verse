@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-
-const API_URL = "http://localhost:4000";
+import { apiFetch } from "../utils/ApiFetch";
 
 const AuthContext = createContext(null);
 
@@ -14,10 +13,7 @@ export function AuthProvider({ children }) {
 
     (async () => {
       try {
-        const res = await fetch(`${API_URL}/auth/me`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const res = await apiFetch(`/auth/me`);
 
         if (!res.ok) {
           if (!cancelled) setUser(null);
@@ -46,12 +42,12 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function login(identifier, password) {
-    const res = await fetch(`${API_URL}/auth/login`, {
+    const res = await apiFetch(`/auth/login`, {
       method: "POST",
-      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ identifier, password }),
     });
+
 
     const data = await res.json().catch(() => ({}));
 
@@ -67,7 +63,7 @@ export function AuthProvider({ children }) {
   // Logout: call /auth/logout, clear `user`
   async function logout() {
     try {
-      await fetch(`${API_URL}/auth/logout`, {
+      await apiFetch(`/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

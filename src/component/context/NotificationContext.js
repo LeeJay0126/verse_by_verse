@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { apiFetch } from "../utils/ApiFetch";
 
 const NotificationContext = createContext(null);
 
@@ -7,18 +8,13 @@ export const NotificationProvider = ({ children }) => {
 
   const refreshUnreadCount = useCallback(async () => {
     try {
-      const res = await fetch(
-        "http://localhost:4000/notifications?unread=true",
-        { credentials: "include" }
-      );
+      const res = await apiFetch("/notifications?unread=true");
       const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load unread notifications");
-
       setUnreadCount((data.notifications || []).length);
-    } catch (err) {
-      console.error("[refreshUnreadCount error]", err);
-      // optional: keep previous count
+    } catch (e) {
+      setUnreadCount(0);
     }
+
   }, []);
 
   useEffect(() => {
