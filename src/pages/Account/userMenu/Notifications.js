@@ -46,33 +46,35 @@ const Notifications = () => {
     fetchNotifications();
   }, [fetchNotifications]);
 
- async function handleDeleteOne(id) {
-  if (!id) return;
+  async function handleDeleteOne(id) {
+    if (!id) return;
 
-  try {
-    setDeletingId(id);
-    setError("");
+    try {
+      setDeletingId(id);
+      setError("");
 
-    const res = await apiFetch(`/notifications/${id}`, {
-      method: "DELETE",
-    });
+      console.log("CLICK delete", id);
 
-    const text = await res.text();
-    const data = text ? JSON.parse(text) : {};
+      const res = await apiFetch(`/notifications/${id}`, { method: "DELETE" });
+      console.log("DELETE returned", res.status);
 
-    if (!res.ok || !data.ok) {
-      throw new Error(data.error || `Failed to delete (${res.status})`);
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || `Failed to delete (${res.status})`);
+      }
+
+      setNotifications((prev) => prev.filter((n) => (n._id || n.id) !== id));
+      refreshUnreadCount();
+    } catch (err) {
+      console.error("[notification delete error]", err);
+      setError(err.message || "Failed to delete notification");
+    } finally {
+      setDeletingId(null);
     }
-
-    setNotifications((prev) => prev.filter((n) => (n._id || n.id) !== id));
-    refreshUnreadCount();
-  } catch (err) {
-    console.error("[notification delete error]", err);
-    setError(err.message || "Failed to delete notification");
-  } finally {
-    setDeletingId(null);
   }
-}
+
 
 
 

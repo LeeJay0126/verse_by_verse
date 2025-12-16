@@ -6,6 +6,7 @@ import PageHeader from "../../../component/PageHeader";
 import Footer from "../../../component/Footer";
 import NewPostModal from "./NewPost";
 import Time from "../../../component/utils/Time";
+import { apiFetch } from "../../../component/utils/ApiFetch";
 
 const API_BASE =
     process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
@@ -38,9 +39,7 @@ const MyCommunity = () => {
         try {
             setCommunityErr("");
 
-            const res = await fetch(`${API_BASE}/community/${communityId}`, {
-                credentials: "include",
-            });
+            const res = await apiFetch(`/community/${communityId}`);
 
             if (!res.ok) {
                 const data = await res.json().catch(() => ({}));
@@ -62,9 +61,8 @@ const MyCommunity = () => {
             setLoading(true);
             setErr("");
 
-            const res = await fetch(
-                `${API_BASE}/community/${communityId}/posts`,
-                { credentials: "include" }
+            const res = await apiFetch(
+                `/community/${communityId}/posts`
             );
 
             if (!res.ok) {
@@ -92,12 +90,11 @@ const MyCommunity = () => {
 
     const handleCreatePost = async (newPostPayload) => {
         try {
-            const res = await fetch(
-                `${API_BASE}/community/${communityId}/posts`,
+            const res = await apiFetch(
+                `/community/${communityId}/posts`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    credentials: "include",
                     body: JSON.stringify({
                         title: newPostPayload.title,
                         body: newPostPayload.description,
@@ -166,11 +163,10 @@ const MyCommunity = () => {
             const formData = new FormData();
             formData.append("heroImage", file);
 
-            const res = await fetch(
-                `${API_BASE}/community/${communityId}/hero-image`,
+            const res = await apiFetch(
+                `/community/${communityId}/hero-image`,
                 {
                     method: "POST",
-                    credentials: "include",
                     body: formData,
                 }
             );
