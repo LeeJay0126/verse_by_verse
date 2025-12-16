@@ -6,6 +6,7 @@ import Time from "../../../component/utils/Time";
 import "./MyCommunity.css";
 import "./PostDetail.css"
 import { apiFetch } from "../../../component/utils/ApiFetch";
+import { emitCommunityActivityUpdated } from "../../../component/utils/CommunityEvents";
 
 
 const PostDetail = () => {
@@ -104,6 +105,8 @@ const PostDetail = () => {
 
             setPollResults(data.pollResults || null);
             setMyVotes(data.myVotes || []);
+            emitCommunityActivityUpdated();
+
         } catch (error) {
             console.error("[PostDetail] vote error:", error);
             setVoteError(error.message || "Could not submit your vote.");
@@ -137,8 +140,9 @@ const PostDetail = () => {
 
             setReplyBody("");
             await fetchReplies();
-            // Optionally refresh post too to update replyCount
             fetchPost();
+            emitCommunityActivityUpdated();
+
         } catch (error) {
             console.error("[PostDetail] submitReply error:", error);
             setReplyError(error.message || "Unable to post reply.");
