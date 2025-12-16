@@ -7,321 +7,317 @@ import Footer from "../../../component/Footer";
 import NewPostModal from "./NewPost";
 import Time from "../../../component/utils/Time";
 import { apiFetch } from "../../../component/utils/ApiFetch";
+import {
+  COMMUNITY_ACTIVITY_EVENT,
+  emitCommunityActivityUpdated,
+} from "../../../component/utils/CommunityEvents";
 
-const API_BASE =
-    process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
-
-const DEFAULT_HERO =
-    "/community/CommunityDefaultHero.png";
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
+const DEFAULT_HERO = "/community/CommunityDefaultHero.png";
 
 const MyCommunity = () => {
-    const { communityId } = useParams();
-    const navigate = useNavigate();
-    const { user } = useAuth();
+  const { communityId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-    const [community, setCommunity] = useState(null);
-    const [communityErr, setCommunityErr] = useState("");
+  const [community, setCommunity] = useState(null);
+  const [communityErr, setCommunityErr] = useState("");
 
-    const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState("");
-    const [showNewPostModal, setShowNewPostModal] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+  const [showNewPostModal, setShowNewPostModal] = useState(false);
 
-    const fileInputRef = useRef(null);
-    const [uploadingHero, setUploadingHero] = useState(false);
-    const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef(null);
+  const [uploadingHero, setUploadingHero] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
-    const handleRowClick = (postId) => {
-        navigate(`/community/${communityId}/posts/${postId}`);
+  const handleRowClick = (postId) => {
+    navigate(`/community/${communityId}/posts/${postId}`);
+  };
+
+  const fetchCommunity = useCallback(async () => {
+    try {
+      setCommunityErr("");
+
+      const res = await apiFetch(`/community/${communityId}`);
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || `Failed to load community (${res.status})`);
+      }
+
+      setCommunity(data.community || null);
+    } catch (error) {
+      console.error("[MyCommunity] fetchCommunity error:", error);
+      setCommunityErr(error.message || "Failed to load community.");
+    }
+  }, [communityId]);
+
+  const fetchPosts = useCallback(async () => {
+    try {
+      setLoading(true);
+      setErr("");
+
+      const res = await apiFetch(`/community/${communityId}/posts`);
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || `Failed to load posts (${res.status})`);
+      }
+
+      setPosts(data.posts || []);
+    } catch (error) {
+      console.error("[MyCommunity] fetchPosts error:", error);
+      setErr(error.message || "Failed to load posts.");
+    } finally {
+      setLoading(false);
+    }
+  }, [communityId]);
+
+  // Initial load
+  useEffect(() => {
+    fetchCommunity();
+    fetchPosts();
+  }, [fetchCommunity, fetchPosts]);
+
+  // Refresh this page when activity happens elsewhere (reply/vote/etc)
+  useEffect(() => {
+    const onActivity = () => {
+      fetchCommunity();
+      fetchPosts();
     };
 
-    const fetchCommunity = useCallback(async () => {
-        try {
-            setCommunityErr("");
+    window.addEventListener(COMMUNITY_ACTIVITY_EVENT, onActivity);
+    return () => window.removeEventListener(COMMUNITY_ACTIVITY_EVENT, onActivity);
+  }, [fetchCommunity, fetchPosts]);
 
-            const res = await apiFetch(`/community/${communityId}`);
+  const handleNewPostClick = () => setShowNewPostModal(true);
+  const handleCloseModal = () => setShowNewPostModal(false);
 
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(
-                    data.error || `Failed to load community (${res.status})`
-                );
-            }
+  const handleCreatePost = async (newPostPayload) => {
+    try {
+      const res = await apiFetch(`/community/${communityId}/posts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newPostPayload.title,
+          body: newPostPayload.description,
+          type: newPostPayload.typeValue,
+          poll: newPostPayload.poll,
+        }),
+      });
 
-            const data = await res.json();
-            setCommunity(data.community || null);
-        } catch (error) {
-            console.error("[MyCommunity] fetchCommunity error:", error);
-            setCommunityErr(error.message || "Failed to load community.");
-        }
-    }, [communityId]);
+      const data = await res.json().catch(() => ({}));
 
-    const fetchPosts = useCallback(async () => {
-        try {
-            setLoading(true);
-            setErr("");
+      if (!res.ok || !data.ok) {
+        return {
+          ok: false,
+          message: data.error || "Failed to create post.",
+        };
+      }
 
-            const res = await apiFetch(
-                `/community/${communityId}/posts`
-            );
+      await fetchPosts();
+      await fetchCommunity();
 
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(data.error || `Failed to load posts (${res.status})`);
-            }
+      // 🔔 tell CommunityBody cards to refresh lastActive
+      emitCommunityActivityUpdated();
 
-            const data = await res.json();
-            setPosts(data.posts || []);
-        } catch (error) {
-            console.error("[MyCommunity] fetchPosts error:", error);
-            setErr(error.message || "Failed to load posts.");
-        } finally {
-            setLoading(false);
-        }
-    }, [communityId]);
+      setShowNewPostModal(false);
+      return { ok: true };
+    } catch (error) {
+      console.error("[MyCommunity] handleCreatePost error:", error);
+      return {
+        ok: false,
+        message: error.message || "Failed to create post.",
+      };
+    }
+  };
 
-    useEffect(() => {
-        fetchCommunity();
-        fetchPosts();
-    }, [fetchCommunity, fetchPosts]);
+  const hasRealPosts = posts.length > 0;
 
-    const handleNewPostClick = () => setShowNewPostModal(true);
-    const handleCloseModal = () => setShowNewPostModal(false);
+  const formatActivity = (post) => {
+    const date = post.updatedAt || post.createdAt;
+    if (!date) return "Just now";
+    return Time(date);
+  };
 
-    const handleCreatePost = async (newPostPayload) => {
-        try {
-            const res = await apiFetch(
-                `/community/${communityId}/posts`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        title: newPostPayload.title,
-                        body: newPostPayload.description,
-                        type: newPostPayload.typeValue,
-                        poll: newPostPayload.poll,
-                    }),
-                }
-            );
+  // Hero style (fallback to default if no custom image)
+  const heroBackgroundUrl = community?.heroImageUrl
+    ? `${API_BASE}${community.heroImageUrl}`
+    : DEFAULT_HERO;
 
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                return {
-                    ok: false,
-                    message: data.error || "Failed to create post.",
-                };
-            }
+  const heroStyle = {
+    backgroundImage: `url("${heroBackgroundUrl}")`,
+    backgroundPosition: "center",
+    backgroundSize: "cover",
+    backgroundRepeat: "no-repeat",
+  };
 
-            await fetchPosts();
-            setShowNewPostModal(false);
-            return { ok: true };
-        } catch (error) {
-            console.error("[MyCommunity] handleCreatePost error:", error);
-            return {
-                ok: false,
-                message: error.message || "Failed to create post.",
-            };
-        }
-    };
+  // ---- Hero image upload handlers ----
+  const handleHeroUploadButtonClick = () => {
+    fileInputRef.current?.click();
+  };
 
-    const hasRealPosts = posts.length > 0;
+  const handleHeroFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const formatActivity = (post) => {
-        const date = post.updatedAt || post.createdAt;
-        if (!date) return "Just now";
-        return Time(date);
-    };
+    setUploadError("");
+    setUploadingHero(true);
 
-    // 👇 Hero style (fallback to default if no custom image)
-    const heroBackgroundUrl =
-        community?.heroImageUrl
-            ? `${API_BASE}${community.heroImageUrl}` // if heroImageUrl is like "/uploads/..."
-            : DEFAULT_HERO;
+    try {
+      const formData = new FormData();
+      formData.append("heroImage", file);
 
-    const heroStyle = {
-        backgroundImage: `url("${heroBackgroundUrl}")`,
-        backgroundPosition: "center",
-        backgroundSize: "cover",
-        backgroundRepeat: "no-repeat",
-    };
+      const res = await apiFetch(`/community/${communityId}/hero-image`, {
+        method: "POST",
+        body: formData,
+      });
 
-    // ---- Hero image upload handlers ----
-    const handleHeroUploadButtonClick = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
-        }
-    };
+      const data = await res.json().catch(() => ({}));
 
-    const handleHeroFileChange = async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || "Failed to upload hero image.");
+      }
 
-        setUploadError("");
-        setUploadingHero(true);
+      await fetchCommunity();
 
-        try {
-            const formData = new FormData();
-            formData.append("heroImage", file);
+      // optional: treat hero updates as activity (if you want cards to reorder)
+      emitCommunityActivityUpdated();
+    } catch (error) {
+      console.error("[MyCommunity] hero upload error:", error);
+      setUploadError(error.message || "Failed to upload hero image.");
+    } finally {
+      setUploadingHero(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
-            const res = await apiFetch(
-                `/community/${communityId}/hero-image`,
-                {
-                    method: "POST",
-                    body: formData,
-                }
-            );
+  // only Owner/Leader can see the upload button.
+  const canEditHero = (() => {
+    if (!community || !user) return false;
 
-            const data = await res.json().catch(() => ({}));
+    const currentUserId = user.id || user._id;
 
-            if (!res.ok || !data.ok) {
-                throw new Error(data.error || "Failed to upload hero image.");
-            }
+    const isOwner = community.owner && community.owner.id === currentUserId;
 
-            // Refresh community data to get new heroImageUrl
-            await fetchCommunity();
-        } catch (error) {
-            console.error("[MyCommunity] hero upload error:", error);
-            setUploadError(error.message || "Failed to upload hero image.");
-        } finally {
-            setUploadingHero(false);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
-        }
-    };
+    const isLeader =
+      Array.isArray(community.members) &&
+      community.members.some(
+        (m) =>
+          (m.role === "Leader" || m.role === "Owner") && m.id === currentUserId
+      );
 
-    // only Owner/Leader can see the upload button.
-    const canEditHero = (() => {
-        if (!community || !user) return false;
+    return isOwner || isLeader;
+  })();
 
-        // Depending on how your user object is shaped, this might be user.id or user._id
-        const currentUserId = user.id || user._id;
+  return (
+    <section className="ForumContainer">
+      <div className="ForumHero" style={heroStyle}>
+        <PageHeader />
+        <button
+          type="button"
+          className="CommunityBackArrow"
+          onClick={() => navigate("/community")}
+          aria-label="Back to Communities"
+          title="Back to Communities"
+        >
+          ←
+        </button>
 
-        const isOwner = community.owner && community.owner.id === currentUserId;
+        <div className="ForumHeaderContainer">
+          <h1 className="ForumHeader">{community?.header || "Temporary Header"}</h1>
+          <h2 className="ForumSubHeader">
+            {community?.subheader ||
+              "Temporary SubHeader Temporary SubHeader Temporary SubHeader Temporary SubHeader Temporary SubHeader"}
+          </h2>
+          {communityErr && (
+            <p className="communityError smallError">{communityErr}</p>
+          )}
+        </div>
 
-        const isLeader =
-            Array.isArray(community.members) &&
-            community.members.some(
-                (m) =>
-                    (m.role === "Leader" || m.role === "Owner") &&
-                    m.id === currentUserId
-            );
+        {canEditHero && (
+          <div className="HeroUploadControl">
+            <button
+              type="button"
+              className="HeroUploadButton"
+              onClick={handleHeroUploadButtonClick}
+              disabled={uploadingHero}
+            >
+              {uploadingHero ? "…" : "+"}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="HeroUploadInput"
+              onChange={handleHeroFileChange}
+            />
+          </div>
+        )}
+      </div>
 
-        return isOwner || isLeader;
-    })();
+      {uploadError && (
+        <div className="HeroUploadError NewPostGlobalError">{uploadError}</div>
+      )}
 
-    return (
-        <section className="ForumContainer">
-            <div className="ForumHero" style={heroStyle}>
-                <PageHeader />
-                <button
-                    type="button"
-                    className="CommunityBackArrow"
-                    onClick={() => navigate("/community")}
-                    aria-label="Back to Communities"
-                    title="Back to Communities"
+      <section className="ForumBody">
+        <div className="ForumActions">
+          <button className="NewPostButton" onClick={handleNewPostClick}>
+            New Post
+          </button>
+        </div>
+
+        {err && <p className="communityError">{err}</p>}
+        {loading && <p>Loading…</p>}
+
+        {!loading && !err && !hasRealPosts && (
+          <p>You don’t have any posts in this community yet.</p>
+        )}
+
+        {!loading && !err && hasRealPosts && (
+          <table className="ForumTable">
+            <thead>
+              <tr>
+                <th>Topic</th>
+                <th>Category</th>
+                <th>Replies</th>
+                <th>Activity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {posts.map((post) => (
+                <tr
+                  key={post.id}
+                  className="ForumRow"
+                  onClick={() => handleRowClick(post.id)}
                 >
-                    ←
-                </button>
-                <div className="ForumHeaderContainer">
-                    <h1 className="ForumHeader">
-                        {community?.header || "Temporary Header"}
-                    </h1>
-                    <h2 className="ForumSubHeader">
-                        {community?.subheader ||
-                            "Temporary SubHeader Temporary SubHeader Temporary SubHeader Temporary SubHeader Temporary SubHeader"}
-                    </h2>
-                    {communityErr && (
-                        <p className="communityError smallError">{communityErr}</p>
-                    )}
-                </div>
+                  <td className="topic">
+                    <div className="title">{post.title}</div>
+                    <div className="subtitle">{post.subtitle}</div>
+                  </td>
+                  <td>
+                    <span className={`Tag ${post.categoryClass || "general"}`}>
+                      {post.category === "Poll" ? "📊 Poll" : post.category}
+                    </span>
+                  </td>
+                  <td>{post.replyCount}</td>
+                  <td>{formatActivity(post)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
 
-                {canEditHero && (
-                    <div className="HeroUploadControl">
-                        <button
-                            type="button"
-                            className="HeroUploadButton"
-                            onClick={handleHeroUploadButtonClick}
-                            disabled={uploadingHero}
-                        >
-                            {uploadingHero ? "…" : "+"}
-                        </button>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            className="HeroUploadInput"
-                            onChange={handleHeroFileChange}
-                        />
-                    </div>
-                )}
-            </div>
+      {showNewPostModal && (
+        <NewPostModal onClose={handleCloseModal} onSubmit={handleCreatePost} />
+      )}
 
-            {uploadError && (
-                <div className="HeroUploadError NewPostGlobalError">
-                    {uploadError}
-                </div>
-            )}
-
-            {/* rest of ForumBody unchanged */}
-            <section className="ForumBody">
-                <div className="ForumActions">
-                    <button className="NewPostButton" onClick={handleNewPostClick}>
-                        New Post
-                    </button>
-                </div>
-
-                {err && <p className="communityError">{err}</p>}
-                {loading && <p>Loading…</p>}
-
-                {!loading && !err && !hasRealPosts && (
-                    <p>You don’t have any posts in this community yet.</p>
-                )}
-
-                {!loading && !err && hasRealPosts && (
-                    <table className="ForumTable">
-                        <thead>
-                            <tr>
-                                <th>Topic</th>
-                                <th>Category</th>
-                                <th>Replies</th>
-                                <th>Activity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {posts.map((post) => (
-                                <tr
-                                    key={post.id}
-                                    className="ForumRow"
-                                    onClick={() => handleRowClick(post.id)}
-                                >
-                                    <td className="topic">
-                                        <div className="title">{post.title}</div>
-                                        <div className="subtitle">{post.subtitle}</div>
-                                    </td>
-                                    <td>
-                                        <span className={`Tag ${post.categoryClass || "general"}`}>
-                                            {post.category === "Poll" ? "📊 Poll" : post.category}
-                                        </span>
-                                    </td>
-                                    <td>{post.replyCount}</td>
-                                    <td>{formatActivity(post)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-
-                    </table>
-                )}
-
-                {/* fallback table unchanged ... */}
-            </section>
-
-            {showNewPostModal && (
-                <NewPostModal onClose={handleCloseModal} onSubmit={handleCreatePost} />
-            )}
-            <Footer />
-        </section>
-    );
+      <Footer />
+    </section>
+  );
 };
 
 export default MyCommunity;

@@ -35,19 +35,16 @@ const CommunityBody = () => {
       try {
         const res = await apiFetch("/community/my");
         const data = await res.json();
-        if (!data.ok) return;
+        if (!res.ok || !data.ok) return;
 
-        const mapped = (data.communities || []).map((c) => ({
-          id: c.id,
-          header: c.header,
-          subheader: c.subheader,
-          content: c.content,
-          type: c.type,
-          members: c.members,
-          lastActive: formatLastActive(c.lastActivityAt),
-          role: c.role,
-          my: true,
-        }));
+        const mapped = (data.communities || [])
+          .map((c) => ({
+            ...c,
+            lastActivityAt: c.lastActivityAt,
+            lastActive: formatLastActive(c.lastActivityAt),
+            my: true,
+          }))
+          .sort((a, b) => new Date(b.lastActivityAt) - new Date(a.lastActivityAt));
 
         setMyCommunities(mapped);
       } catch (err) {
@@ -56,20 +53,31 @@ const CommunityBody = () => {
     })();
   }, []);
 
-  // --- Discover Communities ---
   useEffect(() => {
-    fetch("http://localhost:4000/community/discover")
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.ok) return;
-        const mapped = data.communities.map((c) => ({
-          ...c,
-          lastActive: formatLastActive(c.lastActivityAt || c.lastActive),
-        }));
+    (async () => {
+      try {
+        const res = await apiFetch("/community/discover");
+        const data = await res.json();
+        if (!res.ok || !data.ok) return;
+
+        const mapped = (data.communities || [])
+          .map((c) => ({
+            ...c,
+            lastActivityAt: c.lastActivityAt,
+            lastActive: formatLastActive(c.lastActivityAt),
+            my: false,
+            role: null,
+          }))
+          .sort((a, b) => new Date(b.lastActivityAt) - new Date(a.lastActivityAt));
+
         setDiscoverCommunities(mapped);
-      })
-      .catch((err) => console.error(err));
+      } catch (err) {
+        console.error("[/community/discover]", err);
+      }
+    })();
   }, []);
+
+
 
   // Sync visible counts with actual grid-template-columns
   useEffect(() => {
@@ -98,7 +106,8 @@ const CommunityBody = () => {
     updateVisibleFromGrid();
     window.addEventListener("resize", updateVisibleFromGrid);
     return () => window.removeEventListener("resize", updateVisibleFromGrid);
-  }, [myCommunities.length]);
+  }, [myCommunities.length, discoverCommunities.length, activeTab]);
+
 
   // --- My tab visible list ---
   const visibleMyCommunities = showAllMyCommunities
@@ -109,9 +118,10 @@ const CommunityBody = () => {
   const maxDiscover = Math.min(MAX_DISCOVER_VISIBLE, discoverCommunities.length);
   const initialDiscoverCount = Math.min(visibleDiscoverCount, maxDiscover);
 
-  const visibleDiscoverCommunities = showAllDiscover
+  const visibleDiscoverCommunities = (showAllDiscover
     ? discoverCommunities.slice(0, maxDiscover)
-    : discoverCommunities.slice(0, initialDiscoverCount);
+    : discoverCommunities.slice(0, initialDiscoverCount)
+  )
 
   // underline animation for active tab
   useEffect(() => {

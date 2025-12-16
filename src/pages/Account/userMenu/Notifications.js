@@ -46,34 +46,23 @@ const Notifications = () => {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  async function handleDeleteOne(id) {
-    if (!id) return;
 
-    try {
-      setDeletingId(id);
-      setError("");
 
-      console.log("CLICK delete", id);
+  
+ async function handleDeleteOne(id) {
+  console.log("🧪 about to DELETE", id);
 
-      const res = await apiFetch(`/notifications/${id}`, { method: "DELETE" });
-      console.log("DELETE returned", res.status);
+  try {
+    const res = await apiFetch(`/notifications/${id}`, {
+      method: "DELETE",
+    });
 
-      const text = await res.text();
-      const data = text ? JSON.parse(text) : {};
-
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || `Failed to delete (${res.status})`);
-      }
-
-      setNotifications((prev) => prev.filter((n) => (n._id || n.id) !== id));
-      refreshUnreadCount();
-    } catch (err) {
-      console.error("[notification delete error]", err);
-      setError(err.message || "Failed to delete notification");
-    } finally {
-      setDeletingId(null);
-    }
+    console.log("🧪 DELETE response", res);
+  } catch (e) {
+    console.error("🧪 DELETE failed before network", e);
   }
+}
+
 
 
 

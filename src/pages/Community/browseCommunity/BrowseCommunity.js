@@ -136,10 +136,11 @@ const BrowseCommunity = () => {
         {error && <p className="communityError">{error}</p>}
 
         <section className="joinCommunityGrid">
-          {communities.map((community) => (
+          {communities.filter(c => !c.my).map((community) => (
             <CommunityCard key={community.id} {...community} />
           ))}
         </section>
+
 
       </main>
       <Footer />
