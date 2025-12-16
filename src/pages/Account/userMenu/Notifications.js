@@ -26,9 +26,7 @@ const Notifications = () => {
       setLoading(true);
       setError("");
 
-      const res = await apiFetch("/notifications", {
-        credentials: "include",
-      });
+      const res = await apiFetch("/notifications");
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
@@ -57,7 +55,6 @@ const Notifications = () => {
 
     const res = await apiFetch(`/notifications/${id}`, {
       method: "DELETE",
-      credentials: "include",
     });
 
     const text = await res.text();
@@ -90,7 +87,6 @@ const Notifications = () => {
       const res = await apiFetch(`/notifications/${id}/act`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ action }),
       });
 
@@ -122,7 +118,6 @@ const Notifications = () => {
 
       const res = await apiFetch("/notifications/read-all", {
         method: "POST",
-        credentials: "include",
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
@@ -157,7 +152,6 @@ const Notifications = () => {
 
       const res = await apiFetch("/notifications", {
         method: "DELETE",
-        credentials: "include",
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {

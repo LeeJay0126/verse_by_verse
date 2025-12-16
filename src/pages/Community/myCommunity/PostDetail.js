@@ -5,6 +5,7 @@ import Footer from "../../../component/Footer";
 import Time from "../../../component/utils/Time";
 import "./MyCommunity.css";
 import "./PostDetail.css"
+import { apiFetch } from "../../../component/utils/ApiFetch";
 
 const API_BASE =
     process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
@@ -91,11 +92,10 @@ const PostDetail = () => {
         setVoteError("");
 
         try {
-            const res = await fetch(
-                `${API_BASE}/community/${communityId}/posts/${post.id}/vote`,
+            const res = await apiFetch(
+                `/community/${communityId}/posts/${post.id}/vote`,
                 {
                     method: "POST",
-                    credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ optionIndex }),
                 }
@@ -124,11 +124,10 @@ const PostDetail = () => {
         setReplyError("");
 
         try {
-            const res = await fetch(
-                `${API_BASE}/community/${communityId}/posts/${postId}/replies`,
+            const res = await apiFetch(
+                `/community/${communityId}/posts/${postId}/replies`,
                 {
                     method: "POST",
-                    credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ body: replyBody }),
                 }

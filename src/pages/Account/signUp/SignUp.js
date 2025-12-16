@@ -47,7 +47,6 @@ const SignUp = () => {
     try {
       const res = await apiFetch(`/auth/signup`, {
         method: "POST",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           firstName: firstName.trim(),

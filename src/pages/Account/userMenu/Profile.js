@@ -44,7 +44,6 @@ const Profile = () => {
     try {
       const res = await apiFetch(`/auth/change-password`, {
         method: "POST",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           currentPassword: currentPw,
