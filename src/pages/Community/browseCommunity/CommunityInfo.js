@@ -5,6 +5,7 @@ import Footer from "../../../component/Footer";
 import Time from "../../../component/utils/Time";
 import { useToast } from "../../../component/context/ToastContext";
 import "./CommunityInfo.css";
+import { apiFetch } from "../../../component/utils/ApiFetch";
 
 const CommunityInfo = () => {
   const { communityId } = useParams();
@@ -35,10 +36,8 @@ const CommunityInfo = () => {
         setLoading(true);
         setError("");
 
-        const res = await fetch(
-          `http://localhost:4000/community/${communityId}`,
-          { credentials: "include" }
-        );
+        const res = await apiFetch(
+          `/community/${communityId}`);
         const data = await res.json();
 
         if (!data.ok) {
@@ -66,11 +65,10 @@ const CommunityInfo = () => {
     try {
       setJoinStatus("loading");
 
-      const res = await fetch(
-        `http://localhost:4000/community/${community.id}/request-join`,
+      const res = await apiFetch(
+        `/community/${community.id}/request-join`,
         {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

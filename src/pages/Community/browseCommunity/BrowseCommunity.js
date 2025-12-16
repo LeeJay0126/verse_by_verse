@@ -4,6 +4,7 @@ import PageHeader from "../../../component/PageHeader";
 import CommunityCard from "../CommunityCard";
 import Footer from "../../../component/Footer";
 import Time from "../../../component/utils/Time";
+import { apiFetch } from "../../../component/utils/ApiFetch";
 
 const formatLastActive = Time;
 
@@ -27,10 +28,8 @@ const BrowseCommunity = () => {
       if (sizeFilter) params.append("size", sizeFilter);
       if (lastActiveFilter) params.append("lastActive", lastActiveFilter); // 👈 NEW
 
-      const res = await fetch(
-        `http://localhost:4000/community/discover?${params.toString()}`,
-        { credentials: "include" }
-      );
+      const res = await apiFetch(
+        `/community/discover?${params.toString()}`);
 
       const data = await res.json();
       if (!res.ok || !data.ok) {

@@ -7,8 +7,6 @@ import "./MyCommunity.css";
 import "./PostDetail.css"
 import { apiFetch } from "../../../component/utils/ApiFetch";
 
-const API_BASE =
-    process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
 
 const PostDetail = () => {
     const { communityId, postId } = useParams();
@@ -35,9 +33,8 @@ const PostDetail = () => {
             setLoading(true);
             setErr("");
 
-            const res = await fetch(
-                `${API_BASE}/community/${communityId}/posts/${postId}`,
-                { credentials: "include" }
+            const res = await apiFetch(
+                `/community/${communityId}/posts/${postId}`
             );
             const data = await res.json().catch(() => ({}));
 
@@ -62,9 +59,8 @@ const PostDetail = () => {
             setRepliesLoading(true);
             setReplyError("");
 
-            const res = await fetch(
-                `${API_BASE}/community/${communityId}/posts/${postId}/replies`,
-                { credentials: "include" }
+            const res = await apiFetch(
+                `/community/${communityId}/posts/${postId}/replies`
             );
             const data = await res.json().catch(() => ({}));
 

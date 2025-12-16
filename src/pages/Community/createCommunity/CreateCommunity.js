@@ -4,6 +4,7 @@ import "./CreateCommunity.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa6";
+import { apiFetch } from "../../../component/utils/ApiFetch";
 
 const CreateCommunity = () => {
   const [form, setForm] = useState({
@@ -29,12 +30,11 @@ const CreateCommunity = () => {
   try {
     setSubmitting(true);
 
-    const res = await fetch("http://localhost:4000/community", {
+    const res = await apiFetch("/community", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include", // important for session
       body: JSON.stringify(form),
     });
 

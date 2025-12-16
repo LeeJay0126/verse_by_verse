@@ -58,9 +58,7 @@ const CommunityBody = () => {
 
   // --- Discover Communities ---
   useEffect(() => {
-    fetch("http://localhost:4000/community/discover", {
-      credentials: "include",
-    })
+    fetch("http://localhost:4000/community/discover")
       .then((res) => res.json())
       .then((data) => {
         if (!data.ok) return;
