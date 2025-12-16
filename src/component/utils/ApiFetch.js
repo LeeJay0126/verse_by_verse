@@ -6,16 +6,15 @@ export async function apiFetch(path, options = {}) {
       ? path
       : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
 
-  // IMPORTANT: put credentials AFTER spreading options, so it cannot be overridden
   const opts = {
     ...options,
-    credentials: "include",
+    credentials: "include", // ✅ always send session cookie
     headers: {
       ...(options.headers || {}),
     },
   };
 
-  // Only set Content-Type automatically when sending JSON
+  // Only add JSON content-type when body is JSON
   if (opts.body && !(opts.body instanceof FormData)) {
     if (!opts.headers["Content-Type"]) {
       opts.headers["Content-Type"] = "application/json";
