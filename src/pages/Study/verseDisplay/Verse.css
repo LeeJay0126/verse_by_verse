@@ -26,6 +26,111 @@
   color: #333;
 }
 
+.chapterTitleButton {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  /* centers text */
+}
+
+.chapterTitleButton.active {
+  text-decoration: underline;
+}
+
+/* Notes shell: 35% of viewport height */
+.chapterNotesShell {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 16px;
+}
+
+.chapterNotesInner {
+  height: 35vh;
+  width: 80vw;
+  max-width: 1280px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  backdrop-filter: blur(8px);
+}
+
+.chapterNotesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.chapterNotesTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.chapterNotesActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notesBtn {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.notesBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.notesBtnGhost {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.notesBtnPrimary {
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+}
+
+.notesLoginPrompt {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 14px;
+}
+
+.chapterNotesTextarea {
+  width: 100%;
+  flex: 1;
+  resize: none;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  outline: none;
+  font-size: 14px;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.85);
+  box-sizing: border-box;
+}
+
+.chapterNotesTextarea:disabled {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+
 .chapterTitle.placeholder {
   color: #aaa;
   font-style: italic;
@@ -55,23 +160,57 @@
 /* Each row = up to 2 verses */
 .verseRowPair {
   padding-bottom: 12px;
+  display: block;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+/* Buttons must be inline, not block, not flex */
+.verseInlineBtn {
+  display: inline;
+  width: auto;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* Nice subtle hover without changing layout */
+.verseInlineBtn:hover {
+  text-decoration: underline;
+}
+
+/* The separator between two verses in a pair */
+.verseJoiner {
+  display: inline;
 }
 
 /* Container for each single verse inside the pair */
 .verseChunk {
   display: inline;
-  /* seamless flow */
   margin-right: 10px;
-  /* small gap between verse pairs */
 }
 
 /* Visual for the numbers we render in JSX */
 .verseNum {
   font-size: 0.65rem;
-  vertical-align: top;
+  vertical-align: super;
   margin-right: 3px;
   color: #888;
   font-weight: 600;
+}
+
+/* IMPORTANT: don't introduce forced breaks */
+.verseText {
+  white-space: normal;
+}
+
+.verseGap {
+  display: inline;
 }
 
 .versesList li::before {
@@ -124,6 +263,297 @@
 .navArrow[disabled] {
   display: none;
 }
+
+/* --- Bottom fixed notes editor --- */
+.chapterNotesShell {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: flex;
+  justify-content: center;
+
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+  z-index: 9999;
+
+  /* subtle overlay so it feels “active” */
+  background: linear-gradient(to top,
+      rgba(0, 0, 0, 0.20),
+      rgba(0, 0, 0, 0.00));
+}
+
+.chapterNotesInner {
+  height: 35vh;
+  width: 80vw;
+  max-width: 1280px;
+
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 16px 16px 0 0;
+  padding: 14px 14px 12px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(10px);
+}
+
+.chapterNotesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.chapterNotesTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.chapterNotesActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notesBtn {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.notesBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.notesBtnGhost {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.notesBtnPrimary {
+  background: rgba(0, 0, 0, 0.88);
+  color: white;
+}
+
+.notesLoginPrompt {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 14px;
+}
+
+.chapterNotesTextarea {
+  width: 100%;
+  flex: 1;
+  resize: none;
+
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  outline: none;
+
+  font-size: 14px;
+  line-height: 1.4;
+
+  background: rgba(255, 255, 255, 0.95);
+  box-sizing: border-box;
+}
+
+.chapterNotesTextarea:disabled {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.DisplaySection.notesOpen {
+  /* give space roughly equal to the bottom sheet height */
+  padding-bottom: 15vh;
+}
+
+
+.chapterNotesTitleInput {
+  width: 100%;
+  max-width: 720px;
+
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+
+  padding: 8px 10px;
+  font-size: 15px;
+  font-weight: 600;
+
+  background: rgba(255, 255, 255, 0.85);
+  outline: none;
+}
+
+.chapterNotesTitleInput:focus {
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+.chapterNotesTitleInput:disabled {
+  opacity: 0.7;
+}
+
+/* Header row so "Clear range" can sit beside chapter title */
+.chapterHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.clearRangeBtn {
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.clearRangeBtn:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* Make verseChunk clickable as a button without ugly default button UI */
+.verseChunkBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.verseChunkBtn:hover {
+  text-decoration: underline;
+}
+
+/* ------- Range modal ------- */
+.rangeModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.rangeModalCard {
+  width: min(720px, 92vw);
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.rangeModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.rangeModalTitle {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.rangeModalClose {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.rangeModalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 0 6px;
+}
+
+.rangeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rangeLabel {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.rangeSelect {
+  width: 180px;
+  max-width: 55vw;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.rangeHint {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.rangeModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.rangeBtn {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.rangeBtnGhost {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.rangeBtnPrimary {
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+}
+
+/* When notes bottom-sheet is open, keep content scrollable above it */
+.DisplaySection.notesOpen {
+  padding-bottom: 40vh;
+}
+
+.chapterHeaderStack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* centers title */
+  gap: 6px;
+}
+
+/* Clear button row aligned to right, while title stays centered */
+.clearRangeRow {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
 
 /* Small screens: bring arrows closer to edges and make them slightly smaller */
 @media (max-width: 768px) {
