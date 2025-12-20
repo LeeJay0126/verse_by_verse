@@ -26,6 +26,17 @@
     cursor: pointer;
 }
 
+.BookVersionHolder.isDisabled {
+  opacity: 0.65;
+}
+
+.BookTabContainer.disabled,
+.VersionTabContainer.disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+
 /* .Books:hover, .Versions:hover {
     border: 1px black solid;
     border-bottom: none;

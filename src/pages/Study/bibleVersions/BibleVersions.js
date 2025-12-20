@@ -1,70 +1,87 @@
-import './BibleVersions.css';
+import "./BibleVersions.css";
 import { GoTriangleDown } from "react-icons/go";
-import { useState } from 'react';
-import BibleVersionComponent from './BibleVersionComponent';
-import BookVersionModal from '../bookVersions/BookVersionModal';
+import { useState } from "react";
+import BibleVersionComponent from "./BibleVersionComponent";
+import BookVersionModal from "../bookVersions/BookVersionModal";
 
 const BibleVersions = ({
+  disabled = false,
   setChapter,
   book,
   setBook,
   currVersionId,
-  setCurrentVersion
+  setCurrentVersion,
 }) => {
   const [bookModal, setVisibility] = useState(false);
   const [versionModal, setVersionVisibility] = useState(false);
-  const [versionLabel, setVersionLabel] = useState("ASV"); // display only
+  const [versionLabel, setVersionLabel] = useState("ASV");
+
+  // If we become disabled while a modal is open, close them
+  if (disabled && (bookModal || versionModal)) {
+    // safe immediate close
+    if (bookModal) setVisibility(false);
+    if (versionModal) setVersionVisibility(false);
+  }
+
+  const guardClick = (fn) => {
+    if (disabled) return;
+    fn?.();
+  };
 
   return (
-    <div className="BookVersionHolder">
+    <div className={`BookVersionHolder ${disabled ? "isDisabled" : ""}`}>
       {/* Book selector */}
       <div className="Books">
         <section
-          className='BookTabContainer'
-          onClick={() => setVisibility(!bookModal)}
+          className={`BookTabContainer ${disabled ? "disabled" : ""}`}
+          onClick={() => guardClick(() => setVisibility(!bookModal))}
+          aria-disabled={disabled ? "true" : "false"}
+          title={disabled ? "Close notes to change book/chapter" : undefined}
         >
           <p className="BookNameDisplay">{book?.name || "Select a Book"}</p>
           <GoTriangleDown className="BookVersionDownArrow" />
         </section>
 
-        <BookVersionModal
-          key={currVersionId} // remount when version changes
-          setVis={setVisibility}
-          visibilityStatus={bookModal}
-          versionId={currVersionId}
-          onBookSelect={(b) => {
-            setBook(b);
-            setChapter(null);
-          }}
-          onChapterSelect={setChapter}
-          currentBookId={book?.id}
-        />
+        {!disabled && (
+          <BookVersionModal
+            key={currVersionId}
+            setVis={setVisibility}
+            visibilityStatus={bookModal}
+            versionId={currVersionId}
+            onBookSelect={(b) => {
+              setBook(b);
+              setChapter(null);
+            }}
+            onChapterSelect={setChapter}
+            currentBookId={book?.id}
+          />
+        )}
       </div>
 
       {/* Version selector */}
       <div className="Versions">
         <section
-          className='VersionTabContainer'
-          onClick={() => setVersionVisibility(!versionModal)}
+          className={`VersionTabContainer ${disabled ? "disabled" : ""}`}
+          onClick={() => guardClick(() => setVersionVisibility(!versionModal))}
+          aria-disabled={disabled ? "true" : "false"}
+          title={disabled ? "Close notes to change version" : undefined}
         >
           <p className="VersionNameDisplay">{versionLabel}</p>
           <GoTriangleDown className="BookVersionDownArrow" />
         </section>
 
-        <BibleVersionComponent
-          setVis={setVersionVisibility}
-          visibilityStatus={versionModal}
-          // called with abbreviation (ASV, BSB, engKJV, WEB, FBV, KOR)
-          versionChange={(abbr) => {
-            setVersionLabel(abbr);
-          }}
-          // called with underlying id (api.bible id or "kor")
-          setCurrentVersionId={(newVersionId) => {
-            setCurrentVersion(newVersionId);
-            setBook({ id: null, name: "" });
-            setChapter(null);
-          }}
-        />
+        {!disabled && (
+          <BibleVersionComponent
+            setVis={setVersionVisibility}
+            visibilityStatus={versionModal}
+            versionChange={(abbr) => setVersionLabel(abbr)}
+            setCurrentVersionId={(newVersionId) => {
+              setCurrentVersion(newVersionId);
+              setBook({ id: null, name: "" });
+              setChapter(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );
