@@ -3,6 +3,8 @@ import API from "../../component/Key";
 import GetBookVersions from "./bookVersions/GetBookVersions";
 import BibleVersion from "./bibleVersions/BibleVersions";
 import Verse from "./verseDisplay/Verse";
+import { useNotes } from "../../component/context/NotesContext";
+import "./Bible.css";
 
 // Static chapter counts for Korean ibibles.net mapping
 const KOR_CHAPTER_COUNTS = {
@@ -25,40 +27,24 @@ const KOR_CHAPTER_COUNTS = {
 const Bible = () => {
   const [currChapterId, setCurrentChapterId] = useState(null);
   const [currBook, setCurrBook] = useState({ id: null, name: "" });
-  const [currVersion, setCurrVersion] = useState("06125adad2d5898a-01"); // ASV default
+  const [currVersion, setCurrVersion] = useState("06125adad2d5898a-01"); 
 
   const [booksOrder, setBooksOrder] = useState([]);
   const [chaptersByBook, setChaptersByBook] = useState({});
 
-  // --- Notes feature state ---
   const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const { getChapterNote, saveChapterNote } = useNotes();
 
-  // { [chapterId]: { title: string, text: string } }
-  const [notesByChapter, setNotesByChapter] = useState({});
+  const hasChapter = !!currChapterId;
 
-  const getChapterNote = useCallback(
-    (chapterId) => {
-      const entry = chapterId ? notesByChapter[chapterId] : null;
-      return {
-        title: entry?.title || "",
-        text: entry?.text || "",
-      };
-    },
-    [notesByChapter]
-  );
-
-  const saveChapterNote = useCallback((chapterId, payload) => {
-    if (!chapterId) return;
-
-    const nextTitle = (payload?.title ?? "").toString();
-    const nextText = (payload?.text ?? "").toString();
-
-    setNotesByChapter((prev) => ({
-      ...prev,
-      [chapterId]: { title: nextTitle, text: nextText },
-    }));
-  }, []);
-
+  // Note indicator (dot) if saved note exists for this chapter
+  const hasNoteForChapter = useMemo(() => {
+    if (!currChapterId) return false;
+    const entry = getChapterNote?.(currChapterId);
+    const title = (entry?.title ?? "").toString().trim();
+    const text = (entry?.text ?? "").toString().trim();
+    return Boolean(title || text);
+  }, [currChapterId, getChapterNote]);
 
   // ---- Load books when version changes ----
   useEffect(() => {
@@ -179,15 +165,7 @@ const Bible = () => {
       const nextBook = booksOrder[bi + 1];
       await goToFirstChapterOf(nextBook);
     }
-  }, [
-    currBook,
-    currChapters,
-    currChapterIndex,
-    booksOrder,
-    getBookIndex,
-    goToFirstChapterOf,
-    isNotesOpen,
-  ]);
+  }, [currBook, currChapters, currChapterIndex, booksOrder, getBookIndex, goToFirstChapterOf, isNotesOpen]);
 
   const goPrevChapter = useCallback(async () => {
     if (!currBook?.id || isNotesOpen) return;
@@ -202,15 +180,7 @@ const Bible = () => {
       const prevBook = booksOrder[bi - 1];
       await goToLastChapterOf(prevBook);
     }
-  }, [
-    currBook,
-    currChapters,
-    currChapterIndex,
-    booksOrder,
-    getBookIndex,
-    goToLastChapterOf,
-    isNotesOpen,
-  ]);
+  }, [currBook, currChapters, currChapterIndex, booksOrder, getBookIndex, goToLastChapterOf, isNotesOpen]);
 
   const canPrev = useMemo(() => {
     if (!currBook?.id || isNotesOpen) return false;
@@ -225,14 +195,7 @@ const Bible = () => {
       (currChapterIndex >= 0 && currChapterIndex < currChapters.length - 1) ||
       bi < booksOrder.length - 1
     );
-  }, [
-    currBook?.id,
-    currChapterIndex,
-    currChapters.length,
-    getBookIndex,
-    booksOrder.length,
-    isNotesOpen,
-  ]);
+  }, [currBook?.id, currChapterIndex, currChapters.length, getBookIndex, booksOrder.length, isNotesOpen]);
 
   return (
     <section className="ReadBible">
@@ -250,9 +213,11 @@ const Bible = () => {
           setCurrentChapterId(null);
         }}
         currVersionId={currVersion}
-        setCurrentVersion={(v) => {
-          setCurrVersion(v);
-        }}
+        setCurrentVersion={(v) => setCurrVersion(v)}
+        hasChapter={hasChapter}
+        isNotesOpen={isNotesOpen}
+        setIsNotesOpen={setIsNotesOpen}
+        hasNoteForChapter={hasNoteForChapter}
       />
 
       <Verse
@@ -263,7 +228,6 @@ const Bible = () => {
         onNext={goNextChapter}
         canPrev={canPrev}
         canNext={canNext}
-        // notes props
         isNotesOpen={isNotesOpen}
         setIsNotesOpen={setIsNotesOpen}
         getChapterNote={getChapterNote}

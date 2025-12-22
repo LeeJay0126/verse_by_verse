@@ -36,8 +36,29 @@
   cursor: not-allowed;
 }
 
+.BibleVersionsBlock {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
-/* .Books:hover, .Versions:hover {
-    border: 1px black solid;
-    border-bottom: none;
-} */
+/* existing selector row */
+.BookVersionHolder {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* notes row under selectors */
+.NotesRow {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 4px;
+}
+
+/* optional: softer appearance */
+.NotesRow .Notes {
+  transform: scale(0.95);
+  opacity: 0.9;
+}

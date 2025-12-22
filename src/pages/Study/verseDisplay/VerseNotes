@@ -1,0 +1,17 @@
+Log in to your account (notes won’t be available unless you’re logged in).
+
+Go to the Bible / Read page and select a Bible version, book, and chapter.
+
+Click any verse in the chapter to open the verse range selector.
+
+Choose your Start and End verses (it will always include the verse you clicked).
+
+Click Apply range — the chapter will filter to only the selected verses and the notes modal will open automatically.
+
+Edit the note title (optional) and write your notes in the text area.
+
+Click Submit to save the note for that selected passage.
+
+Click Exit to close the notes modal and continue reading (use Clear range to return to the full chapter).
+
+To view saved notes later, open the separate Notes page (notes are stored and managed there, not on the Bible page).

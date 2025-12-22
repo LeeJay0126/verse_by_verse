@@ -67,3 +67,17 @@
   background-color: transparent;
   border: none;
 }
+
+.BibleVersionRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
+  gap: 28px;
+  width: 100%;
+  justify-content: center;
+}
+
+.NotesSelectorSlot {
+  display: flex;
+  justify-content: flex-end;
+}
