@@ -1,0 +1,63 @@
+/* Underline-selector style button to blend with your current dropdown vibe */
+.NotesBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.55);
+  
+  padding: 12px 24px;
+  margin: 0;
+  
+  font: inherit;
+  font-size: 24px;
+  color: rgb(34, 34, 34);
+
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.NotesBtn:hover {
+  border-bottom-color: rgba(0, 0, 0, 0.85);
+}
+
+.NotesBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-bottom-color: rgba(0, 0, 0, 0.25);
+}
+
+.NotesBtn.active {
+  border-bottom-color: rgba(0, 0, 0, 0.95);
+}
+
+.NotesCaret {
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.8;
+  transform: translateY(1px);
+}
+
+/* Tiny “note exists” indicator */
+.NotesDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.75);
+  display: inline-block;
+  transform: translateY(1px);
+}
+
+/* Layout wrapper to place Notes next to selector row */
+.BibleSelectorRow {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 28px;
+}

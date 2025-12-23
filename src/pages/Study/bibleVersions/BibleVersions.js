@@ -3,6 +3,7 @@ import { GoTriangleDown } from "react-icons/go";
 import { useState } from "react";
 import BibleVersionComponent from "./BibleVersionComponent";
 import BookVersionModal from "../bookVersions/BookVersionModal";
+import Notes from "../Notes/Notes";
 
 const BibleVersions = ({
   disabled = false,
@@ -11,14 +12,17 @@ const BibleVersions = ({
   setBook,
   currVersionId,
   setCurrentVersion,
+
+  notesDisabled = true,
+  notesActive = false,
+  notesHasNote = false,
+  onNotesClick,
 }) => {
   const [bookModal, setVisibility] = useState(false);
   const [versionModal, setVersionVisibility] = useState(false);
   const [versionLabel, setVersionLabel] = useState("ASV");
 
-  // If we become disabled while a modal is open, close them
   if (disabled && (bookModal || versionModal)) {
-    // safe immediate close
     if (bookModal) setVisibility(false);
     if (versionModal) setVersionVisibility(false);
   }
@@ -29,59 +33,69 @@ const BibleVersions = ({
   };
 
   return (
-    <div className={`BookVersionHolder ${disabled ? "isDisabled" : ""}`}>
-      {/* Book selector */}
-      <div className="Books">
-        <section
-          className={`BookTabContainer ${disabled ? "disabled" : ""}`}
-          onClick={() => guardClick(() => setVisibility(!bookModal))}
-          aria-disabled={disabled ? "true" : "false"}
-          title={disabled ? "Close notes to change book/chapter" : undefined}
-        >
-          <p className="BookNameDisplay">{book?.name || "Select a Book"}</p>
-          <GoTriangleDown className="BookVersionDownArrow" />
-        </section>
+    <div className={`BibleVersionsBlock ${disabled ? "isDisabled" : ""}`}>
+      <div className="BookVersionHolder">
+        <div className="Books">
+          <section
+            className={`BookTabContainer ${disabled ? "disabled" : ""}`}
+            onClick={() => guardClick(() => setVisibility(!bookModal))}
+          >
+            <p className="BookNameDisplay">{book?.name || "Select a Book"}</p>
+            <GoTriangleDown className="BookVersionDownArrow" />
+          </section>
 
-        {!disabled && (
-          <BookVersionModal
-            key={currVersionId}
-            setVis={setVisibility}
-            visibilityStatus={bookModal}
-            versionId={currVersionId}
-            onBookSelect={(b) => {
-              setBook(b);
-              setChapter(null);
-            }}
-            onChapterSelect={setChapter}
-            currentBookId={book?.id}
-          />
-        )}
+          {!disabled && (
+            <BookVersionModal
+              key={currVersionId}
+              setVis={setVisibility}
+              visibilityStatus={bookModal}
+              versionId={currVersionId}
+              onBookSelect={(b) => {
+                setBook(b);
+                setChapter(null);
+              }}
+              onChapterSelect={setChapter}
+              currentBookId={book?.id}
+            />
+          )}
+        </div>
+
+        <div className="Versions">
+          <section
+            className={`VersionTabContainer ${disabled ? "disabled" : ""}`}
+            onClick={() => guardClick(() => setVersionVisibility(!versionModal))}
+          >
+            <p className="VersionNameDisplay">{versionLabel}</p>
+            <GoTriangleDown className="BookVersionDownArrow" />
+          </section>
+
+          {!disabled && (
+            <BibleVersionComponent
+              setVis={setVersionVisibility}
+              visibilityStatus={versionModal}
+              versionChange={(abbr) => setVersionLabel(abbr)}
+              setCurrentVersionId={(newVersionId) => {
+                setCurrentVersion(newVersionId);
+                setBook({ id: null, name: "" });
+                setChapter(null);
+              }}
+            />
+          )}
+        </div>
       </div>
 
-      {/* Version selector */}
-      <div className="Versions">
-        <section
-          className={`VersionTabContainer ${disabled ? "disabled" : ""}`}
-          onClick={() => guardClick(() => setVersionVisibility(!versionModal))}
-          aria-disabled={disabled ? "true" : "false"}
-          title={disabled ? "Close notes to change version" : undefined}
-        >
-          <p className="VersionNameDisplay">{versionLabel}</p>
-          <GoTriangleDown className="BookVersionDownArrow" />
-        </section>
-
-        {!disabled && (
-          <BibleVersionComponent
-            setVis={setVersionVisibility}
-            visibilityStatus={versionModal}
-            versionChange={(abbr) => setVersionLabel(abbr)}
-            setCurrentVersionId={(newVersionId) => {
-              setCurrentVersion(newVersionId);
-              setBook({ id: null, name: "" });
-              setChapter(null);
-            }}
-          />
-        )}
+      <div className="NotesRow">
+        <Notes
+          disabled={notesDisabled || disabled}
+          active={notesActive}
+          hasNote={notesHasNote}
+          onClick={() => {
+            if (notesDisabled || disabled) return;
+            onNotesClick?.();
+            setVisibility(false);
+            setVersionVisibility(false);
+          }}
+        />
       </div>
     </div>
   );

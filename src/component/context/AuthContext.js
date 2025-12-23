@@ -7,7 +7,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [initializing, setInitializing] = useState(true);
 
-  // On mount: ask the server if we already have a session
   useEffect(() => {
     let cancelled = false;
 
@@ -85,7 +84,7 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Custom hook for convenience
+
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {

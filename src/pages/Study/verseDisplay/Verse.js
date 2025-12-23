@@ -17,6 +17,9 @@ const Verse = ({
   setIsNotesOpen,
   getChapterNote,
   saveChapterNote,
+
+  // NEW: auth guard (from Bible.jsx)
+  requireAuthForNotes,
 }) => {
   const { user, initializing } = useAuth();
 
@@ -25,19 +28,15 @@ const Verse = ({
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Notes drafts (keep whatever you currently use)
   const [noteDraft, setNoteDraft] = useState("");
   const [noteTitleDraft, setNoteTitleDraft] = useState("");
 
-  // -------- NEW: Verse range selection --------
-  // activeRange: { start: number, end: number } OR null (means show whole chapter)
   const [activeRange, setActiveRange] = useState(null);
 
-  // range modal state
   const [rangeModalOpen, setRangeModalOpen] = useState(false);
   const [rangeStart, setRangeStart] = useState(null);
   const [rangeEnd, setRangeEnd] = useState(null);
-  const [rangeAnchor, setRangeAnchor] = useState(null); // clicked verse number
+  const [rangeAnchor, setRangeAnchor] = useState(null);
 
   const hasChapter = !!chapterId;
   const chapterNumber = hasChapter ? (chapterId.split(".")[1] || "") : "";
@@ -193,7 +192,7 @@ const Verse = ({
 
   const showArrows = hasChapter && (canPrev || canNext);
 
-  // ---------- Notes syncing (same editor, now range-aware title fallback) ----------
+  // Notes syncing (range-aware title fallback)
   useEffect(() => {
     if (!hasChapter) {
       setIsNotesOpen?.(false);
@@ -204,16 +203,11 @@ const Verse = ({
 
     if (isNotesOpen) {
       const existing = getChapterNote?.(chapterId);
-      const rangeLabel =
-        activeRange ? ` (v${activeRange.start}–${activeRange.end})` : "";
-
+      const rangeLabel = activeRange ? ` (v${activeRange.start}–${activeRange.end})` : "";
       const fallbackTitle = `Notes — ${book?.name || ""} ${chapterNumber}${rangeLabel}`.trim();
 
-      // if you already switched to {title,text} object, support both shapes safely:
-      const existingTitle =
-        typeof existing === "string" ? "" : (existing?.title || "");
-      const existingText =
-        typeof existing === "string" ? existing : (existing?.text || "");
+      const existingTitle = typeof existing === "string" ? "" : existing?.title || "";
+      const existingText = typeof existing === "string" ? existing : existing?.text || "";
 
       setNoteTitleDraft(existingTitle || fallbackTitle);
       setNoteDraft(existingText || "");
@@ -229,9 +223,7 @@ const Verse = ({
       const el = e.target;
       const typing =
         el &&
-        (el.tagName === "INPUT" ||
-          el.tagName === "TEXTAREA" ||
-          el.isContentEditable);
+        (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
       if (typing) return;
 
       if (rangeModalOpen) {
@@ -264,15 +256,14 @@ const Verse = ({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [hasChapter, canPrev, canNext, onPrev, onNext, isNotesOpen, setIsNotesOpen, rangeModalOpen]);
 
-  // -------- NEW: clicking a verse opens range picker modal --------
+  // clicking a verse opens range picker modal
   const openRangeModalFromVerse = (verseNumber) => {
     if (!hasChapter) return;
 
-    // ensure at least one verse: start=end=clicked
     const n = Number(verseNumber);
     if (Number.isNaN(n)) return;
 
-    // if notes are open, close them first (optional but cleaner)
+    // close notes if open
     setIsNotesOpen?.(false);
 
     setRangeAnchor(n);
@@ -296,10 +287,12 @@ const Verse = ({
 
     setActiveRange({ start: boundedStart, end: boundedEnd });
 
+    // close range modal
     setRangeModalOpen(false);
-    if (user) setIsNotesOpen?.(true);
-  };
 
+    if (requireAuthForNotes && !requireAuthForNotes()) return;
+    setIsNotesOpen?.(true);
+  };
 
   const clearRange = () => {
     setActiveRange(null);
@@ -307,6 +300,11 @@ const Verse = ({
 
   const toggleNotes = () => {
     if (!hasChapter) return;
+
+    if (!isNotesOpen) {
+      if (requireAuthForNotes && !requireAuthForNotes()) return;
+    }
+
     setIsNotesOpen?.((v) => !v);
   };
 
@@ -314,9 +312,10 @@ const Verse = ({
 
   const submitNotes = () => {
     if (!hasChapter) return;
+
+    // keep existing safety (no save when logged out)
     if (!user) return;
 
-    // support both your old "string note" and new "{title,text}" shapes
     saveChapterNote?.(chapterId, {
       title: noteTitleDraft,
       text: noteDraft,
@@ -324,6 +323,8 @@ const Verse = ({
 
     closeNotes();
   };
+
+  const normalizeText = (t) => (t ?? "").toString().replace(/\s+/g, " ").trim();
 
   return (
     <section className={`DisplaySection ${isNotesOpen ? "notesOpen" : ""}`}>
@@ -338,7 +339,7 @@ const Verse = ({
               title="Click to add/view notes"
             >
               {book?.name || ""} {chapterNumber}
-              {activeRange ? ` (v${activeRange.start}–v${activeRange.end})` : ""}
+              {activeRange ? ` (v${activeRange.start}–${activeRange.end})` : ""}
             </button>
 
             {activeRange && (
@@ -354,13 +355,12 @@ const Verse = ({
               </div>
             )}
           </div>
-
         ) : (
           <span className="chapterTitle placeholder">Select a book and chapter to begin.</span>
         )}
       </h2>
 
-      {/* -------- Range Picker Modal -------- */}
+      {/* Range Picker Modal */}
       {rangeModalOpen && (
         <div
           className="rangeModalOverlay"
@@ -371,9 +371,7 @@ const Verse = ({
         >
           <div className="rangeModalCard" onMouseDown={(e) => e.stopPropagation()}>
             <div className="rangeModalHeader">
-              <div className="rangeModalTitle">
-                Select range (starting from v{rangeAnchor})
-              </div>
+              <div className="rangeModalTitle">Select range (starting from v{rangeAnchor})</div>
               <button
                 type="button"
                 className="rangeModalClose"
@@ -428,13 +426,11 @@ const Verse = ({
               </div>
             </div>
 
-
             <div className="rangeModalFooter">
               <button
                 type="button"
                 className="rangeBtn rangeBtnGhost"
                 onClick={() => {
-                  // quick reset to just the clicked verse
                   setRangeStart(rangeAnchor);
                   setRangeEnd(rangeAnchor);
                 }}
@@ -450,7 +446,7 @@ const Verse = ({
         </div>
       )}
 
-      {/* -------- Notes editor (fixed bottom sheet) -------- */}
+      {/* Notes editor (fixed bottom sheet) */}
       {hasChapter && isNotesOpen && (
         <section className="chapterNotesShell" aria-label="Chapter notes editor">
           <div className="chapterNotesInner">
@@ -520,9 +516,8 @@ const Verse = ({
                     title="Click to select verse range"
                   >
                     <sup className="verseNum">{v1.number}</sup>
-                    <span className="verseText">{(verseTexts[v1.id] ?? "").replace(/\s+/g, " ").trim()}</span>
+                    <span className="verseText">{normalizeText(verseTexts[v1.id])}</span>
                   </span>
-
                 )}
 
                 {v2 && (
@@ -530,7 +525,7 @@ const Verse = ({
                     role="button"
                     tabIndex={0}
                     className="verseInlineBtn"
-                    onClick={() => openRangeModalFromVerse(v1.number)}
+                    onClick={() => openRangeModalFromVerse(v2.number)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
@@ -539,14 +534,12 @@ const Verse = ({
                     }}
                     title="Click to select verse range"
                   >
+                    <span className="verseGap"> </span>
                     <sup className="verseNum">{v2.number}</sup>
-                    <span className="verseText">{(verseTexts[v2.id] ?? "").replace(/\s+/g, " ").trim()}</span>
+                    <span className="verseText">{normalizeText(verseTexts[v2.id])}</span>
                   </span>
-
                 )}
               </li>
-
-
             ))}
           </ol>
         )}

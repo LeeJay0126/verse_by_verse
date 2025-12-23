@@ -1,8 +1,12 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../../component/Key";
 import GetBookVersions from "./bookVersions/GetBookVersions";
 import BibleVersion from "./bibleVersions/BibleVersions";
 import Verse from "./verseDisplay/Verse";
+import { useNotes } from "../../component/context/NotesContext";
+import { useAuth } from "../../component/context/AuthContext";
+import "./Bible.css";
 
 // Static chapter counts for Korean ibibles.net mapping
 const KOR_CHAPTER_COUNTS = {
@@ -23,45 +27,50 @@ const KOR_CHAPTER_COUNTS = {
 };
 
 const Bible = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [currChapterId, setCurrentChapterId] = useState(null);
   const [currBook, setCurrBook] = useState({ id: null, name: "" });
-  const [currVersion, setCurrVersion] = useState("06125adad2d5898a-01"); // ASV default
+  const [currVersion, setCurrVersion] = useState("06125adad2d5898a-01");
 
   const [booksOrder, setBooksOrder] = useState([]);
   const [chaptersByBook, setChaptersByBook] = useState({});
 
-  // --- Notes feature state ---
   const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const { getChapterNote, saveChapterNote } = useNotes();
 
-  // { [chapterId]: { title: string, text: string } }
-  const [notesByChapter, setNotesByChapter] = useState({});
+  const hasChapter = !!currChapterId;
 
-  const getChapterNote = useCallback(
-    (chapterId) => {
-      const entry = chapterId ? notesByChapter[chapterId] : null;
-      return {
-        title: entry?.title || "",
-        text: entry?.text || "",
-      };
-    },
-    [notesByChapter]
-  );
+  // For logged out users
+  const requireAuthForNotes = useCallback(() => {
+    if (!user) {
+      navigate("/bible/walkthrough", { state: { from: "notes" } });
+      return false;
+    }
+    return true;
+  }, [user, navigate]);
 
-  const saveChapterNote = useCallback((chapterId, payload) => {
-    if (!chapterId) return;
+  // Redirect logged-out users to Bible walkthrough
+  useEffect(() => {
+    if (!user) {
+      navigate("/bible/walkthrough", { replace: true });
+    }
+  }, [user, navigate]);
 
-    const nextTitle = (payload?.title ?? "").toString();
-    const nextText = (payload?.text ?? "").toString();
-
-    setNotesByChapter((prev) => ({
-      ...prev,
-      [chapterId]: { title: nextTitle, text: nextText },
-    }));
-  }, []);
-
+  // Note indicator (dot) if saved note exists for this chapter
+  const hasNoteForChapter = useMemo(() => {
+    if (!currChapterId) return false;
+    const entry = getChapterNote?.(currChapterId);
+    const title = (entry?.title ?? "").toString().trim();
+    const text = (entry?.text ?? "").toString().trim();
+    return Boolean(title || text);
+  }, [currChapterId, getChapterNote]);
 
   // ---- Load books when version changes ----
   useEffect(() => {
+    if (!user) return;
+
     let cancelled = false;
 
     (async () => {
@@ -84,11 +93,12 @@ const Bible = () => {
     return () => {
       cancelled = true;
     };
-  }, [currVersion]);
+  }, [currVersion, user]);
 
   // ---- Helper: fetch/load chapters for a given book ----
   const fetchChapters = useCallback(
     async (bookId) => {
+      if (!user) return [];
       if (!bookId) return [];
 
       if (chaptersByBook[bookId]) return chaptersByBook[bookId];
@@ -122,12 +132,13 @@ const Bible = () => {
         return [];
       }
     },
-    [currVersion, chaptersByBook]
+    [currVersion, chaptersByBook, user]
   );
 
   useEffect(() => {
+    if (!user) return;
     if (currBook?.id) fetchChapters(currBook.id);
-  }, [currBook?.id, fetchChapters]);
+  }, [currBook?.id, fetchChapters, user]);
 
   const currChapters = useMemo(() => {
     if (!currBook?.id) return [];
@@ -167,6 +178,7 @@ const Bible = () => {
   );
 
   const goNextChapter = useCallback(async () => {
+    if (!user) return;
     if (!currBook?.id || isNotesOpen) return;
 
     if (currChapterIndex >= 0 && currChapterIndex < currChapters.length - 1) {
@@ -180,6 +192,7 @@ const Bible = () => {
       await goToFirstChapterOf(nextBook);
     }
   }, [
+    user,
     currBook,
     currChapters,
     currChapterIndex,
@@ -190,6 +203,7 @@ const Bible = () => {
   ]);
 
   const goPrevChapter = useCallback(async () => {
+    if (!user) return;
     if (!currBook?.id || isNotesOpen) return;
 
     if (currChapterIndex > 0) {
@@ -203,6 +217,7 @@ const Bible = () => {
       await goToLastChapterOf(prevBook);
     }
   }, [
+    user,
     currBook,
     currChapters,
     currChapterIndex,
@@ -213,12 +228,14 @@ const Bible = () => {
   ]);
 
   const canPrev = useMemo(() => {
+    if (!user) return false;
     if (!currBook?.id || isNotesOpen) return false;
     const bi = getBookIndex(currBook.id);
     return currChapterIndex > 0 || bi > 0;
-  }, [currBook?.id, currChapterIndex, getBookIndex, isNotesOpen]);
+  }, [user, currBook?.id, currChapterIndex, getBookIndex, isNotesOpen]);
 
   const canNext = useMemo(() => {
+    if (!user) return false;
     if (!currBook?.id || isNotesOpen) return false;
     const bi = getBookIndex(currBook.id);
     return (
@@ -226,6 +243,7 @@ const Bible = () => {
       bi < booksOrder.length - 1
     );
   }, [
+    user,
     currBook?.id,
     currChapterIndex,
     currChapters.length,
@@ -233,6 +251,9 @@ const Bible = () => {
     booksOrder.length,
     isNotesOpen,
   ]);
+
+  // While redirecting, render nothing
+  if (!user) return null;
 
   return (
     <section className="ReadBible">
@@ -250,9 +271,14 @@ const Bible = () => {
           setCurrentChapterId(null);
         }}
         currVersionId={currVersion}
-        setCurrentVersion={(v) => {
-          setCurrVersion(v);
+        setCurrentVersion={(v) => setCurrVersion(v)}
+        hasChapter={hasChapter}
+        isNotesOpen={isNotesOpen}
+        setIsNotesOpen={(open) => {
+          if (open && !requireAuthForNotes()) return;
+          setIsNotesOpen(open);
         }}
+        hasNoteForChapter={hasNoteForChapter}
       />
 
       <Verse
@@ -263,7 +289,6 @@ const Bible = () => {
         onNext={goNextChapter}
         canPrev={canPrev}
         canNext={canNext}
-        // notes props
         isNotesOpen={isNotesOpen}
         setIsNotesOpen={setIsNotesOpen}
         getChapterNote={getChapterNote}

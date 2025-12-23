@@ -10,7 +10,6 @@ const CommunityLayout = () => {
             <PageHeader />
             <header className="communityLayoutHeader">
                 <h1 className="communityLayoutTitle">Community</h1>
-                {/* later you can show the actual community name once fetched */}
             </header>
 
             <nav className="communityLayoutTabs">
@@ -31,7 +30,6 @@ const CommunityLayout = () => {
                 >
                     My Posts
                 </NavLink>
-                {/* You can add more tabs later: /posts, /members, etc. */}
             </nav>
 
             <main className="communityLayoutBody">

@@ -21,35 +21,42 @@ import { NotificationProvider } from "./component/context/NotificationContext";
 import { ToastProvider } from "./component/context/ToastContext";
 import MyCommunity from "./pages/Community/myCommunity/MyCommunity";
 import SessionListener from "./component/utils/SessionListener";
+import Notes from "./pages/Study/Notes/Notes";
+import { NotesProvider } from "./component/context/NotesContext";
+import BibleWalkthrough from "./pages/Study/BibleWalkthrough";
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
         <AuthProvider>
-          <SessionListener />
-          <NotificationProvider>
-            <ToastProvider>
-              <Routes>
-                <Route path="/" exact element={<Home />} />
-                <Route path="/study" exact element={<Study />} />
-                <Route path="/community" exact element={<Community />} />
-                <Route path="/contact" exact element={<Contact />} />
-                <Route path="/account" exact element={<Account />} />
-                <Route path="/read" exact element={<Read />} />
-                <Route path="/signup" exact element={<SignUp />} />
-                <Route path="/findpw" exact element={<FindPw />} />
-                <Route path="/create-community" exact element={<CreateCommunity />} />
-                <Route path="/browse-community" exact element={<BrowseCommunity />} />
-                <Route path="/community-how" exact element={<CommunityWalkthrough />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/community/:communityId/info" element={<CommunityInfo />} />
-                <Route path="/community/:communityId/my-posts" element={<MyCommunity />} />
-                <Route path="/community/:communityId/posts/:postId" element={<PostDetail />} />
-              </Routes>
-            </ToastProvider>
-          </NotificationProvider>
+          <NotesProvider>
+            <SessionListener />
+            <NotificationProvider>
+              <ToastProvider>
+                <Routes>
+                  <Route path="/" exact element={<Home />} />
+                  <Route path="/study" exact element={<Study />} />
+                  <Route path="/community" exact element={<Community />} />
+                  <Route path="/contact" exact element={<Contact />} />
+                  <Route path="/account" exact element={<Account />} />
+                  <Route path="/read" exact element={<Read />} />
+                  <Route path="/signup" exact element={<SignUp />} />
+                  <Route path="/findpw" exact element={<FindPw />} />
+                  <Route path="/create-community" exact element={<CreateCommunity />} />
+                  <Route path="/browse-community" exact element={<BrowseCommunity />} />
+                  <Route path="/community-how" exact element={<CommunityWalkthrough />} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/community/:communityId/info" element={<CommunityInfo />} />
+                  <Route path="/community/:communityId/my-posts" element={<MyCommunity />} />
+                  <Route path="/community/:communityId/posts/:postId" element={<PostDetail />} />
+                  <Route path="/study/notes" element={<Notes />} />
+                  <Route path="/bible/walkthrough" element={<BibleWalkthrough />} />
+                </Routes>
+              </ToastProvider>
+            </NotificationProvider>
+          </NotesProvider>
         </AuthProvider>
       </BrowserRouter>
     </div >
