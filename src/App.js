@@ -23,6 +23,7 @@ import MyCommunity from "./pages/Community/myCommunity/MyCommunity";
 import SessionListener from "./component/utils/SessionListener";
 import Notes from "./pages/Study/Notes/Notes";
 import { NotesProvider } from "./component/context/NotesContext";
+import BibleWalkthrough from "./pages/Study/BibleWalkthrough";
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
                   <Route path="/community/:communityId/my-posts" element={<MyCommunity />} />
                   <Route path="/community/:communityId/posts/:postId" element={<PostDetail />} />
                   <Route path="/study/notes" element={<Notes />} />
+                  <Route path="/bible/walkthrough" element={<BibleWalkthrough />} />
                 </Routes>
               </ToastProvider>
             </NotificationProvider>

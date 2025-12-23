@@ -1,0 +1,252 @@
+/* src/pages/BibleWalkthrough/BibleWalkthrough.css */
+
+/* Page wrapper */
+.bibleWalkthrough {
+  min-height: 100vh;
+  background-color: #f4eee6;
+  color: #2f261d;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HERO */
+.bibleWalkthroughHero {
+  position: relative;
+  background-image: url("../../component/images/study/studyHeroImage.png");
+  background-size: cover;
+  background-position: center 90%;
+  background-repeat: no-repeat;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+/* Back button */
+.bibleWalkthroughBackBtn {
+  position: absolute;
+  top: 72px; /* leaves room for PageHeader */
+  left: 14px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background-color: rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+  transition: transform 0.08s ease, opacity 0.08s ease;
+}
+
+.bibleWalkthroughBackBtn:active {
+  transform: translateY(1px);
+  opacity: 0.9;
+}
+
+.bibleWalkthroughHeroOverlay {
+  width: 100%;
+  padding: 32px 20px 24px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.55),
+    rgba(0, 0, 0, 0.1)
+  );
+  box-sizing: border-box;
+}
+
+.bibleWalkthroughHeroEyebrow {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #f4eee6;
+  margin-bottom: 6px;
+  opacity: 0.85;
+}
+
+.bibleWalkthroughHeroTitle {
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0 0 6px;
+}
+
+.bibleWalkthroughHeroSubtitle {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #f9f3ea;
+  margin: 0;
+}
+
+/* BODY */
+.bibleWalkthroughBody {
+  flex: 1;
+  padding: 20px 16px 80px;
+  box-sizing: border-box;
+}
+
+.bibleWalkthroughIntro {
+  margin-bottom: 16px;
+}
+
+.bibleWalkthroughIntro h2 {
+  font-size: 18px;
+  margin: 0 0 6px;
+  font-weight: 500;
+}
+
+.bibleWalkthroughIntro p {
+  font-size: 14px;
+  margin: 0;
+  color: #5b4b3c;
+}
+
+/* Steps list */
+.bibleWalkthroughSteps {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bibleWalkthroughStepCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(47, 38, 29, 0.09);
+}
+
+.bibleWalkthroughStepNumber {
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #d7c7b1;
+  color: #2f261d;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.bibleWalkthroughStepContent h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.bibleWalkthroughStepContent p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #5b4b3c;
+}
+
+/* FOOTER CTA */
+.bibleWalkthroughFooter {
+  position: sticky;
+  bottom: 0;
+  background-color: #f4eee6;
+  padding: 12px 16px 20px;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+.bibleWalkthroughFooterText {
+  font-size: 14px;
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.bibleWalkthroughFooterButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.bibleWalkthroughBtnPrimary,
+.bibleWalkthroughBtnSecondary {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.08s ease;
+}
+
+.bibleWalkthroughBtnPrimary {
+  background-color: #8c7b6a;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(47, 38, 29, 0.18);
+}
+
+.bibleWalkthroughBtnSecondary {
+  background-color: #ffffff;
+  color: #2f261d;
+  border: 1px solid #d7c7b1;
+}
+
+.bibleWalkthroughBtnPrimary:active,
+.bibleWalkthroughBtnSecondary:active {
+  transform: translateY(1px);
+  box-shadow: none;
+  opacity: 0.9;
+}
+
+/* TABLET+ */
+@media (min-width: 768px) {
+  .bibleWalkthroughHero {
+    min-height: 400px;
+    background-position: 50% 20%;
+  }
+
+  .bibleWalkthroughHeroTitle {
+    font-size: 30px;
+  }
+
+  .bibleWalkthroughIntro h2 {
+    padding-top: 30px;
+    font-size: 24px;
+  }
+
+  .bibleWalkthroughHeroSubtitle {
+    font-size: 15px;
+    max-width: 420px;
+  }
+
+  .bibleWalkthroughBody {
+    padding: 24px 40px 96px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .bibleWalkthroughFooter {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .bibleWalkthroughBackBtn {
+    top: 84px;
+    left: 24px;
+  }
+}
+
+/* DESKTOP */
+@media (min-width: 1024px) {
+  .bibleWalkthroughHero {
+    min-height: 500px;
+    background-position: 50% 25%;
+  }
+
+  .bibleWalkthroughBody {
+    max-width: 860px;
+  }
+}

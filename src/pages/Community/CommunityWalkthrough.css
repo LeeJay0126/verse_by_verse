@@ -19,6 +19,7 @@
   flex-direction: column;
   align-items: flex-end;
   justify-content: space-between;
+  
 }
 
 .communityWalkthroughHeroOverlay {
@@ -58,7 +59,6 @@
 .communityWalkthroughBody {
   flex: 1;
   padding: 20px 16px 80px;
-  /* extra bottom padding so footer buttons don’t feel cramped on mobile */
   box-sizing: border-box;
 }
 
@@ -204,16 +204,16 @@
   font-size: 1.6rem; /* tweak as needed */
 }
 
-/* Small red circle for unread notifications */
+
 .NotificationDot {
   position: absolute;
   top: -3px;
-  left: -3px;     /* top-left corner */
+  left: -3px;    
   width: 8px;
   height: 8px;
   border-radius: 999px;
   background-color: #e53935;
-  border: 1px solid #ffffff; /* makes it visible on light bg */
+  border: 1px solid #ffffff; 
 }
 
 /* Dropdown panel */
@@ -255,49 +255,3 @@
   background-color: #ffebee;
 }
 
-
-/* TABLET+ (mobile-first → enhance on larger screens) */
-@media (min-width: 768px) {
-  .communityWalkthroughHero {
-    min-height: 400px;
-    background-position: 5% 15%;
-  }
-
-  .communityWalkthroughHeroTitle {
-    font-size: 30px;
-  }
-
-  .communityWalkthroughIntro h2 {
-    padding-top: 30px;
-    font-size: 24px;
-  }
-
-  .communityWalkthroughHeroSubtitle {
-    font-size: 15px;
-    max-width: 420px;
-  }
-
-  .communityWalkthroughBody {
-    padding: 24px 40px 96px;
-    max-width: 720px;
-    margin: 0 auto;
-  }
-
-  .communityWalkthroughFooter {
-    padding-left: 40px;
-    padding-right: 40px;
-  }
-}
-
-/* DESKTOP */
-@media (min-width: 1024px) {
-  .communityWalkthroughHero {
-    position: relative;
-    background-position: 0% 20%;
-    min-height: 500px;
-  }
-
-  .communityWalkthroughBody {
-    max-width: 860px;
-  }
-}

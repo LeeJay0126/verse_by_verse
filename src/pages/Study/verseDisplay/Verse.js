@@ -17,6 +17,9 @@ const Verse = ({
   setIsNotesOpen,
   getChapterNote,
   saveChapterNote,
+
+  // NEW: auth guard (from Bible.jsx)
+  requireAuthForNotes,
 }) => {
   const { user, initializing } = useAuth();
 
@@ -33,7 +36,7 @@ const Verse = ({
   const [rangeModalOpen, setRangeModalOpen] = useState(false);
   const [rangeStart, setRangeStart] = useState(null);
   const [rangeEnd, setRangeEnd] = useState(null);
-  const [rangeAnchor, setRangeAnchor] = useState(null); 
+  const [rangeAnchor, setRangeAnchor] = useState(null);
 
   const hasChapter = !!chapterId;
   const chapterNumber = hasChapter ? (chapterId.split(".")[1] || "") : "";
@@ -76,9 +79,7 @@ const Verse = ({
           }));
 
           setVerses(normalized.map((v) => ({ id: v.id, number: v.number })));
-          setVerseTexts(
-            Object.fromEntries(normalized.map((v) => [v.id, v.text]))
-          );
+          setVerseTexts(Object.fromEntries(normalized.map((v) => [v.id, v.text])));
           return;
         }
 
@@ -150,9 +151,7 @@ const Verse = ({
 
   // Available verse numbers for range picker
   const verseNumbers = useMemo(() => {
-    const nums = verses
-      .map((v) => Number(v.number))
-      .filter((n) => !Number.isNaN(n));
+    const nums = verses.map((v) => Number(v.number)).filter((n) => !Number.isNaN(n));
     nums.sort((a, b) => a - b);
     return nums;
   }, [verses]);
@@ -205,13 +204,10 @@ const Verse = ({
     if (isNotesOpen) {
       const existing = getChapterNote?.(chapterId);
       const rangeLabel = activeRange ? ` (v${activeRange.start}–${activeRange.end})` : "";
-
       const fallbackTitle = `Notes — ${book?.name || ""} ${chapterNumber}${rangeLabel}`.trim();
 
-      const existingTitle =
-        typeof existing === "string" ? "" : (existing?.title || "");
-      const existingText =
-        typeof existing === "string" ? existing : (existing?.text || "");
+      const existingTitle = typeof existing === "string" ? "" : existing?.title || "";
+      const existingText = typeof existing === "string" ? existing : existing?.text || "";
 
       setNoteTitleDraft(existingTitle || fallbackTitle);
       setNoteDraft(existingText || "");
@@ -227,9 +223,7 @@ const Verse = ({
       const el = e.target;
       const typing =
         el &&
-        (el.tagName === "INPUT" ||
-          el.tagName === "TEXTAREA" ||
-          el.isContentEditable);
+        (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
       if (typing) return;
 
       if (rangeModalOpen) {
@@ -260,16 +254,7 @@ const Verse = ({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [
-    hasChapter,
-    canPrev,
-    canNext,
-    onPrev,
-    onNext,
-    isNotesOpen,
-    setIsNotesOpen,
-    rangeModalOpen,
-  ]);
+  }, [hasChapter, canPrev, canNext, onPrev, onNext, isNotesOpen, setIsNotesOpen, rangeModalOpen]);
 
   // clicking a verse opens range picker modal
   const openRangeModalFromVerse = (verseNumber) => {
@@ -304,7 +289,9 @@ const Verse = ({
 
     // close range modal
     setRangeModalOpen(false);
-    if (user) setIsNotesOpen?.(true);
+
+    if (requireAuthForNotes && !requireAuthForNotes()) return;
+    setIsNotesOpen?.(true);
   };
 
   const clearRange = () => {
@@ -313,6 +300,11 @@ const Verse = ({
 
   const toggleNotes = () => {
     if (!hasChapter) return;
+
+    if (!isNotesOpen) {
+      if (requireAuthForNotes && !requireAuthForNotes()) return;
+    }
+
     setIsNotesOpen?.((v) => !v);
   };
 
@@ -320,6 +312,8 @@ const Verse = ({
 
   const submitNotes = () => {
     if (!hasChapter) return;
+
+    // keep existing safety (no save when logged out)
     if (!user) return;
 
     saveChapterNote?.(chapterId, {
@@ -362,9 +356,7 @@ const Verse = ({
             )}
           </div>
         ) : (
-          <span className="chapterTitle placeholder">
-            Select a book and chapter to begin.
-          </span>
+          <span className="chapterTitle placeholder">Select a book and chapter to begin.</span>
         )}
       </h2>
 
@@ -379,9 +371,7 @@ const Verse = ({
         >
           <div className="rangeModalCard" onMouseDown={(e) => e.stopPropagation()}>
             <div className="rangeModalHeader">
-              <div className="rangeModalTitle">
-                Select range (starting from v{rangeAnchor})
-              </div>
+              <div className="rangeModalTitle">Select range (starting from v{rangeAnchor})</div>
               <button
                 type="button"
                 className="rangeModalClose"
@@ -448,11 +438,7 @@ const Verse = ({
                 Just v{rangeAnchor}
               </button>
 
-              <button
-                type="button"
-                className="rangeBtn rangeBtnPrimary"
-                onClick={applyRange}
-              >
+              <button type="button" className="rangeBtn rangeBtnPrimary" onClick={applyRange}>
                 Apply range
               </button>
             </div>
@@ -474,11 +460,7 @@ const Verse = ({
               />
 
               <div className="chapterNotesActions">
-                <button
-                  type="button"
-                  className="notesBtn notesBtnGhost"
-                  onClick={closeNotes}
-                >
+                <button type="button" className="notesBtn notesBtnGhost" onClick={closeNotes}>
                   Exit
                 </button>
                 <button
