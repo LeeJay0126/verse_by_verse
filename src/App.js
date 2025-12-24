@@ -24,6 +24,8 @@ import SessionListener from "./component/utils/SessionListener";
 import Notes from "./pages/Study/Notes/Notes";
 import { NotesProvider } from "./component/context/NotesContext";
 import BibleWalkthrough from "./pages/Study/BibleWalkthrough";
+import NotesPage from "./pages/Study/Notes/NotesPage";
+import NotePage from "./pages/Study/Notes/NotePage";
 
 function App() {
   return (
@@ -53,6 +55,8 @@ function App() {
                   <Route path="/community/:communityId/posts/:postId" element={<PostDetail />} />
                   <Route path="/study/notes" element={<Notes />} />
                   <Route path="/bible/walkthrough" element={<BibleWalkthrough />} />
+                  <Route path="/notes" element={<NotesPage />} />
+                  <Route path="/notes/:noteId" element={<NotePage />} />
                 </Routes>
               </ToastProvider>
             </NotificationProvider>

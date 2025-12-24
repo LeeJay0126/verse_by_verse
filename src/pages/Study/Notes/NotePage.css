@@ -1,0 +1,21 @@
+.NotePage {
+  padding: 24px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.NotePageTop {
+  margin-bottom: 12px;
+}
+
+.NotePageBack {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.NotePageBack:hover {
+  opacity: 1;
+}

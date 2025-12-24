@@ -18,7 +18,7 @@ const Verse = ({
   getChapterNote,
   saveChapterNote,
 
-  // NEW: auth guard (from Bible.jsx)
+  // auth guard (from Bible.jsx)
   requireAuthForNotes,
 }) => {
   const { user, initializing } = useAuth();
@@ -40,6 +40,15 @@ const Verse = ({
 
   const hasChapter = !!chapterId;
   const chapterNumber = hasChapter ? (chapterId.split(".")[1] || "") : "";
+
+  const noteKey = useMemo(() => {
+    const bibleId = currVersionId || "";
+    const chap = chapterId || "";
+    const rs = activeRange?.start ?? "";
+    const re = activeRange?.end ?? "";
+    return `${bibleId}::${chap}::${rs}::${re}`;
+  }, [currVersionId, chapterId, activeRange]);
+
 
   // Fetch verses whenever version or chapter changes
   useEffect(() => {
@@ -79,7 +88,9 @@ const Verse = ({
           }));
 
           setVerses(normalized.map((v) => ({ id: v.id, number: v.number })));
-          setVerseTexts(Object.fromEntries(normalized.map((v) => [v.id, v.text])));
+          setVerseTexts(
+            Object.fromEntries(normalized.map((v) => [v.id, v.text]))
+          );
           return;
         }
 
@@ -192,7 +203,7 @@ const Verse = ({
 
   const showArrows = hasChapter && (canPrev || canNext);
 
-  // Notes syncing (range-aware title fallback)
+  // Notes syncing (range-aware key + title fallback)
   useEffect(() => {
     if (!hasChapter) {
       setIsNotesOpen?.(false);
@@ -202,18 +213,22 @@ const Verse = ({
     }
 
     if (isNotesOpen) {
-      const existing = getChapterNote?.(chapterId);
-      const rangeLabel = activeRange ? ` (v${activeRange.start}–${activeRange.end})` : "";
+      const existing = getChapterNote?.(noteKey);
+
+      const rangeLabel =
+        activeRange ? ` (v${activeRange.start}–${activeRange.end})` : "";
       const fallbackTitle = `Notes — ${book?.name || ""} ${chapterNumber}${rangeLabel}`.trim();
 
-      const existingTitle = typeof existing === "string" ? "" : existing?.title || "";
-      const existingText = typeof existing === "string" ? existing : existing?.text || "";
+      const existingTitle =
+        typeof existing === "string" ? "" : existing?.title || "";
+      const existingText =
+        typeof existing === "string" ? existing : existing?.text || "";
 
       setNoteTitleDraft(existingTitle || fallbackTitle);
       setNoteDraft(existingText || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isNotesOpen, chapterId, hasChapter, activeRange]);
+  }, [isNotesOpen, hasChapter, noteKey, activeRange, chapterNumber, book?.name]);
 
   // Keyboard navigation (disable while notes or range modal open)
   useEffect(() => {
@@ -316,7 +331,7 @@ const Verse = ({
     // keep existing safety (no save when logged out)
     if (!user) return;
 
-    saveChapterNote?.(chapterId, {
+    saveChapterNote?.(noteKey, {
       title: noteTitleDraft,
       text: noteDraft,
     });

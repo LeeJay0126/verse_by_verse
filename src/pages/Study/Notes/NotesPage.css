@@ -1,0 +1,147 @@
+.NotesPage {
+  padding: 24px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.NotesPageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.NotesPageTitle {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 500;
+}
+
+.NotesPageSub {
+  margin-top: 4px;
+  opacity: 0.75;
+}
+
+.NotesToolbar {
+  display: grid;
+  grid-template-columns: 1.2fr 180px 180px 180px;
+  gap: 10px;
+  margin: 16px 0 12px;
+}
+
+@media (max-width: 900px) {
+  .NotesToolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.NotesSearch,
+.NotesSelect,
+.NotesFilter {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.08);
+  color: inherit;
+}
+
+.NotesError {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 70, 70, 0.12);
+}
+
+.NotesLoading {
+  margin: 12px 0;
+  opacity: 0.8;
+}
+
+.NotesCount {
+  margin: 8px 0 14px;
+  opacity: 0.8;
+}
+
+.NotesEmpty {
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(0,0,0,0.06);
+  margin: 14px 0;
+}
+
+.NotesEmptyTitle {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.NotesEmptySub {
+  opacity: 0.8;
+}
+
+.NotesList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.NotesCard {
+  margin: 0;
+}
+
+.NotesCardBtn {
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.06);
+  color: inherit;
+  cursor: pointer;
+}
+
+.NotesCardBtn:hover {
+  background: rgba(0,0,0,0.09);
+}
+
+.NotesCardTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.NotesCardTitle {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.NotesCardRef {
+  opacity: 0.75;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.NotesCardPreview {
+  margin-top: 8px;
+  opacity: 0.85;
+  line-height: 1.35;
+}
+
+.NotesCardMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.NotesBadge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  font-size: 12px;
+}
