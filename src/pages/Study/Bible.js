@@ -6,6 +6,8 @@ import BibleVersion from "./bibleVersions/BibleVersions";
 import Verse from "./verseDisplay/Verse";
 import { useNotes } from "../../component/context/NotesContext";
 import { useAuth } from "../../component/context/AuthContext";
+import NotesListDrawer from "./Notes/NotesListDrawer";
+
 import "./Bible.css";
 
 // Static chapter counts for Korean ibibles.net mapping
@@ -39,6 +41,8 @@ const Bible = () => {
 
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const { getChapterNote, saveChapterNote } = useNotes();
+  const [isNotesListOpen, setIsNotesListOpen] = useState(false);
+
 
   const hasChapter = !!currChapterId;
 
@@ -272,14 +276,23 @@ const Bible = () => {
         }}
         currVersionId={currVersion}
         setCurrentVersion={(v) => setCurrVersion(v)}
-        hasChapter={hasChapter}
-        isNotesOpen={isNotesOpen}
-        setIsNotesOpen={(open) => {
-          if (open && !requireAuthForNotes()) return;
-          setIsNotesOpen(open);
+        notesDisabled={false}
+        notesActive={isNotesListOpen}
+        notesHasNote={hasNoteForChapter}
+        onNotesClick={() => {
+          if (!requireAuthForNotes()) return;
+          setIsNotesOpen(false);
+          setIsNotesListOpen((v) => !v);
         }}
-        hasNoteForChapter={hasNoteForChapter}
       />
+
+      <NotesListDrawer
+        open={isNotesListOpen}
+        onClose={() => setIsNotesListOpen(false)}
+        bibleId={currVersion}
+        chapterId={currChapterId || ""}
+      />
+
 
       <Verse
         chapterId={currChapterId}

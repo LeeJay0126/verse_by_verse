@@ -2,6 +2,7 @@ import "./Verse.css";
 import { useEffect, useMemo, useState } from "react";
 import API from "../../../component/Key";
 import { useAuth } from "../../../component/context/AuthContext";
+import { useNotesApi } from "../Notes/useNotesApi";
 
 const Verse = ({
   chapterId,
@@ -49,6 +50,7 @@ const Verse = ({
     return `${bibleId}::${chap}::${rs}::${re}`;
   }, [currVersionId, chapterId, activeRange]);
 
+  const { upsertNote } = useNotesApi();
 
   // Fetch verses whenever version or chapter changes
   useEffect(() => {
@@ -325,18 +327,24 @@ const Verse = ({
 
   const closeNotes = () => setIsNotesOpen?.(false);
 
-  const submitNotes = () => {
+  const submitNotes = async () => {
     if (!hasChapter) return;
-
-    // keep existing safety (no save when logged out)
     if (!user) return;
 
-    saveChapterNote?.(noteKey, {
-      title: noteTitleDraft,
-      text: noteDraft,
-    });
+    try {
+      await upsertNote({
+        bibleId: currVersionId,
+        chapterId,
+        rangeStart: activeRange?.start ?? null,
+        rangeEnd: activeRange?.end ?? null,
+        title: noteTitleDraft,
+        text: noteDraft,
+      });
 
-    closeNotes();
+      closeNotes();
+    } catch (e) {
+      console.error("Failed to save note:", e);
+    }
   };
 
   const normalizeText = (t) => (t ?? "").toString().replace(/\s+/g, " ").trim();

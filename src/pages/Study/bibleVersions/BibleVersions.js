@@ -86,16 +86,17 @@ const BibleVersions = ({
 
       <div className="NotesRow">
         <Notes
-          disabled={notesDisabled || disabled}
+          disabled={notesDisabled}
           active={notesActive}
           hasNote={notesHasNote}
           onClick={() => {
-            if (notesDisabled || disabled) return;
+            if (notesDisabled) return;
             onNotesClick?.();
             setVisibility(false);
             setVersionVisibility(false);
           }}
         />
+
       </div>
     </div>
   );
