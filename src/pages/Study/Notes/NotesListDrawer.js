@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNotesApi } from "./useNotesApi";
 import NoteDetailModal from "./NoteDetailModal";
 
+const PAGE_SIZE = 10;
+
 const shortPreview = (s, n = 140) => {
   const t = (s || "").toString().replace(/\s+/g, " ").trim();
   if (t.length <= n) return t;
@@ -32,6 +34,9 @@ const NotesListDrawer = ({
   const [err, setErr] = useState("");
   const [activeId, setActiveId] = useState(null);
 
+  // paging
+  const [page, setPage] = useState(1);
+
   const bookId = useMemo(() => {
     if (!chapterId) return "";
     return String(chapterId).split(".")[0] || "";
@@ -39,7 +44,11 @@ const NotesListDrawer = ({
 
   const filterLabel = useMemo(() => {
     if (!chapterId) return "All notes";
-    return `This chapter (${formatRef({ chapterId, rangeStart: null, rangeEnd: null })})`;
+    return `This chapter (${formatRef({
+      chapterId,
+      rangeStart: null,
+      rangeEnd: null,
+    })})`;
   }, [chapterId]);
 
   useEffect(() => {
@@ -64,15 +73,17 @@ const NotesListDrawer = ({
         if (!alive) return;
 
         let arr = Array.isArray(res.notes) ? res.notes : [];
-
-        if (chapterId) {
-          arr = arr.filter((n) => n.chapterId === chapterId);
-        }
+        if (chapterId) arr = arr.filter((n) => n.chapterId === chapterId);
 
         setNotes(arr);
+        setPage(1); // reset paging when drawer opens / filter changes
       } catch (e) {
         if (!alive) return;
-        setErr(e.status === 401 ? "Please log in to view notes." : (e.message || "Failed to load notes"));
+        setErr(
+          e.status === 401
+            ? "Please log in to view notes."
+            : e.message || "Failed to load notes"
+        );
       } finally {
         if (alive) setLoading(false);
       }
@@ -94,10 +105,38 @@ const NotesListDrawer = ({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  const totalNotes = notes.length;
+  const totalPages = Math.max(1, Math.ceil(totalNotes / PAGE_SIZE));
+  const safePage = Math.min(Math.max(page, 1), totalPages);
+
+  const pageNotes = useMemo(() => {
+    const start = (safePage - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    return notes.slice(start, end);
+  }, [notes, safePage]);
+
+  useEffect(() => {
+    // keep page in range if notes change
+    if (!open) return;
+    if (page !== safePage) setPage(safePage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [safePage, open, totalNotes]);
+
+  const canPrevPage = safePage > 1;
+  const canNextPage = safePage < totalPages;
+
+  const goPrev = () => canPrevPage && setPage((p) => Math.max(1, p - 1));
+  const goNext = () => canNextPage && setPage((p) => Math.min(totalPages, p + 1));
+
   if (!open) return null;
 
   return (
-    <div className="NotesListOverlay" role="dialog" aria-modal="true" onMouseDown={onClose}>
+    <div
+      className="NotesListOverlay"
+      role="dialog"
+      aria-modal="true"
+      onMouseDown={onClose}
+    >
       <div className="NotesListCard" onMouseDown={(e) => e.stopPropagation()}>
         <div className="NotesListHeader">
           <div className="NotesListTitle">{title}</div>
@@ -108,47 +147,78 @@ const NotesListDrawer = ({
 
         <div className="NotesListSub">
           <span className="NotesListSubLabel">{filterLabel}</span>
-          <span className="NotesListCount">{notes.length}</span>
+          <span className="NotesListCount">{totalNotes}</span>
         </div>
 
-        {err && <div className="NotesListError" role="alert">{err}</div>}
-
-        {loading && <div className="NotesListLoading">Loading…</div>}
-
-        {!loading && !err && notes.length === 0 && (
-          <div className="NotesListEmpty">
-            No notes found.
+        {err && (
+          <div className="NotesListError" role="alert">
+            {err}
           </div>
         )}
 
-        <ul className="NotesList">
-          {notes.map((n) => (
-            <li key={n._id} className="NotesListItem">
-              <button
-                type="button"
-                className="NotesListItemBtn"
-                onClick={() => setActiveId(n._id)}
-              >
-                <div className="NotesListItemTop">
-                  <div className="NotesListItemTitle">{n.title || "Untitled"}</div>
-                  <div className="NotesListItemRef">{formatRef(n)}</div>
+        {loading && <div className="NotesListLoading">Loading…</div>}
+
+        {!loading && !err && totalNotes === 0 && (
+          <div className="NotesListEmpty">No notes found.</div>
+        )}
+
+        {!loading && !err && totalNotes > 0 && (
+          <>
+            <ul className="NotesList">
+              {pageNotes.map((n) => (
+                <li key={n._id} className="NotesListItem">
+                  <button
+                    type="button"
+                    className="NotesListItemBtn"
+                    onClick={() => setActiveId(n._id)}
+                  >
+                    <div className="NotesListItemTop">
+                      <div className="NotesListItemTitle">{n.title || "Untitled"}</div>
+                      <div className="NotesListItemRef">{formatRef(n)}</div>
+                    </div>
+                    <div className="NotesListItemPreview">
+                      {shortPreview(n.preview ?? n.text)}
+                    </div>
+                    <div className="NotesListItemMeta">
+                      {n.updatedAt ? new Date(n.updatedAt).toLocaleString() : "—"}
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            {totalPages > 1 && (
+              <div className="NotesListPager">
+                <button
+                  type="button"
+                  className="NotesListPagerBtn"
+                  onClick={goPrev}
+                  disabled={!canPrevPage}
+                  aria-label="Previous page"
+                >
+                  ←
+                </button>
+
+                <div className="NotesListPagerText">
+                  Page {safePage} / {totalPages}
                 </div>
-                <div className="NotesListItemPreview">
-                  {shortPreview(n.preview ?? n.text)}
-                </div>
-                <div className="NotesListItemMeta">
-                  {n.updatedAt ? new Date(n.updatedAt).toLocaleString() : "—"}
-                </div>
-              </button>
-            </li>
-          ))}
-        </ul>
+
+                <button
+                  type="button"
+                  className="NotesListPagerBtn"
+                  onClick={goNext}
+                  disabled={!canNextPage}
+                  aria-label="Next page"
+                >
+                  →
+                </button>
+              </div>
+            )}
+          </>
+        )}
 
         {activeId && (
-          <NoteDetailModal
-            noteId={activeId}
-            onClose={() => setActiveId(null)}
-          />
+          <NoteDetailModal noteId={activeId} onClose={() => setActiveId(null)} />
         )}
       </div>
     </div>

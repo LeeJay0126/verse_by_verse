@@ -50,9 +50,8 @@ const Verse = ({
     return `${bibleId}::${chap}::${rs}::${re}`;
   }, [currVersionId, chapterId, activeRange]);
 
-  const { upsertNote } = useNotesApi();
+  const { createNote } = useNotesApi();
 
-  // Fetch verses whenever version or chapter changes
   useEffect(() => {
     if (!currVersionId || !chapterId) return;
 
@@ -332,7 +331,7 @@ const Verse = ({
     if (!user) return;
 
     try {
-      await upsertNote({
+      await createNote({
         bibleId: currVersionId,
         chapterId,
         rangeStart: activeRange?.start ?? null,
@@ -346,6 +345,7 @@ const Verse = ({
       console.error("Failed to save note:", e);
     }
   };
+
 
   const normalizeText = (t) => (t ?? "").toString().replace(/\s+/g, " ").trim();
 
