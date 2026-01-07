@@ -1,5 +1,5 @@
 import "./NotesListDrawer.css";
-import { useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
+import { useEffect, useMemo, useRef, useState, useLayoutEffect, useCallback } from "react";
 import { useNotesApi } from "./useNotesApi";
 import NoteDetailModal from "./NoteDetailModal";
 
@@ -27,7 +27,7 @@ const NotesListDrawer = ({
   chapterId = "",
   title = "Notes",
 }) => {
-  const { listNotes } = useNotesApi();
+  const { listNotes, deleteNote } = useNotesApi();
 
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,10 +37,11 @@ const NotesListDrawer = ({
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // NEW: scope + sort
   const canUseChapterScope = !!chapterId;
-  const [scope, setScope] = useState("chapter"); // "chapter" | "all"
-  const [sortMode, setSortMode] = useState("recent"); // "recent" | "oldest" | "chapter"
+  const [scope, setScope] = useState("chapter");
+  const [sortMode, setSortMode] = useState("recent");
+
+  const [deletingId, setDeletingId] = useState(null);
 
   const listRef = useRef(null);
 
@@ -170,6 +171,38 @@ const NotesListDrawer = ({
   const goPrev = () => canPrevPage && setPage((p) => Math.max(1, p - 1));
   const goNext = () => canNextPage && setPage((p) => Math.min(totalPages, p + 1));
 
+  const handleDeleteNote = useCallback(
+    async (e, id, noteTitle) => {
+      // prevent opening modal
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!id || deletingId) return;
+
+      const label = (noteTitle || "Untitled").trim();
+      const ok = window.confirm(`Delete "${label}"? This cannot be undone.`);
+      if (!ok) return;
+
+      try {
+        setDeletingId(id);
+        await deleteNote(id);
+
+        setNotes((prev) => prev.filter((n) => n._id !== id));
+
+        // if they deleted the one currently opened, close modal
+        setActiveId((curr) => (curr === id ? null : curr));
+
+        // keep pagination sane (safePage effect will clamp)
+        setPage((p) => Math.max(1, p));
+      } catch (err) {
+        setErr(err?.message || "Failed to delete note");
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [deleteNote, deletingId]
+  );
+
   if (!open) return null;
 
   return (
@@ -182,7 +215,7 @@ const NotesListDrawer = ({
           </button>
         </div>
 
-        {/* NEW controls row */}
+        {/* controls row */}
         <div className="NotesListControls">
           <div className="NotesListControl">
             <label className="NotesListControlLabel">Scope</label>
@@ -240,11 +273,34 @@ const NotesListDrawer = ({
                 >
                   <div className="NotesListItemTop">
                     <div className="NotesListItemTitle">{n.title || "Untitled"}</div>
-                    <div className="NotesListItemRef">{formatRef(n)}</div>
+
+                    {/* right side: ref + trash */}
+                    <div className="NotesListItemTopRight">
+                      <div className="NotesListItemRef">{formatRef(n)}</div>
+                    </div>
                   </div>
-                  <div className="NotesListItemPreview">{shortPreview(n.preview ?? n.text)}</div>
-                  <div className="NotesListItemMeta">
-                    {n.updatedAt ? new Date(n.updatedAt).toLocaleString() : "—"}
+                  <div className="NotesListItemFlex">
+                    <div className="NotesListItemDescFlex">
+                      <div className="NotesListItemPreview">{shortPreview(n.preview ?? n.text)}</div>
+                      <div className="NotesListItemMeta">
+                        {n.updatedAt ? new Date(n.updatedAt).toLocaleString() : "—"}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="NotesListTrashBtn"
+                      onClick={(e) => handleDeleteNote(e, n._id, n.title)}
+                      disabled={deletingId === n._id}
+                      aria-label="Delete note"
+                      title="Delete"
+                    >
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v10h-2V9zm4 0h2v10h-2V9zM7 9h2v10H7V9zm-1 12h12a2 2 0 0 0 2-2V7H4v12a2 2 0 0 0 2 2z"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 </button>
               </li>
@@ -280,9 +336,19 @@ const NotesListDrawer = ({
           </div>
         )}
 
-        {activeId && <NoteDetailModal noteId={activeId} onClose={() => setActiveId(null)} />}
+        {activeId && (
+          <NoteDetailModal
+            noteId={activeId}
+            onClose={() => setActiveId(null)}
+            onDeleted={(deletedId) => {
+              setNotes((prev) => prev.filter((n) => n._id !== deletedId));
+              setActiveId(null);
+              setPage(1);
+            }}
+          />
+        )}
       </div>
-    </div>
+    </div >
   );
 };
 
