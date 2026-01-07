@@ -9,16 +9,16 @@
 
 .NotesListCard {
   width: min(520px, 92vw);
-  height: 100%;
   background: #fff;
+  height: 100vh;
+  margin: 0;
   box-shadow: -16px 0 40px rgba(0, 0, 0, 0.18);
   padding: 16px 16px 20px;
   overflow: hidden;
 
-  display: grid;
-  grid-template-rows: auto auto auto 1fr auto; 
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  min-height: 0;
 }
 
 .NotesListHeader {
@@ -62,22 +62,22 @@
   opacity: 0.75;
 }
 
-.NotesListCard .NotesList {
+.NotesList {
   list-style: none;
   padding: 0;
   margin: 0;
 
-  display: block !important;  
-  columns: 1 !important;      
-  column-count: 1 !important;
-  column-gap: 0 !important;
+  display: flex !important;
+  flex-direction: column;
+  gap: 10px;
 
   overflow-y: auto;
   min-height: 0;
-}
+  flex: 1;
 
-.NotesListCard .NotesListItem + .NotesListItem {
-  margin-top: 10px;
+  columns: 1 !important;
+  column-count: 1 !important;
+  column-gap: 0 !important;
 }
 
 .NotesListItemBtn {
@@ -123,9 +123,11 @@
 }
 
 .NotesListPager {
+  margin-top: auto;
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 20px 10px;
 }
 
 .NotesListPagerBtn {
@@ -144,4 +146,31 @@
 .NotesListPagerText {
   font-size: 13px;
   opacity: 0.8;
+}
+
+.NotesListControls {
+  display: flex;
+  gap: 12px;
+  padding: 10px 14px 6px 14px;
+  align-items: flex-end;
+}
+
+.NotesListControl {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.NotesListControlLabel {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.NotesListSelect {
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.18);
+  padding: 0 10px;
+  background: white;
 }
