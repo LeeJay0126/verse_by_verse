@@ -14,7 +14,6 @@ const formatRangeLabel = (n) => {
 
 const formatRef = (note) => {
   const chap = note?.chapterId || "";
-  // chap format like "GEN.1"
   const [bookId, chNum] = chap.split(".");
   const friendly = `${bookId || ""} ${chNum || ""}`.trim();
   return `${friendly}${formatRangeLabel(note)}`.trim();
@@ -24,7 +23,8 @@ const NoteDetail = ({
   noteId: noteIdProp,
   initialNote = null,
   onClose,
-  onOpenPassage, 
+  onOpenPassage,
+  onUpdated,
 }) => {
   const params = useParams();
   const noteId = noteIdProp || params.noteId;
@@ -43,24 +43,22 @@ const NoteDetail = ({
 
   const canEdit = !!user && !initializing;
 
-  // fetch note if not provided
   useEffect(() => {
     let alive = true;
 
     (async () => {
       if (!noteId) return;
-      if (initialNote && initialNote._id === noteId) return;
+      if (initialNote && String(initialNote._id) === String(noteId)) return;
 
       try {
         setErr("");
         setLoading(true);
         const res = await getNote(noteId);
         if (!alive) return;
-
-        setNote(res.note || null);
+        setNote(res?.note || null);
       } catch (e) {
         if (!alive) return;
-        setErr(e.status === 401 ? "Please log in to view notes." : (e.message || "Failed to load note"));
+        setErr(e?.status === 401 ? "Please log in to view notes." : (e?.message || "Failed to load note"));
       } finally {
         if (alive) setLoading(false);
       }
@@ -69,10 +67,8 @@ const NoteDetail = ({
     return () => {
       alive = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [noteId]);
+  }, [noteId, initialNote, getNote]);
 
-  // sync drafts when note changes
   useEffect(() => {
     if (!note) return;
     setTitle(note.title || "");
@@ -91,10 +87,19 @@ const NoteDetail = ({
       setLoading(true);
 
       const res = await updateNote(note._id, { title, text });
-      setNote(res.note || note);
-      setDirty(false);
+      const updated = res?.note || null;
+
+      if (updated) {
+        setNote(updated);
+        setTitle(updated.title || "");
+        setText(updated.text || "");
+        setDirty(false);
+        onUpdated?.(updated);
+      } else {
+        setDirty(false);
+      }
     } catch (e) {
-      setErr(e.status === 401 ? "Please log in to save notes." : (e.message || "Failed to save"));
+      setErr(e?.status === 401 ? "Please log in to save notes." : (e?.message || "Failed to save"));
     } finally {
       setLoading(false);
     }
@@ -113,11 +118,10 @@ const NoteDetail = ({
 
       await deleteNote(note._id);
 
-      // modal -> close, page -> back to list
       if (onClose) onClose();
       else navigate("/notes");
     } catch (e) {
-      setErr(e.status === 401 ? "Please log in to delete notes." : (e.message || "Failed to delete"));
+      setErr(e?.status === 401 ? "Please log in to delete notes." : (e?.message || "Failed to delete"));
     } finally {
       setLoading(false);
     }
@@ -131,8 +135,6 @@ const NoteDetail = ({
       return;
     }
 
-    // Default fallback: just go to home or bible route if you have one.
-    // Replace "/bible" with your actual Bible page route.
     navigate("/bible", { state: { note } });
   };
 
