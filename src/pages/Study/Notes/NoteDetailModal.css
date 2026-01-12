@@ -1,7 +1,7 @@
 .NoteModalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,9 +14,27 @@
   max-height: 90vh;
   overflow: auto;
   border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(20,20,20,0.98);
-  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(18, 18, 18, 0.98);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.55);
+}
+
+.NoteModalHeader {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(18, 18, 18, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 14px 16px;
+}
+
+.NoteModalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .NoteModalActions {
@@ -24,25 +42,45 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.NoteModalDeleteBtn {
-  border: 1px solid rgba(0,0,0,0.25);
+.NoteModalBody {
+  padding: 16px;
+}
+
+.NoteModalBtn {
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 10px;
   padding: 8px 12px;
-  background: white;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
   cursor: pointer;
 }
 
-.NoteModalDeleteBtn:disabled {
-  opacity: 0.6;
+.NoteModalBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.NoteModalBtn:disabled {
+  opacity: 0.55;
   cursor: not-allowed;
+}
+
+.NoteModalDeleteBtn {
+  border-color: rgba(255, 80, 80, 0.35);
+  background: rgba(255, 80, 80, 0.14);
+}
+
+.NoteModalDeleteBtn:hover {
+  background: rgba(255, 80, 80, 0.2);
 }
 
 .NoteModalError {
   margin-right: auto;
   font-size: 13px;
-  color: #b00020;
+  color: rgba(255, 140, 140, 0.95);
+  background: rgba(255, 80, 80, 0.12);
+  border: 1px solid rgba(255, 80, 80, 0.25);
+  padding: 8px 10px;
+  border-radius: 10px;
 }

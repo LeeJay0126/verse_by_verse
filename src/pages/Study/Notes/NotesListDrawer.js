@@ -1,5 +1,5 @@
 import "./NotesListDrawer.css";
-import { useEffect, useMemo, useRef, useState, useLayoutEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNotesApi } from "./useNotesApi";
 import NoteDetailModal from "./NoteDetailModal";
 
@@ -17,185 +17,136 @@ const formatRef = (note) => {
 
   if (note?.rangeStart == null || note?.rangeEnd == null) return `${base} (full)`;
   if (note.rangeStart === note.rangeEnd) return `${base} (v${note.rangeStart})`;
-  return `${base} (v${note.rangeStart}–${note.rangeEnd})`;
+  return `${base} (v${note.rangeStart}-${note.rangeEnd})`;
 };
+
+const isUpdatedAtDesc = (sort) => String(sort || "").toLowerCase() === "updatedat:desc";
 
 const NotesListDrawer = ({
   open,
   onClose,
-  bibleId = "",
-  chapterId = "",
-  title = "Notes",
+  bibleId,
+  bookId,
+  chapterId,
+  onOpenPassage,
 }) => {
   const { listNotes, deleteNote } = useNotesApi();
 
-  const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState("");
-  const [activeId, setActiveId] = useState(null);
+  const [q, setQ] = useState("");
+  const [sort, setSort] = useState("updatedAt:desc");
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(8);
 
-  const canUseChapterScope = !!chapterId;
-  const [scope, setScope] = useState("chapter");
-  const [sortMode, setSortMode] = useState("recent");
+  const [notes, setNotes] = useState([]);
+  const [total, setTotal] = useState(0);
 
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  const [activeNoteId, setActiveNoteId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
+  // Fit paging to drawer height (minimal logic, no CSS changes required)
   const listRef = useRef(null);
-
-  // If drawer opens on a screen without chapterId, force "all"
-  useEffect(() => {
-    if (!open) return;
-    if (!canUseChapterScope) setScope("all");
-    else setScope((s) => (s === "all" ? "all" : "chapter"));
-  }, [open, canUseChapterScope]);
-
-  const sortParam = useMemo(() => {
-    if (sortMode === "oldest") return "createdAt:asc";
-    if (sortMode === "chapter") return "chapterId:asc";
-    return "updatedAt:desc"; // most recent
-  }, [sortMode]);
-
-  const filterLabel = useMemo(() => {
-    if (scope === "all" || !chapterId) return "All notes";
-    return `This chapter (${formatRef({ chapterId, rangeStart: null, rangeEnd: null })})`;
-  }, [scope, chapterId]);
-
-  useEffect(() => {
-    let alive = true;
-
-    (async () => {
-      if (!open) return;
-
-      try {
-        setErr("");
-        setLoading(true);
-
-        const res = await listNotes({
-          q: "",
-          bibleId: bibleId || "",
-          chapterId: scope === "chapter" ? chapterId : "",
-          sort: sortParam,
-          limit: 200,
-          offset: 0,
-        });
-
-        if (!alive) return;
-
-        const arr = Array.isArray(res.notes) ? res.notes : [];
-        setNotes(arr);
-        setPage(1);
-      } catch (e) {
-        if (!alive) return;
-        setErr(
-          e.status === 401
-            ? "Please log in to view notes."
-            : e.message || "Failed to load notes"
-        );
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, [open, bibleId, chapterId, scope, sortParam, listNotes]);
+  const sampleItemRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
 
-    const onKey = (e) => {
-      if (e.key === "Escape") onClose?.();
-    };
-
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
-  useLayoutEffect(() => {
-    if (!open) return;
     const el = listRef.current;
     if (!el) return;
 
     const compute = () => {
-      const containerH = el.clientHeight || 0;
-      if (!containerH) return;
-
-      const firstBtn = el.querySelector(".NotesListItemBtn");
-      if (!firstBtn) return;
-
-      const itemH = firstBtn.getBoundingClientRect().height || 0;
-      if (!itemH) return;
-
-      const fit = Math.max(
-        1,
-        Math.floor((containerH + ITEM_GAP_PX) / (itemH + ITEM_GAP_PX))
-      );
+      const h = el.clientHeight || 0;
+      const itemH = sampleItemRef.current?.getBoundingClientRect?.().height || 88;
+      const full = itemH + ITEM_GAP_PX;
+      const fit = Math.max(3, Math.min(30, Math.floor(h / full) || 8));
 
       setPageSize((prev) => (prev === fit ? prev : fit));
     };
 
     compute();
 
-    const ro = new ResizeObserver(() => compute());
+    const ro = new ResizeObserver(compute);
     ro.observe(el);
-    window.addEventListener("resize", compute);
+
+    const t = setTimeout(compute, 0);
 
     return () => {
+      clearTimeout(t);
       ro.disconnect();
-      window.removeEventListener("resize", compute);
     };
-  }, [open, notes.length]);
+  }, [open]);
 
-  const totalNotes = notes.length;
-  const totalPages = Math.max(1, Math.ceil(totalNotes / pageSize));
-  const safePage = Math.min(Math.max(page, 1), totalPages);
+
+  // reset to page 1 when scope changes
+  useEffect(() => {
+    setPage(1);
+  }, [open, bibleId, bookId, chapterId, q, sort]);
+
+  const offset = useMemo(() => (page - 1) * pageSize, [page, pageSize]);
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize) || 1), [total, pageSize]);
+
+  const fetchNotes = useCallback(async () => {
+    if (!open) return;
+
+    try {
+      setErr("");
+      setLoading(true);
+
+      const res = await listNotes({
+        q,
+        bibleId,
+        bookId,
+        chapterId,
+        sort,
+        limit: pageSize,
+        offset,
+      });
+
+      const incoming = Array.isArray(res?.notes) ? res.notes : [];
+      const incomingTotal = Number.isFinite(res?.total) ? res.total : 0;
+
+      setNotes(incoming);
+      setTotal(incomingTotal);
+
+      // keep page in range if pageSize changed
+      const maxPage = Math.max(1, Math.ceil(incomingTotal / pageSize) || 1);
+      if (page > maxPage) setPage(maxPage);
+    } catch (e) {
+      setErr(e?.message || "Failed to load notes");
+    } finally {
+      setLoading(false);
+    }
+  }, [open, listNotes, q, bibleId, bookId, chapterId, sort, pageSize, offset, page]);
 
   useEffect(() => {
-    if (!open) return;
-    if (page !== safePage) setPage(safePage);
-  }, [open, page, safePage]);
+    fetchNotes();
+  }, [fetchNotes]);
 
-  const pageNotes = useMemo(() => {
-    const start = (safePage - 1) * pageSize;
-    const end = start + pageSize;
-    return notes.slice(start, end);
-  }, [notes, safePage, pageSize]);
+  const onPrev = useCallback(() => setPage((p) => Math.max(1, p - 1)), []);
+  const onNext = useCallback(() => setPage((p) => Math.min(totalPages, p + 1)), [totalPages]);
 
-  const canPrevPage = safePage > 1;
-  const canNextPage = safePage < totalPages;
+  const onOpenNote = useCallback((id) => setActiveNoteId(id), []);
 
-  const goPrev = () => canPrevPage && setPage((p) => Math.max(1, p - 1));
-  const goNext = () => canNextPage && setPage((p) => Math.min(totalPages, p + 1));
+  // Drawer quick delete (trash icon)
+  const onTrash = useCallback(
+    async (noteId) => {
+      if (!noteId || deletingId) return;
 
-  const handleDeleteNote = useCallback(
-    async (e, id, noteTitle) => {
-      // prevent opening modal
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (!id || deletingId) return;
-
-      const label = (noteTitle || "Untitled").trim();
-      const ok = window.confirm(`Delete "${label}"? This cannot be undone.`);
+      const ok = window.confirm("Delete this note? This cannot be undone.");
       if (!ok) return;
 
       try {
-        setDeletingId(id);
-        await deleteNote(id);
+        setErr("");
+        setDeletingId(noteId);
+        await deleteNote(noteId);
 
-        setNotes((prev) => prev.filter((n) => n._id !== id));
-
-        // if they deleted the one currently opened, close modal
-        setActiveId((curr) => (curr === id ? null : curr));
-
-        // keep pagination sane (safePage effect will clamp)
-        setPage((p) => Math.max(1, p));
-      } catch (err) {
-        setErr(err?.message || "Failed to delete note");
+        setNotes((prev) => prev.filter((n) => String(n._id) !== String(noteId)));
+        setTotal((t) => Math.max(0, t - 1));
+      } catch (e) {
+        setErr(e?.message || "Failed to delete note");
       } finally {
         setDeletingId(null);
       }
@@ -203,51 +154,84 @@ const NotesListDrawer = ({
     [deleteNote, deletingId]
   );
 
+  const onDeletedFromModal = useCallback((id) => {
+    setNotes((prev) => prev.filter((n) => String(n._id) !== String(id)));
+    setTotal((t) => Math.max(0, t - 1));
+  }, []);
+
+  const onUpdatedFromModal = useCallback(
+    (updated) => {
+      if (!updated?._id) return;
+
+      setNotes((prev) => {
+        const idx = prev.findIndex((n) => String(n._id) === String(updated._id));
+        if (idx === -1) return prev;
+
+        const merged = {
+          ...prev[idx],
+          ...updated,
+          preview: updated.preview ?? shortPreview(updated.text),
+        };
+
+        const next = prev.slice();
+        next[idx] = merged;
+
+        if (isUpdatedAtDesc(sort)) {
+          next.splice(idx, 1);
+          next.unshift(merged);
+        }
+
+        return next;
+      });
+    },
+    [sort]
+  );
+
   if (!open) return null;
 
   return (
-    <div className="NotesListOverlay" role="dialog" aria-modal="true" onMouseDown={onClose}>
+    <div className="NotesListOverlay" onMouseDown={onClose}>
       <div className="NotesListCard" onMouseDown={(e) => e.stopPropagation()}>
         <div className="NotesListHeader">
-          <div className="NotesListTitle">{title}</div>
-          <button type="button" className="NotesListClose" onClick={onClose}>
+          <div className="NotesListTitle">Notes</div>
+          <button type="button" className="NotesListClose" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>
 
-        {/* controls row */}
         <div className="NotesListControls">
           <div className="NotesListControl">
-            <label className="NotesListControlLabel">Scope</label>
-            <select
-              className="NotesListSelect"
-              value={scope}
-              onChange={(e) => setScope(e.target.value)}
-              disabled={!canUseChapterScope}
-              title={!canUseChapterScope ? "Open from a chapter to enable this" : ""}
-            >
-              <option value="chapter">This chapter</option>
-              <option value="all">All notes</option>
+            <div className="NotesListControlLabel">Sort</div>
+            <select className="NotesListSelect" value={sort} onChange={(e) => setSort(e.target.value)}>
+              <option value="updatedAt:desc">Updated (new → old)</option>
+              <option value="updatedAt:asc">Updated (old → new)</option>
+              <option value="createdAt:desc">Created (new → old)</option>
+              <option value="createdAt:asc">Created (old → new)</option>
+              <option value="title:asc">Title (A → Z)</option>
+              <option value="title:desc">Title (Z → A)</option>
+              <option value="chapterId:asc">Chapter (A → Z)</option>
+              <option value="chapterId:desc">Chapter (Z → A)</option>
             </select>
           </div>
 
-          <div className="NotesListControl">
-            <label className="NotesListControlLabel">Sort</label>
-            <select
+          <div className="NotesListControl" style={{ flex: 1, minWidth: 0 }}>
+            <div className="NotesListControlLabel">Search</div>
+            <input
               className="NotesListSelect"
-              value={sortMode}
-              onChange={(e) => setSortMode(e.target.value)}
-            >
-              <option value="recent">Most recent</option>
-              <option value="oldest">Oldest</option>
-              <option value="chapter">By chapter</option>
-            </select>
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search title or text…"
+            />
           </div>
         </div>
 
         <div className="NotesListSub">
-          <span className="NotesListSubLabel">{filterLabel}</span>
-          <span className="NotesListCount">{totalNotes}</span>
+          <div>
+            Total: <b>{total}</b>
+          </div>
+          <div>
+            Page <b>{page}</b> / {totalPages}
+          </div>
         </div>
 
         {err && (
@@ -256,99 +240,88 @@ const NotesListDrawer = ({
           </div>
         )}
 
-        {loading && <div className="NotesListLoading">Loading…</div>}
-
-        {!loading && !err && totalNotes === 0 && (
+        {loading ? (
+          <div className="NotesListLoading">Loading…</div>
+        ) : notes.length === 0 ? (
           <div className="NotesListEmpty">No notes found.</div>
-        )}
-
-        {!loading && !err && totalNotes > 0 && (
+        ) : (
           <ul className="NotesList" ref={listRef}>
-            {pageNotes.map((n) => (
-              <li key={n._id} className="NotesListItem">
-                <button
-                  type="button"
-                  className="NotesListItemBtn"
-                  onClick={() => setActiveId(n._id)}
-                >
-                  <div className="NotesListItemTop">
-                    <div className="NotesListItemTitle">{n.title || "Untitled"}</div>
+            {notes.map((note, i) => {
+              const preview = note.preview ?? shortPreview(note.text);
+              const refText = formatRef(note);
 
-                    {/* right side: ref + trash */}
-                    <div className="NotesListItemTopRight">
-                      <div className="NotesListItemRef">{formatRef(n)}</div>
-                    </div>
-                  </div>
-                  <div className="NotesListItemFlex">
-                    <div className="NotesListItemDescFlex">
-                      <div className="NotesListItemPreview">{shortPreview(n.preview ?? n.text)}</div>
-                      <div className="NotesListItemMeta">
-                        {n.updatedAt ? new Date(n.updatedAt).toLocaleString() : "—"}
+              return (
+                <li key={note._id}>
+                  <button
+                    type="button"
+                    className="NotesListItemBtn"
+                    onClick={() => onOpenNote(note._id)}
+                    ref={i === 0 ? sampleItemRef : undefined}
+                  >
+                    <div className="NotesListItemFlex">
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div className="NotesListItemTop">
+                          <div className="NotesListItemTitle">{note.title || "(Untitled)"}</div>
+
+                          <div className="NotesListItemTopRight">
+                            <div className="NotesListItemRef">{refText}</div>
+
+                            <button
+                              type="button"
+                              className="NotesListTrashBtn"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onTrash(note._id);
+                              }}
+                              disabled={!!deletingId}
+                              aria-label="Delete note"
+                              title="Delete note"
+                            >
+                              {deletingId === note._id ? "…" : "🗑"}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="NotesListItemPreview">{preview}</div>
+
+                        {note.updatedAt && (
+                          <div className="NotesListItemMeta">
+                            Updated: {new Date(note.updatedAt).toLocaleString()}
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      className="NotesListTrashBtn"
-                      onClick={(e) => handleDeleteNote(e, n._id, n.title)}
-                      disabled={deletingId === n._id}
-                      aria-label="Delete note"
-                      title="Delete"
-                    >
-                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                        <path
-                          fill="currentColor"
-                          d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v10h-2V9zm4 0h2v10h-2V9zM7 9h2v10H7V9zm-1 12h12a2 2 0 0 0 2-2V7H4v12a2 2 0 0 0 2 2z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </button>
-              </li>
-            ))}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
 
-        {totalPages > 1 && (
-          <div className="NotesListPager">
-            <button
-              type="button"
-              className="NotesListPagerBtn"
-              onClick={goPrev}
-              disabled={!canPrevPage}
-              aria-label="Previous page"
-            >
-              ←
-            </button>
+        <div className="NotesListPager">
+          <button className="NotesListPagerBtn" onClick={onPrev} disabled={page <= 1}>
+            Prev
+          </button>
 
-            <div className="NotesListPagerText">
-              Page {safePage} / {totalPages}
-            </div>
-
-            <button
-              type="button"
-              className="NotesListPagerBtn"
-              onClick={goNext}
-              disabled={!canNextPage}
-              aria-label="Next page"
-            >
-              →
-            </button>
+          <div className="NotesListPagerText">
+            Page <b>{page}</b> / {totalPages} · {pageSize} per page
           </div>
-        )}
 
-        {activeId && (
-          <NoteDetailModal
-            noteId={activeId}
-            onClose={() => setActiveId(null)}
-            onDeleted={(deletedId) => {
-              setNotes((prev) => prev.filter((n) => n._id !== deletedId));
-              setActiveId(null);
-              setPage(1);
-            }}
-          />
-        )}
+          <button className="NotesListPagerBtn" onClick={onNext} disabled={page >= totalPages}>
+            Next
+          </button>
+        </div>
+
+        <NoteDetailModal
+          noteId={activeNoteId}
+          onClose={() => setActiveNoteId(null)}
+          onOpenPassage={onOpenPassage}
+          onDeleted={onDeletedFromModal}
+          onUpdated={onUpdatedFromModal}
+        />
       </div>
-    </div >
+    </div>
   );
 };
 

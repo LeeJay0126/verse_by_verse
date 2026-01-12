@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  padding: 10px 20px;
 }
 
 .NoteDetailTop {
@@ -106,4 +107,10 @@
 
 .NoteBtnGhost {
   background: transparent;
+}
+
+.NoteModalDeleteBtn {
+  color: white;
+  padding: 3px 5px;
+  margin: 3px 15px;
 }

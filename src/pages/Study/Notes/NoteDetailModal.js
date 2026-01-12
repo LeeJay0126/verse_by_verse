@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import { useNotesApi } from "./useNotesApi";
 import NoteDetail from "./NoteDetails";
 
-const NoteDetailModal = ({ noteId, onClose, onOpenPassage, onDeleted }) => {
+const NoteDetailModal = ({ noteId, onClose, onOpenPassage, onDeleted, onUpdated }) => {
   const { deleteNote } = useNotesApi();
 
   const [deleting, setDeleting] = useState(false);
@@ -21,10 +21,7 @@ const NoteDetailModal = ({ noteId, onClose, onOpenPassage, onDeleted }) => {
 
       await deleteNote(noteId);
 
-      // Tell parent (drawer) so it can remove it from the list immediately
       onDeleted?.(noteId);
-
-      // Close modal
       onClose?.();
     } catch (e) {
       setDeleteErr(e.message || "Failed to delete note");
@@ -38,7 +35,6 @@ const NoteDetailModal = ({ noteId, onClose, onOpenPassage, onDeleted }) => {
   return (
     <div className="NoteModalOverlay" role="dialog" aria-modal="true" onMouseDown={onClose}>
       <div className="NoteModalCard" onMouseDown={(e) => e.stopPropagation()}>
-        {/* action row */}
         <div className="NoteModalActions">
           {deleteErr && (
             <div className="NoteModalError" role="alert">
@@ -46,13 +42,7 @@ const NoteDetailModal = ({ noteId, onClose, onOpenPassage, onDeleted }) => {
             </div>
           )}
 
-          <button
-            type="button"
-            className="NoteModalDeleteBtn"
-            onClick={onDelete}
-            disabled={deleting}
-            aria-label="Delete note"
-          >
+          <button type="button" className="NoteModalDeleteBtn" onClick={onDelete} disabled={deleting}>
             {deleting ? "Deleting…" : "Delete"}
           </button>
         </div>
@@ -61,6 +51,7 @@ const NoteDetailModal = ({ noteId, onClose, onOpenPassage, onDeleted }) => {
           noteId={noteId}
           onClose={onClose}
           onOpenPassage={onOpenPassage}
+          onUpdated={onUpdated} 
         />
       </div>
     </div>
