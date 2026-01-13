@@ -10,7 +10,6 @@ import NotesListDrawer from "./Notes/NotesListDrawer";
 
 import "./Bible.css";
 
-// Static chapter counts for Korean ibibles.net mapping
 const KOR_CHAPTER_COUNTS = {
   ge: 50, exo: 40, lev: 27, num: 36, deu: 34,
   josh: 24, jdgs: 21, ruth: 4, "1sm": 31, "2sm": 24,
@@ -43,10 +42,10 @@ const Bible = () => {
   const { getChapterNote, saveChapterNote } = useNotes();
   const [isNotesListOpen, setIsNotesListOpen] = useState(false);
 
+  const [passageRange, setPassageRange] = useState(null);
 
   const hasChapter = !!currChapterId;
 
-  // For logged out users
   const requireAuthForNotes = useCallback(() => {
     if (!user) {
       navigate("/bible/walkthrough", { state: { from: "notes" } });
@@ -55,14 +54,12 @@ const Bible = () => {
     return true;
   }, [user, navigate]);
 
-  // Redirect logged-out users to Bible walkthrough
   useEffect(() => {
     if (!user) {
       navigate("/bible/walkthrough", { replace: true });
     }
   }, [user, navigate]);
 
-  // Note indicator (dot) if saved note exists for this chapter
   const hasNoteForChapter = useMemo(() => {
     if (!currChapterId) return false;
     const entry = getChapterNote?.(currChapterId);
@@ -71,7 +68,6 @@ const Bible = () => {
     return Boolean(title || text);
   }, [currChapterId, getChapterNote]);
 
-  // ---- Load books when version changes ----
   useEffect(() => {
     if (!user) return;
 
@@ -93,13 +89,13 @@ const Bible = () => {
     setCurrBook({ id: null, name: "" });
     setCurrentChapterId(null);
     setIsNotesOpen(false);
+    setPassageRange(null);
 
     return () => {
       cancelled = true;
     };
   }, [currVersion, user]);
 
-  // ---- Helper: fetch/load chapters for a given book ----
   const fetchChapters = useCallback(
     async (bookId) => {
       if (!user) return [];
@@ -256,26 +252,70 @@ const Bible = () => {
     isNotesOpen,
   ]);
 
-  // While redirecting, render nothing
+  const onOpenPassage = useCallback(
+    async (note) => {
+      if (!note?.chapterId) return;
+
+      if (note?.bibleId && note.bibleId !== currVersion) {
+        setCurrVersion(note.bibleId);
+      }
+
+      const chap = String(note.chapterId);
+      const [noteBookId] = chap.split(".");
+      const bookIdx = booksOrder.findIndex((b) => b.id === noteBookId);
+
+      const pickBookObj =
+        bookIdx >= 0
+          ? booksOrder[bookIdx]
+          : { id: noteBookId || null, name: noteBookId || "" };
+
+      setCurrBook(pickBookObj);
+      setCurrentChapterId(chap);
+
+      if (note.rangeStart == null || note.rangeEnd == null) {
+        setPassageRange(null);
+      } else {
+        const s = Number(note.rangeStart);
+        const e = Number(note.rangeEnd);
+        setPassageRange({
+          start: Number.isNaN(s) ? null : s,
+          end: Number.isNaN(e) ? null : e,
+        });
+      }
+
+      setIsNotesListOpen(false);
+      setIsNotesOpen(false);
+    },
+    [booksOrder, currVersion]
+  );
+
   if (!user) return null;
 
   return (
     <section className="ReadBible">
       <BibleVersion
         disabled={isNotesOpen}
-        setChapter={setCurrentChapterId}
+        setChapter={(id) => {
+          setCurrentChapterId(id);
+          setPassageRange(null);
+        }}
         book={currBook}
         setBook={(b) => {
           if (!b) {
             setCurrBook({ id: null, name: "" });
             setCurrentChapterId(null);
+            setPassageRange(null);
             return;
           }
           setCurrBook(b);
           setCurrentChapterId(null);
+          setPassageRange(null);
         }}
         currVersionId={currVersion}
-        setCurrentVersion={(v) => setCurrVersion(v)}
+        setCurrentVersion={(v) => {
+          setCurrVersion(v);
+          setPassageRange(null);
+        }}
         notesDisabled={false}
         notesActive={isNotesListOpen}
         notesHasNote={hasNoteForChapter}
@@ -291,8 +331,8 @@ const Bible = () => {
         onClose={() => setIsNotesListOpen(false)}
         bibleId={currVersion}
         chapterId={currChapterId || ""}
+        onOpenPassage={onOpenPassage}
       />
-
 
       <Verse
         chapterId={currChapterId}
@@ -306,6 +346,8 @@ const Bible = () => {
         setIsNotesOpen={setIsNotesOpen}
         getChapterNote={getChapterNote}
         saveChapterNote={saveChapterNote}
+        requireAuthForNotes={requireAuthForNotes}
+        passageRange={passageRange}
       />
     </section>
   );

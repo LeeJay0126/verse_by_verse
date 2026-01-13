@@ -47,7 +47,6 @@ const NotesListDrawer = ({
   const [activeNoteId, setActiveNoteId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
-  // Fit paging to drawer height (minimal logic, no CSS changes required)
   const listRef = useRef(null);
   const sampleItemRef = useRef(null);
 
@@ -79,14 +78,15 @@ const NotesListDrawer = ({
     };
   }, [open]);
 
-
-  // reset to page 1 when scope changes
   useEffect(() => {
     setPage(1);
   }, [open, bibleId, bookId, chapterId, q, sort]);
 
   const offset = useMemo(() => (page - 1) * pageSize, [page, pageSize]);
-  const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize) || 1), [total, pageSize]);
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(total / pageSize) || 1),
+    [total, pageSize]
+  );
 
   const fetchNotes = useCallback(async () => {
     if (!open) return;
@@ -111,7 +111,6 @@ const NotesListDrawer = ({
       setNotes(incoming);
       setTotal(incomingTotal);
 
-      // keep page in range if pageSize changed
       const maxPage = Math.max(1, Math.ceil(incomingTotal / pageSize) || 1);
       if (page > maxPage) setPage(maxPage);
     } catch (e) {
@@ -130,7 +129,6 @@ const NotesListDrawer = ({
 
   const onOpenNote = useCallback((id) => setActiveNoteId(id), []);
 
-  // Drawer quick delete (trash icon)
   const onTrash = useCallback(
     async (noteId) => {
       if (!noteId || deletingId) return;
