@@ -34,6 +34,7 @@ const NotesListDrawer = ({
 
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("updatedAt:desc");
+  const [scope, setScope] = useState("chapter");
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
@@ -80,7 +81,7 @@ const NotesListDrawer = ({
 
   useEffect(() => {
     setPage(1);
-  }, [open, bibleId, bookId, chapterId, q, sort]);
+  }, [open, bibleId, bookId, chapterId, q, sort, scope]);
 
   const offset = useMemo(() => (page - 1) * pageSize, [page, pageSize]);
   const totalPages = useMemo(
@@ -99,7 +100,7 @@ const NotesListDrawer = ({
         q,
         bibleId,
         bookId,
-        chapterId,
+        chapterId: scope === "all" ? "" : chapterId,
         sort,
         limit: pageSize,
         offset,
@@ -118,7 +119,19 @@ const NotesListDrawer = ({
     } finally {
       setLoading(false);
     }
-  }, [open, listNotes, q, bibleId, bookId, chapterId, sort, pageSize, offset, page]);
+  }, [
+    open,
+    listNotes,
+    q,
+    bibleId,
+    bookId,
+    chapterId,
+    scope,
+    sort,
+    pageSize,
+    offset,
+    page,
+  ]);
 
   useEffect(() => {
     fetchNotes();
@@ -209,6 +222,14 @@ const NotesListDrawer = ({
               <option value="title:desc">Title (Z → A)</option>
               <option value="chapterId:asc">Chapter (A → Z)</option>
               <option value="chapterId:desc">Chapter (Z → A)</option>
+            </select>
+          </div>
+
+          <div className="NotesListControl">
+            <div className="NotesListControlLabel">View</div>
+            <select className="NotesListSelect" value={scope} onChange={(e) => setScope(e.target.value)}>
+              <option value="chapter">Current chapter</option>
+              <option value="all">All chapters</option>
             </select>
           </div>
 
