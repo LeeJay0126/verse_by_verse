@@ -12,15 +12,12 @@ const Verse = ({
   onNext,
   canPrev,
   canNext,
-
-  // notes props (from Bible.jsx)
   isNotesOpen,
   setIsNotesOpen,
   getChapterNote,
   saveChapterNote,
-
-  // auth guard (from Bible.jsx)
   requireAuthForNotes,
+  passageRange,
 }) => {
   const { user, initializing } = useAuth();
 
@@ -64,7 +61,6 @@ const Verse = ({
         setVerseTexts({});
         setLoading(true);
 
-        // reset selection when chapter changes
         setActiveRange(null);
         setRangeModalOpen(false);
         setRangeStart(null);
@@ -72,7 +68,6 @@ const Verse = ({
         setRangeAnchor(null);
         setIsNotesOpen?.(false);
 
-        // ---------- KOREAN ----------
         if (currVersionId === "kor") {
           const res = await fetch(`/api/passage/${currVersionId}/${chapterId}`, {
             signal: controller.signal,
@@ -89,13 +84,10 @@ const Verse = ({
           }));
 
           setVerses(normalized.map((v) => ({ id: v.id, number: v.number })));
-          setVerseTexts(
-            Object.fromEntries(normalized.map((v) => [v.id, v.text]))
-          );
+          setVerseTexts(Object.fromEntries(normalized.map((v) => [v.id, v.text])));
           return;
         }
 
-        // ---------- NON-KOREAN ----------
         const url = new URL(
           `https://api.scripture.api.bible/v1/bibles/${currVersionId}/chapters/${chapterId}/verses`
         );
@@ -161,12 +153,35 @@ const Verse = ({
     return () => controller.abort();
   }, [currVersionId, chapterId, setIsNotesOpen]);
 
-  // Available verse numbers for range picker
   const verseNumbers = useMemo(() => {
     const nums = verses.map((v) => Number(v.number)).filter((n) => !Number.isNaN(n));
     nums.sort((a, b) => a - b);
     return nums;
   }, [verses]);
+
+  const minVerse = verseNumbers[0] ?? null;
+  const maxVerse = verseNumbers[verseNumbers.length - 1] ?? null;
+
+  useEffect(() => {
+    if (!hasChapter) return;
+
+    if (!passageRange || passageRange.start == null || passageRange.end == null) {
+      setActiveRange(null);
+      return;
+    }
+
+    const s = Number(passageRange.start);
+    const e = Number(passageRange.end);
+    if (Number.isNaN(s) || Number.isNaN(e)) return;
+
+    const start = Math.min(s, e);
+    const end = Math.max(s, e);
+
+    const boundedStart = minVerse != null ? Math.max(start, minVerse) : start;
+    const boundedEnd = maxVerse != null ? Math.min(end, maxVerse) : end;
+
+    setActiveRange({ start: boundedStart, end: boundedEnd });
+  }, [passageRange, hasChapter, chapterId, currVersionId, minVerse, maxVerse]);
 
   const startOptions = useMemo(() => {
     if (!verseNumbers.length) return [];
@@ -183,17 +198,12 @@ const Verse = ({
     return idx >= 0 ? verseNumbers.slice(idx) : verseNumbers;
   }, [verseNumbers, rangeStart, rangeAnchor]);
 
-  const minVerse = verseNumbers[0] ?? null;
-  const maxVerse = verseNumbers[verseNumbers.length - 1] ?? null;
-
-  // Display only selected range if activeRange is set
   const visibleVerses = useMemo(() => {
     if (!activeRange) return verses;
     const { start, end } = activeRange;
     return verses.filter((v) => v.number >= start && v.number <= end);
   }, [verses, activeRange]);
 
-  // Pair verses visually: 2 verses per line
   const pairedVerses = useMemo(() => {
     const out = [];
     for (let i = 0; i < visibleVerses.length; i += 2) {
@@ -204,7 +214,6 @@ const Verse = ({
 
   const showArrows = hasChapter && (canPrev || canNext);
 
-  // Notes syncing (range-aware key + title fallback)
   useEffect(() => {
     if (!hasChapter) {
       setIsNotesOpen?.(false);
@@ -216,30 +225,24 @@ const Verse = ({
     if (isNotesOpen) {
       const existing = getChapterNote?.(noteKey);
 
-      const rangeLabel =
-        activeRange ? ` (v${activeRange.start}–${activeRange.end})` : "";
+      const rangeLabel = activeRange ? ` (v${activeRange.start}–${activeRange.end})` : "";
       const fallbackTitle = `Notes — ${book?.name || ""} ${chapterNumber}${rangeLabel}`.trim();
 
-      const existingTitle =
-        typeof existing === "string" ? "" : existing?.title || "";
-      const existingText =
-        typeof existing === "string" ? existing : existing?.text || "";
+      const existingTitle = typeof existing === "string" ? "" : existing?.title || "";
+      const existingText = typeof existing === "string" ? existing : existing?.text || "";
 
       setNoteTitleDraft(existingTitle || fallbackTitle);
       setNoteDraft(existingText || "");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isNotesOpen, hasChapter, noteKey, activeRange, chapterNumber, book?.name]);
+  }, [isNotesOpen, hasChapter, noteKey, activeRange, chapterNumber, book?.name, setIsNotesOpen, getChapterNote]);
 
-  // Keyboard navigation (disable while notes or range modal open)
   useEffect(() => {
     if (!hasChapter) return;
 
     const onKeyDown = (e) => {
       const el = e.target;
       const typing =
-        el &&
-        (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+        el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
       if (typing) return;
 
       if (rangeModalOpen) {
@@ -272,14 +275,12 @@ const Verse = ({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [hasChapter, canPrev, canNext, onPrev, onNext, isNotesOpen, setIsNotesOpen, rangeModalOpen]);
 
-  // clicking a verse opens range picker modal
   const openRangeModalFromVerse = (verseNumber) => {
     if (!hasChapter) return;
 
     const n = Number(verseNumber);
     if (Number.isNaN(n)) return;
 
-    // close notes if open
     setIsNotesOpen?.(false);
 
     setRangeAnchor(n);
@@ -303,7 +304,6 @@ const Verse = ({
 
     setActiveRange({ start: boundedStart, end: boundedEnd });
 
-    // close range modal
     setRangeModalOpen(false);
 
     if (requireAuthForNotes && !requireAuthForNotes()) return;
@@ -346,7 +346,6 @@ const Verse = ({
     }
   };
 
-
   const normalizeText = (t) => (t ?? "").toString().replace(/\s+/g, " ").trim();
 
   return (
@@ -383,7 +382,6 @@ const Verse = ({
         )}
       </h2>
 
-      {/* Range Picker Modal */}
       {rangeModalOpen && (
         <div
           className="rangeModalOverlay"
@@ -415,7 +413,6 @@ const Verse = ({
                     const nextStart = Number(e.target.value);
                     setRangeStart(nextStart);
 
-                    // keep end >= start
                     if (rangeEnd == null || Number(rangeEnd) < nextStart) {
                       setRangeEnd(nextStart);
                     }
@@ -469,7 +466,6 @@ const Verse = ({
         </div>
       )}
 
-      {/* Notes editor (fixed bottom sheet) */}
       {hasChapter && isNotesOpen && (
         <section className="chapterNotesShell" aria-label="Chapter notes editor">
           <div className="chapterNotesInner">
