@@ -1,16 +1,15 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import "./CommunityBody.css";
 
 import { FaPlus } from "react-icons/fa6";
 import { PiBookOpenLight } from "react-icons/pi";
 import { LuNotebookPen } from "react-icons/lu";
 import CommunityCard from "./CommunityCard";
-import Time from "../../component/utils/Time";
 import { apiFetch } from "../../component/utils/ApiFetch";
+import { normalizeCommunity } from "../../component/utils/communityNormalize";
+import { COMMUNITY_ACTIVITY_EVENT } from "../../component/utils/CommunityEvents";
 
 const MAX_DISCOVER_VISIBLE = 15;
-
-const formatLastActive = Time;
 
 const CommunityBody = () => {
   const [activeTab, setActiveTab] = useState("my");
@@ -18,7 +17,6 @@ const CommunityBody = () => {
   const [showAllDiscover, setShowAllDiscover] = useState(false);
   const [gridCols, setGridCols] = useState(3);
 
-  // separate visible counts for each tab
   const [visibleMyCount, setVisibleMyCount] = useState(0);
   const [visibleDiscoverCount, setVisibleDiscoverCount] = useState(0);
 
@@ -30,56 +28,60 @@ const CommunityBody = () => {
   const [myCommunities, setMyCommunities] = useState([]);
   const [discoverCommunities, setDiscoverCommunities] = useState([]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await apiFetch("/community/my");
-        const data = await res.json();
-        if (!res.ok || !data.ok) return;
+  const fetchMy = useCallback(async () => {
+    try {
+      const res = await apiFetch("/community/my");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) return;
 
-        const mapped = (data.communities || [])
-          .map((c) => ({
-            ...c,
-            lastActivityAt: c.lastActivityAt,
-            lastActive: formatLastActive(c.lastActivityAt),
-            my: true,
-          }))
-          .sort((a, b) => new Date(b.lastActivityAt) - new Date(a.lastActivityAt));
+      const mapped = (data.communities || [])
+        .map((c) => ({
+          ...normalizeCommunity(c),
+          my: true,
+        }))
+        .sort((a, b) => new Date(b.lastActivityAt) - new Date(a.lastActivityAt));
 
-        setMyCommunities(mapped);
-      } catch (err) {
-        console.error("[/community/my]", err);
-      }
-    })();
+      setMyCommunities(mapped);
+    } catch (err) {
+      console.error("[/community/my]", err);
+    }
+  }, []);
+
+  const fetchDiscover = useCallback(async () => {
+    try {
+      const res = await apiFetch("/community/discover");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) return;
+
+      const mapped = (data.communities || [])
+        .map((c) => ({
+          ...normalizeCommunity(c),
+          my: false,
+          role: null,
+        }))
+        .sort((a, b) => new Date(b.lastActivityAt) - new Date(a.lastActivityAt));
+
+      setDiscoverCommunities(mapped);
+    } catch (err) {
+      console.error("[/community/discover]", err);
+    }
   }, []);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await apiFetch("/community/discover");
-        const data = await res.json();
-        if (!res.ok || !data.ok) return;
+    fetchMy();
+    fetchDiscover();
+  }, [fetchMy, fetchDiscover]);
 
-        const mapped = (data.communities || [])
-          .map((c) => ({
-            ...c,
-            lastActivityAt: c.lastActivityAt,
-            lastActive: formatLastActive(c.lastActivityAt),
-            my: false,
-            role: null,
-          }))
-          .sort((a, b) => new Date(b.lastActivityAt) - new Date(a.lastActivityAt));
+  useEffect(() => {
+    const onActivity = () => {
+      fetchMy();
+      fetchDiscover();
+    };
 
-        setDiscoverCommunities(mapped);
-      } catch (err) {
-        console.error("[/community/discover]", err);
-      }
-    })();
-  }, []);
+    window.addEventListener(COMMUNITY_ACTIVITY_EVENT, onActivity);
+    return () => window.removeEventListener(COMMUNITY_ACTIVITY_EVENT, onActivity);
+  }, [fetchMy, fetchDiscover]);
 
-
-
-  // Sync visible counts with actual grid-template-columns
   useEffect(() => {
     const updateVisibleFromGrid = () => {
       if (!gridRef.current) return;
@@ -88,42 +90,32 @@ const CommunityBody = () => {
       const templateColumns = styles.getPropertyValue("grid-template-columns");
       if (!templateColumns) return;
 
-      // "1fr 1fr" → 2
       const cols = templateColumns
         .trim()
         .split(/\s+/)
         .filter(Boolean).length;
 
       setGridCols(cols);
-
-      // My tab: show up to cols or total communities
-      setVisibleMyCount((prev) => Math.min(cols, myCommunities.length || cols));
-
-      // Discover tab: initial visible count = cols (we'll cap to 15 later)
-      setVisibleDiscoverCount((prev) => cols);
+      setVisibleMyCount(Math.min(cols, myCommunities.length || cols));
+      setVisibleDiscoverCount(Math.min(cols, discoverCommunities.length || cols));
     };
 
     updateVisibleFromGrid();
     window.addEventListener("resize", updateVisibleFromGrid);
     return () => window.removeEventListener("resize", updateVisibleFromGrid);
-  }, [myCommunities.length, discoverCommunities.length, activeTab]);
+  }, [myCommunities.length, discoverCommunities.length, activeTab, gridCols]);
 
-
-  // --- My tab visible list ---
   const visibleMyCommunities = showAllMyCommunities
     ? myCommunities
     : myCommunities.slice(0, visibleMyCount);
 
-  // --- Discover tab visible list ---
   const maxDiscover = Math.min(MAX_DISCOVER_VISIBLE, discoverCommunities.length);
   const initialDiscoverCount = Math.min(visibleDiscoverCount, maxDiscover);
 
-  const visibleDiscoverCommunities = (showAllDiscover
+  const visibleDiscoverCommunities = showAllDiscover
     ? discoverCommunities.slice(0, maxDiscover)
-    : discoverCommunities.slice(0, initialDiscoverCount)
-  )
+    : discoverCommunities.slice(0, initialDiscoverCount);
 
-  // underline animation for active tab
   useEffect(() => {
     const tabRef = activeTab === "my" ? myRef : discoverRef;
     const underline = underlineRef.current;
@@ -148,8 +140,7 @@ const CommunityBody = () => {
 
         <button
           ref={discoverRef}
-          className={`communityBodyB ${activeTab === "discover" ? "active" : ""
-            }`}
+          className={`communityBodyB ${activeTab === "discover" ? "active" : ""}`}
           onClick={() => setActiveTab("discover")}
         >
           Discover
@@ -163,49 +154,26 @@ const CommunityBody = () => {
           <>
             <section className="communityCardGrid" ref={gridRef}>
               {visibleMyCommunities.map((community, index) => (
-                <CommunityCard
-                  key={community.id || index}
-                  id={community.id}
-                  header={community.header}
-                  subheader={community.subheader}
-                  content={community.content}
-                  members={community.members}
-                  lastActive={community.lastActive}
-                  role={community.role}
-                  my={community.my}
-                  type={community.type}
-                />
+                <CommunityCard key={community.id || index} {...community} />
               ))}
             </section>
 
-            {!showAllMyCommunities &&
-              myCommunities.length > visibleMyCount && (
-                <div className="communityShowMoreWrapper">
-                  <button
-                    className="communityShowMoreButton"
-                    onClick={() => setShowAllMyCommunities(true)}
-                  >
-                    Show More
-                  </button>
-                </div>
-              )}
+            {!showAllMyCommunities && myCommunities.length > visibleMyCount && (
+              <div className="communityShowMoreWrapper">
+                <button
+                  className="communityShowMoreButton"
+                  onClick={() => setShowAllMyCommunities(true)}
+                >
+                  Show More
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <>
             <section className="communityCardGrid" ref={gridRef}>
               {visibleDiscoverCommunities.map((community, index) => (
-                <CommunityCard
-                  key={community.id || index}
-                  id={community.id}
-                  header={community.header}
-                  subheader={community.subheader}
-                  content={community.content}
-                  members={community.members}
-                  lastActive={community.lastActive}
-                  role={community.role}
-                  my={community.my}
-                  type={community.type}
-                />
+                <CommunityCard key={community.id || index} {...community} />
               ))}
             </section>
 
