@@ -151,3 +151,8 @@
 .type-other {
     background-color: #bfb7aa;   /* darker neutral taupe */
 }
+
+.communityCardMeta {
+  font-size: 14px;
+  padding-bottom: 3px;
+}

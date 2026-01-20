@@ -20,10 +20,12 @@ const CommunityCard = (props) => {
     subheader,
     content,
     members,
+    membersCount,
+    membersList,
     lastActive,
     role,
     type,
-    my, // true if user is already a member
+    my,
   } = props;
 
   useEffect(() => {
@@ -48,8 +50,8 @@ const CommunityCard = (props) => {
     };
   }, [header, subheader, content]);
 
-  const getTypeClass = (type) => {
-    switch (type) {
+  const getTypeClass = (t) => {
+    switch (t) {
       case "Bible Study":
         return "type-bible-study";
       case "Read Through":
@@ -63,14 +65,23 @@ const CommunityCard = (props) => {
     }
   };
 
+  const memberCount =
+    typeof membersCount === "number"
+      ? membersCount
+      : typeof members === "number"
+        ? members
+        : Array.isArray(membersList)
+          ? membersList.length
+          : Array.isArray(members)
+            ? members.length
+            : 0;
+
   const handlePrimaryClick = () => {
     if (!id) return;
 
     if (my) {
-      // Member → go to my-posts in this community
       navigate(`/community/${id}/my-posts`);
     } else {
-      // Non-member → info/join page
       navigate(`/community/${id}/info`, {
         state: {
           community: {
@@ -78,31 +89,33 @@ const CommunityCard = (props) => {
             header,
             subheader,
             content,
-            members,
+            membersCount: memberCount,
             lastActive,
             role,
             type,
+            my: false,
           },
         },
       });
     }
   };
 
-
   return (
     <section className="CommunityCards">
       <h2
         ref={headerRef}
-        className={`communityCardHeader marqueeLine ${overflow.header ? "marqueeScrollable" : ""
-          }`}
+        className={`communityCardHeader marqueeLine ${
+          overflow.header ? "marqueeScrollable" : ""
+        }`}
       >
         <span className="marqueeInner">{header}</span>
       </h2>
 
       <h3
         ref={subheaderRef}
-        className={`communityCardSubHeader marqueeLine ${overflow.subheader ? "marqueeScrollable" : ""
-          }`}
+        className={`communityCardSubHeader marqueeLine ${
+          overflow.subheader ? "marqueeScrollable" : ""
+        }`}
       >
         <span className="marqueeInner">{subheader}</span>
       </h3>
@@ -110,15 +123,17 @@ const CommunityCard = (props) => {
       {content ? (
         <p
           ref={contentRef}
-          className={`communityCardContent marqueeLine ${overflow.content ? "marqueeScrollable" : ""
-            }`}
+          className={`communityCardContent marqueeLine ${
+            overflow.content ? "marqueeScrollable" : ""
+          }`}
         >
           <span className="marqueeInner">{content}</span>
         </p>
       ) : null}
 
-      <p className="communityCardContent">
-        {members} members, {lastActive}
+      <p className="communityCardMeta">
+        {memberCount} member{memberCount === 1 ? "" : "s"}
+        {lastActive ? `, ${lastActive}` : ""}
       </p>
 
       <div className="communityCardTags">

@@ -26,6 +26,7 @@ import { NotesProvider } from "./component/context/NotesContext";
 import BibleWalkthrough from "./pages/Study/BibleWalkthrough";
 import NotesPage from "./pages/Study/Notes/NotesPage";
 import NotePage from "./pages/Study/Notes/NotePage";
+import CommunityOverview from "./pages/Community/myCommunity/CommunityOverview";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
               <ToastProvider>
                 <Routes>
                   <Route path="/" exact element={<Home />} />
+                  <Route path="/community/:communityId" element={<CommunityOverview />} />
                   <Route path="/study" exact element={<Study />} />
                   <Route path="/community" exact element={<Community />} />
                   <Route path="/contact" exact element={<Contact />} />
