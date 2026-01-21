@@ -18,16 +18,11 @@ const CommunityInfo = () => {
   const [community, setCommunity] = useState(initialCommunity);
   const [loading, setLoading] = useState(!initialCommunity);
   const [error, setError] = useState("");
-  const [joinStatus, setJoinStatus] = useState("idle"); // idle | loading | requested | error
+  const [joinStatus, setJoinStatus] = useState("idle");
 
-  const API_BASE =
-    process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
+  const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
+  const DEFAULT_HERO = "/community/CommunityDefaultHero.png";
 
-  const DEFAULT_HERO =
-    "/community/CommunityDefaultHero.png";
-
-
-  // Always fetch full community detail so we get owner, leaders, members, etc.
   useEffect(() => {
     if (!communityId) return;
 
@@ -36,8 +31,7 @@ const CommunityInfo = () => {
         setLoading(true);
         setError("");
 
-        const res = await apiFetch(
-          `/community/${communityId}`);
+        const res = await apiFetch(`/community/${communityId}`);
         const data = await res.json();
 
         if (!data.ok) {
@@ -65,15 +59,10 @@ const CommunityInfo = () => {
     try {
       setJoinStatus("loading");
 
-      const res = await apiFetch(
-        `/community/${community.id}/request-join`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await apiFetch(`/community/${community.id}/request-join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
 
       const data = await res.json();
       if (!res.ok || !data.ok) {
@@ -109,9 +98,7 @@ const CommunityInfo = () => {
       <section className="CommunityInfo">
         <PageHeader />
         <div className="CommunityInfoBody">
-          <p className="CommunityInfoError">
-            {error || "Community not found."}
-          </p>
+          <p className="CommunityInfoError">{error || "Community not found."}</p>
           <button
             className="CommunityInfoBackButton"
             onClick={() => navigate(-1)}
@@ -136,7 +123,6 @@ const CommunityInfo = () => {
     heroImageUrl,
   } = community;
 
-  // Normalize members for display (array vs number)
   const rawMembers = members;
   const memberList = Array.isArray(rawMembers) ? rawMembers : [];
 
@@ -154,21 +140,18 @@ const CommunityInfo = () => {
         ? "Requested"
         : "Request to Join";
 
-  const joinDisabled =
-    joinStatus === "loading" || joinStatus === "requested";
+  const joinDisabled = joinStatus === "loading" || joinStatus === "requested";
 
   const MAX_DISPLAY_USERS = 5;
 
-  const formatUserLabel = (user) => {
-    if (!user) return "—";
-    if (user.username) return user.username;
-    if (user.fullName) return user.fullName;
+  const formatUserLabel = (u) => {
+    if (!u) return "—";
+    if (u.username) return u.username;
+    if (u.fullName) return u.fullName;
     return "Unknown";
   };
 
-  const heroBackgroundUrl = heroImageUrl
-    ? `${API_BASE}${heroImageUrl}` // if backend returns "/uploads/..."
-    : DEFAULT_HERO;
+  const heroBackgroundUrl = heroImageUrl ? `${API_BASE}${heroImageUrl}` : DEFAULT_HERO;
 
   const heroStyle = {
     backgroundImage: `url("${heroBackgroundUrl}")`,
@@ -189,23 +172,11 @@ const CommunityInfo = () => {
     <section className="CommunityInfo">
       <div className="CommunityInfoHero" style={heroStyle}>
         <PageHeader />
-
-        <button
-          type="button"
-          className="CommunityBackArrow"
-          onClick={() => navigate("/community")}
-          aria-label="Back to Communities"
-          title="Back to Communities"
-        >
-          ←
-        </button>
-
         <header className="CommunityInfoHeader">
           <h1 className="CommunityInfoTitle">{header}</h1>
           {subheader && <p className="CommunityInfoSubtitle">{subheader}</p>}
         </header>
       </div>
-
 
       <section className="CommunityInfoMeta">
         <div className="CommunityInfoMetaItem">
@@ -222,16 +193,12 @@ const CommunityInfo = () => {
 
         <div className="CommunityInfoMetaItem">
           <span className="CommunityInfoMetaLabel">Last active</span>
-          <span className="CommunityInfoMetaValue">
-            {lastActive || "—"}
-          </span>
+          <span className="CommunityInfoMetaValue">{lastActive || "—"}</span>
         </div>
       </section>
 
       <section className="CommunityInfoDescription">
-        <h2 className="CommunityInfoDescriptionTitle">
-          About this community
-        </h2>
+        <h2 className="CommunityInfoDescriptionTitle">About this community</h2>
         <p className="CommunityInfoDescriptionText">
           {content || "No description has been added yet."}
         </p>
@@ -241,7 +208,6 @@ const CommunityInfo = () => {
         <h2 className="CommunityInfoPeopleTitle">People in this community</h2>
 
         <div className="CommunityInfoPeopleGrid">
-          {/* Owner */}
           <div className="CommunityInfoPeopleBlock">
             <span className="CommunityInfoMetaLabel">Owner</span>
             <span className="CommunityInfoMetaValue">
@@ -255,42 +221,36 @@ const CommunityInfo = () => {
             </span>
           </div>
 
-          {/* Leaders */}
           <div className="CommunityInfoPeopleBlock">
             <span className="CommunityInfoMetaLabel">Leaders</span>
             {leaders.length === 0 ? (
               <span className="CommunityInfoMetaValue">None yet</span>
             ) : (
               <ul className="CommunityInfoUserList">
-                {displayedLeaders.map((user) => (
-                  <li key={user.id} className="CommunityInfoUserItem">
+                {displayedLeaders.map((u) => (
+                  <li key={u.id} className="CommunityInfoUserItem">
                     <span className="CommunityInfoUserTag CommunityInfoLeaderTag">
-                      {formatUserLabel(user)}
+                      {formatUserLabel(u)}
                     </span>
                   </li>
                 ))}
-                {hasMoreLeaders && (
-                  <li className="CommunityInfoUserMore">…</li>
-                )}
+                {hasMoreLeaders && <li className="CommunityInfoUserMore">…</li>}
               </ul>
             )}
           </div>
 
-          {/* Members */}
           <div className="CommunityInfoPeopleBlock">
             <span className="CommunityInfoMetaLabel">Members</span>
             {memberList.length === 0 ? (
               <span className="CommunityInfoMetaValue">No members yet</span>
             ) : (
               <ul className="CommunityInfoUserList">
-                {displayedMembers.map((user) => (
-                  <li key={user.id} className="CommunityInfoUserItem">
-                    {formatUserLabel(user)}
+                {displayedMembers.map((u) => (
+                  <li key={u.id} className="CommunityInfoUserItem">
+                    {formatUserLabel(u)}
                   </li>
                 ))}
-                {hasMoreMembers && (
-                  <li className="CommunityInfoUserMore">…</li>
-                )}
+                {hasMoreMembers && <li className="CommunityInfoUserMore">…</li>}
               </ul>
             )}
           </div>

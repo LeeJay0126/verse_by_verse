@@ -39,14 +39,11 @@ const MyCommunity = () => {
   const fetchCommunity = useCallback(async () => {
     try {
       setCommunityErr("");
-
       const res = await apiFetch(`/community/${communityId}`);
       const data = await res.json().catch(() => ({}));
-
       if (!res.ok || !data.ok) {
         throw new Error(data.error || `Failed to load community (${res.status})`);
       }
-
       setCommunity(data.community || null);
     } catch (error) {
       console.error("[MyCommunity] fetchCommunity error:", error);
@@ -58,14 +55,11 @@ const MyCommunity = () => {
     try {
       setLoading(true);
       setErr("");
-
       const res = await apiFetch(`/community/${communityId}/posts`);
       const data = await res.json().catch(() => ({}));
-
       if (!res.ok || !data.ok) {
         throw new Error(data.error || `Failed to load posts (${res.status})`);
       }
-
       setPosts(data.posts || []);
     } catch (error) {
       console.error("[MyCommunity] fetchPosts error:", error);
@@ -75,19 +69,16 @@ const MyCommunity = () => {
     }
   }, [communityId]);
 
-  // Initial load
   useEffect(() => {
     fetchCommunity();
     fetchPosts();
   }, [fetchCommunity, fetchPosts]);
 
-  // Refresh this page when activity happens elsewhere (reply/vote/etc)
   useEffect(() => {
     const onActivity = () => {
       fetchCommunity();
       fetchPosts();
     };
-
     window.addEventListener(COMMUNITY_ACTIVITY_EVENT, onActivity);
     return () => window.removeEventListener(COMMUNITY_ACTIVITY_EVENT, onActivity);
   }, [fetchCommunity, fetchPosts]);
@@ -111,26 +102,19 @@ const MyCommunity = () => {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok || !data.ok) {
-        return {
-          ok: false,
-          message: data.error || "Failed to create post.",
-        };
+        return { ok: false, message: data.error || "Failed to create post." };
       }
 
       await fetchPosts();
       await fetchCommunity();
 
-      // 🔔 tell CommunityBody cards to refresh lastActive
       emitCommunityActivityUpdated();
 
       setShowNewPostModal(false);
       return { ok: true };
     } catch (error) {
       console.error("[MyCommunity] handleCreatePost error:", error);
-      return {
-        ok: false,
-        message: error.message || "Failed to create post.",
-      };
+      return { ok: false, message: error.message || "Failed to create post." };
     }
   };
 
@@ -142,7 +126,6 @@ const MyCommunity = () => {
     return Time(date);
   };
 
-  // Hero style (fallback to default if no custom image)
   const heroBackgroundUrl = community?.heroImageUrl
     ? `${API_BASE}${community.heroImageUrl}`
     : DEFAULT_HERO;
@@ -154,7 +137,6 @@ const MyCommunity = () => {
     backgroundRepeat: "no-repeat",
   };
 
-  // ---- Hero image upload handlers ----
   const handleHeroUploadButtonClick = () => {
     fileInputRef.current?.click();
   };
@@ -182,8 +164,6 @@ const MyCommunity = () => {
       }
 
       await fetchCommunity();
-
-      // optional: treat hero updates as activity (if you want cards to reorder)
       emitCommunityActivityUpdated();
     } catch (error) {
       console.error("[MyCommunity] hero upload error:", error);
@@ -194,12 +174,10 @@ const MyCommunity = () => {
     }
   };
 
-  // only Owner/Leader can see the upload button.
   const canEditHero = (() => {
     if (!community || !user) return false;
 
     const currentUserId = user.id || user._id;
-
     const isOwner = community.owner && community.owner.id === currentUserId;
 
     const isLeader =
@@ -216,15 +194,6 @@ const MyCommunity = () => {
     <section className="ForumContainer">
       <div className="ForumHero" style={heroStyle}>
         <PageHeader />
-        <button
-          type="button"
-          className="CommunityBackArrow"
-          onClick={() => navigate("/community")}
-          aria-label="Back to Communities"
-          title="Back to Communities"
-        >
-          ←
-        </button>
 
         <div className="ForumHeaderContainer">
           <h1 className="ForumHeader">{community?.header || "Temporary Header"}</h1>
