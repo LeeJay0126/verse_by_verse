@@ -190,6 +190,12 @@ const MyCommunity = () => {
     return isOwner || isLeader;
   })();
 
+  const renderCategoryLabel = (post) => {
+    if (post.category === "Poll") return "📊 Poll";
+    if (post.category === "General") return "Bible Study";
+    return post.category;
+  };
+
   return (
     <section className="ForumContainer">
       <div className="ForumHero" style={heroStyle}>
@@ -268,7 +274,7 @@ const MyCommunity = () => {
                   </td>
                   <td>
                     <span className={`Tag ${post.categoryClass || "general"}`}>
-                      {post.category === "Poll" ? "📊 Poll" : post.category}
+                      {renderCategoryLabel(post)}
                     </span>
                   </td>
                   <td>{post.replyCount}</td>
