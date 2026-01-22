@@ -224,7 +224,7 @@ const PostDetail = () => {
         ? "Announcements"
         : type === "poll"
           ? "Poll"
-          : "General";
+          : "Bible Study";
 
   const activityText = Time(updatedAt || createdAt);
 
