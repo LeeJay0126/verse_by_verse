@@ -64,6 +64,7 @@ const PostDetail = () => {
       setPost(data.post || null);
       setPollResults(data.post?.pollResults || null);
       setMyVotes(data.post?.myVotes || []);
+      setCommunity(data.community || null);
     } catch (error) {
       console.error("[PostDetail] fetchPost error:", error);
       setErr(error.message || "Unable to load this post.");
@@ -108,8 +109,9 @@ const PostDetail = () => {
     return () => window.removeEventListener(COMMUNITY_ACTIVITY_EVENT, onActivity);
   }, [fetchCommunity]);
 
-  const handleVote = async (optionIndex) => {
+  const handleVoteToggle = async (optionIndex) => {
     if (!post || post.type !== "poll") return;
+    if (voting) return;
 
     setVoting(true);
     setVoteError("");
@@ -123,15 +125,15 @@ const PostDetail = () => {
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) {
-        throw new Error(data.error || "Failed to submit vote.");
+        throw new Error(data.error || "Failed to update vote.");
       }
 
       setPollResults(data.pollResults || null);
-      setMyVotes(data.myVotes || []);
+      setMyVotes(Array.isArray(data.myVotes) ? data.myVotes : []);
       emitCommunityActivityUpdated();
     } catch (error) {
       console.error("[PostDetail] vote error:", error);
-      setVoteError(error.message || "Could not submit your vote.");
+      setVoteError(error.message || "Could not update your vote.");
     } finally {
       setVoting(false);
     }
@@ -215,7 +217,7 @@ const PostDetail = () => {
     );
   }
 
-  const { title, body, type, createdAt, updatedAt, author } = post;
+  const { title, body, type, createdAt, updatedAt, author, poll } = post;
 
   const typeLabel =
     type === "questions"
@@ -223,13 +225,13 @@ const PostDetail = () => {
       : type === "announcements"
         ? "Announcements"
         : type === "poll"
-          ? "Poll"
+          ? "📊 Poll"
           : "Bible Study";
 
   const activityText = Time(updatedAt || createdAt);
 
   const renderPollSection = () => {
-    if (!post.poll || !post.poll.options?.length) {
+    if (!poll || !poll.options?.length) {
       return <p className="PostDetailEmptyPoll">This poll doesn’t have any options yet.</p>;
     }
 
@@ -239,8 +241,9 @@ const PostDetail = () => {
     return (
       <div className="PostDetailPoll">
         <h3 className="PostDetailSubTitle">Poll options</h3>
+
         <ul className="PostDetailPollList">
-          {post.poll.options.map((opt, idx) => {
+          {poll.options.map((opt, idx) => {
             const count = counts[idx] || 0;
             const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
             const isSelected = myVotes.includes(idx);
@@ -251,24 +254,26 @@ const PostDetail = () => {
                   type="button"
                   className={`PostDetailPollButton ${isSelected ? "selected" : ""}`}
                   disabled={voting}
-                  onClick={() => handleVote(idx)}
+                  onClick={() => handleVoteToggle(idx)}
+                  aria-pressed={isSelected}
                 >
-                  <span className="PostDetailPollLabel">{opt.text}</span>
-                </button>
-                {totalVotes > 0 && (
-                  <span className="PostDetailPollStats">
-                    {count} vote{count === 1 ? "" : "s"} ({percentage}%)
+                  <span className="PostDetailPollBar" style={{ width: `${percentage}%` }} />
+                  <span className="PostDetailPollContent">
+                    <span className="PostDetailPollLabel">{opt.text}</span>
+                    <span className="PostDetailPollStats">
+                      {count} vote{count === 1 ? "" : "s"} ({percentage}%)
+                    </span>
                   </span>
-                )}
+                </button>
               </li>
             );
           })}
         </ul>
 
         <p className="PostDetailPollMeta">
-          {post.poll.allowMultiple ? "You can vote for more than one option." : "You can vote for one option."}
+          {poll.allowMultiple ? "You can vote for more than one option." : "You can vote for one option."}
           <br />
-          {post.poll.anonymous ? "Votes are anonymous." : "Votes may be visible per user."}
+          {poll.anonymous ? "Votes are anonymous." : "Votes may be visible per user."}
         </p>
 
         {voteError && <p className="communityError smallError">{voteError}</p>}
@@ -293,9 +298,7 @@ const PostDetail = () => {
       <section className="ForumBody PostDetailBody">
         <header className="PostDetailHeader">
           <div className="PostDetailMetaRow">
-            <span className={`Tag ${type || "general"}`}>
-              {type === "poll" ? "📊 Poll" : typeLabel}
-            </span>
+            <span className={`Tag ${type || "general"}`}>{type === "poll" ? "📊 Poll" : typeLabel}</span>
             <span className="PostDetailMetaText">
               Posted by {author || "Unknown"} · {activityText}
             </span>
