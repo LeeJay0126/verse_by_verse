@@ -239,6 +239,7 @@ const PostDetail = () => {
     return (
       <div className="PostDetailPoll">
         <h3 className="PostDetailSubTitle">Poll options</h3>
+
         <ul className="PostDetailPollList">
           {post.poll.options.map((opt, idx) => {
             const count = counts[idx] || 0;
@@ -253,13 +254,14 @@ const PostDetail = () => {
                   disabled={voting}
                   onClick={() => handleVote(idx)}
                 >
-                  <span className="PostDetailPollLabel">{opt.text}</span>
-                </button>
-                {totalVotes > 0 && (
-                  <span className="PostDetailPollStats">
-                    {count} vote{count === 1 ? "" : "s"} ({percentage}%)
+                  <span className="PostDetailPollBar" style={{ width: `${percentage}%` }} />
+                  <span className="PostDetailPollContent">
+                    <span className="PostDetailPollLabel">{opt.text}</span>
+                    <span className="PostDetailPollStats">
+                      {count} vote{count === 1 ? "" : "s"} ({percentage}%)
+                    </span>
                   </span>
-                )}
+                </button>
               </li>
             );
           })}
@@ -275,6 +277,7 @@ const PostDetail = () => {
       </div>
     );
   };
+
 
   return (
     <section className="ForumContainer">
