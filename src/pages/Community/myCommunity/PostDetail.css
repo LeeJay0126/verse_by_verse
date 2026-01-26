@@ -147,6 +147,8 @@
   width: 0%;
   background: rgba(0, 0, 0, 0.08);
   z-index: 0;
+  transition: width 240ms ease;
+  will-change: width;
 }
 
 .PostDetailPollContent {
@@ -188,4 +190,10 @@
 .NewPostPrimaryButton {
   padding: 10px 10px;
   border-radius: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .PostDetailPollBar {
+    transition: none;
+  }
 }
