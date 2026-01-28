@@ -22,29 +22,16 @@ const BookVersionComponent = (props) => {
 
   const onNotesClick = useMemo(() => {
     if (typeof props.onNotesClick === "function") return props.onNotesClick;
-    return () => {};
+    return () => { };
   }, [props.onNotesClick]);
 
   return (
     <div className={props.visibilityStatus ? "BookModal" : "ModalHidden"}>
       <section className="ModalHeader">
-        {/* Left side: Notes (blends with header row, optional) */}
-        <div className="ModalHeaderLeft">
-          <Notes
-            disabled={notesDisabled}
-            active={notesActive}
-            hasNote={notesHasNote}
-            onClick={onNotesClick}
-          />
-        </div>
-
-        {/* Right side: title + cancel (keeps your existing UX) */}
-        <div className="ModalHeaderRight">
-          <h3 className="ModalTitle">Versions</h3>
-          <h4 className="ModalExitButton" onClick={modalCloseHandler}>
-            CANCEL
-          </h4>
-        </div>
+        <h3 className="ModalTitle">Versions</h3>
+        <h4 className="ModalExitButton" onClick={modalCloseHandler}>
+          CANCEL
+        </h4>
       </section>
 
       <section className="ModalFilter">
