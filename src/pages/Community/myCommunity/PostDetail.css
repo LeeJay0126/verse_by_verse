@@ -1,11 +1,17 @@
-.ForumHero--small {
-  min-height: 400px;
+.ForumContainer {
+  background-color: #fdfcfa;
 }
 
 .PostDetailBody {
-  max-width: 800px;
+  background-color: #f8f5f0;
+  max-width: 1000px;
   width: 80%;
+  padding: 0 30px;
   margin: 0 auto 40px;
+}
+
+.ForumHero--small {
+  min-height: 400px;
 }
 
 .PostDetailHeader {
@@ -25,8 +31,6 @@
   margin-top: 8px;
   margin-bottom: 12px;
 }
-
-/* Post Body Header */
 
 .PostDetailMetaRow {
   display: flex;
@@ -49,15 +53,10 @@
   color: #333;
 }
 
-/* Post Body */
-
 .PostDetailSubTitle {
   font-size: 18px;
-  padding-bottom: 20px;
-  padding-top: 20px;
+  padding: 20px 0;
 }
-
-/* Replies section */
 
 .PostDetailRepliesEmpty {
   font-size: 14px;
@@ -65,31 +64,124 @@
 }
 
 .PostDetailRepliesList {
-  padding: 5px 10px;
-  padding-bottom: 10px;
+  padding: 5px 10px 10px;
   list-style: none;
   border: 1px solid rgba(0, 0, 0, 0.08);
+  margin: 0;
+}
+
+.PostDetailRepliesChildren {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .PostDetailReplyItem {
+  padding: 0;
+  --depth: 0;
+}
+
+:root {
+  --thread-col: 14px;
+  --thread-line: 2px;
+  --thread-color: rgba(0, 0, 0, 0.14);
+  --thread-elbow-y: 22px;
+}
+
+.ThreadRow {
+  display: flex;
+  align-items: stretch;
+}
+
+.ThreadGutter {
+  position: relative;
+  flex: 0 0 auto;
+  width: calc(var(--depth) * var(--thread-col));
+  min-width: calc(var(--depth) * var(--thread-col));
+}
+
+.ThreadContent {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  padding: 5px 10px;
+  padding: 0 10px;
+}
+
+.ThreadCol,
+.ThreadElbow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--i) * var(--thread-col));
+  width: var(--thread-col);
+}
+
+.ThreadCol.on::before {
+  content: "";
+  position: absolute;
+  left: calc((var(--thread-col) - var(--thread-line)) / 2);
+  top: 0;
+  bottom: 0;
+  width: var(--thread-line);
+  background: var(--thread-color);
+  border-radius: 999px;
+}
+
+.ThreadElbow::after {
+  content: "";
+  position: absolute;
+  left: calc((var(--thread-col) - var(--thread-line)) / 2);
+  top: var(--thread-elbow-y);
+  width: 14px;
+  height: var(--thread-line);
+  background: var(--thread-color);
+  border-radius: 999px;
+}
+
+.ThreadElbow::before {
+  content: "";
+  position: absolute;
+  left: calc((var(--thread-col) - var(--thread-line)) / 2);
+  top: 0;
+  width: var(--thread-line);
+  background: var(--thread-color);
+  border-radius: 999px;
+}
+
+.ThreadElbow.continue::before {
+  bottom: 0;
+}
+
+.ThreadElbow.stop::before {
+  bottom: calc(100% - var(--thread-elbow-y));
+}
+
+.ThreadDepthCapDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.16);
+  display: inline-block;
 }
 
 .PostDetailReplyHeader {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
-  padding-bottom: 3px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.008);
+}
+
+.PostDetailReplyHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .PostDetailReplyAuthor {
   text-transform: uppercase;
-  font-weight: 400;
+  font-weight: 700;
   font-size: 14px;
-  letter-spacing: 1px;
 }
 
 .PostDetailReplyTime {
@@ -99,12 +191,60 @@
 
 .PostDetailReplyBody {
   font-weight: 400;
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1.6;
 }
 
-/* Poll Related styling  */
-/* Poll options */
+.PostDetailReplyActionsRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0 2px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.ReplyActionBtn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 13px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  color: #333;
+}
+
+.ReplyActionBtn--muted {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.ReplyActionBtn--deep {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.ReplyActionBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  text-decoration: none;
+}
+
+.ReplyDepthLimitText {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.5);
+  font-style: italic;
+}
+
+.PostDetailInlineReplyForm {
+  padding: 8px 0 4px;
+}
+
+.PostDetailInlineReplyActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+}
 
 .PostDetailPollList {
   padding-bottom: 20px;
@@ -117,7 +257,6 @@
   color: #666;
 }
 
-/* For Mobile, This should be changed to flex-direction: column */
 .PostDetailPollOption {
   width: 90%;
   margin: 0 auto 10px;
@@ -174,9 +313,6 @@
   border-color: rgba(0, 0, 0, 0.2);
 }
 
-
-/* Add Reply Section */
-
 .PostDetailReplyForm {
   padding-top: 25px;
   display: flex;
@@ -187,9 +323,51 @@
   height: 100px;
   padding: 5px 10px;
 }
+
 .NewPostPrimaryButton {
   padding: 10px 10px;
   border-radius: 0;
+}
+
+.PostDetailRepliesMore {
+  list-style: none;
+  padding: 6px 0 0;
+}
+
+.PostDetailRepliesMoreText {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+  font-style: italic;
+}
+
+.PostDetailReplyItem.is-new-highlight .ThreadContent {
+  animation: replyFlash 1.6s ease-out;
+}
+
+.PostDetailInlineEditForm {
+  padding: 8px 0 4px;
+}
+
+.ReplyActionBtn--danger {
+  color: rgba(160, 0, 0, 0.75);
+}
+
+
+@keyframes replyFlash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 200, 0, 0);
+    background: rgba(255, 200, 0, 0.18);
+  }
+
+  35% {
+    box-shadow: 0 0 0 6px rgba(255, 200, 0, 0.18);
+    background: rgba(255, 200, 0, 0.14);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 200, 0, 0);
+    background: transparent;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
