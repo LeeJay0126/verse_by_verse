@@ -214,7 +214,46 @@
 }
 
 .NotesListItemFlex {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.NotesListToggleBtn {
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  padding: 0 10px;
+  background: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+}
+
+.NotesListToggleBtn.isOn {
+  border-color: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.NotesListToggleBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.NotesListSectionTitle {
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 700;
+  padding: 6px 2px 10px;
+}
+
+.NotesListSectionTitle--spaced {
+  margin-top: 18px;
+}
+
+.NotesListScroll {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
 }

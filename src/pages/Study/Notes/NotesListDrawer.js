@@ -1,347 +1,259 @@
 import "./NotesListDrawer.css";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNotesApi } from "./useNotesApi";
-import NoteDetailModal from "./NoteDetailModal";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-const ITEM_GAP_PX = 10;
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
+
+const FILTER = {
+  UPDATED: "updated",
+  CREATED: "created",
+  BOOK: "book",
+  VERSION: "version",
+};
+
+const safeStr = (v) => (v == null ? "" : String(v));
+const ts = (v) => {
+  const t = new Date(v || 0).getTime();
+  return Number.isFinite(t) ? t : 0;
+};
+
+const updatedTs = (n) => ts(n?.updatedAt);
+const createdTs = (n) => ts(n?.createdAt);
+
+const versionKeyFromNote = (n) => safeStr(n?.bibleId || n?.versionId || n?.versionName);
+
+const bookKeyFromNote = (n) => {
+  const fromChapterId = safeStr(n?.chapterId).split(".")[0];
+  return safeStr(n?.bookId || n?.bookName || fromChapterId);
+};
 
 const shortPreview = (s, n = 140) => {
-  const t = (s || "").toString().replace(/\s+/g, " ").trim();
+  const t = safeStr(s).replace(/\s+/g, " ").trim();
   if (t.length <= n) return t;
   return `${t.slice(0, n)}…`;
 };
 
-const formatRef = (note) => {
-  const [bookId, chapterNum] = (note?.chapterId || "").split(".");
-  const base = `${bookId || ""} ${chapterNum || ""}`.trim();
-
-  if (note?.rangeStart == null || note?.rangeEnd == null) return `${base} (full)`;
-  if (note.rangeStart === note.rangeEnd) return `${base} (v${note.rangeStart})`;
-  return `${base} (v${note.rangeStart}-${note.rangeEnd})`;
-};
-
-const isUpdatedAtDesc = (sort) => String(sort || "").toLowerCase() === "updatedat:desc";
-
-const NotesListDrawer = ({
-  open,
-  onClose,
-  bibleId,
-  bookId,
-  chapterId,
-  onOpenPassage,
-}) => {
-  const { listNotes, deleteNote } = useNotesApi();
-
-  const [q, setQ] = useState("");
-  const [sort, setSort] = useState("updatedAt:desc");
-  const [scope, setScope] = useState("chapter");
-
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(8);
+export default function NotesListDrawer({ open, onClose, bibleId, chapterId, onOpenPassage }) {
+  const [filterMode, setFilterMode] = useState(FILTER.UPDATED);
+  const [currentOnly, setCurrentOnly] = useState(false);
 
   const [notes, setNotes] = useState([]);
   const [total, setTotal] = useState(0);
 
   const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState("");
+  const [error, setError] = useState("");
 
-  const [activeNoteId, setActiveNoteId] = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
+  const scopeChapterId = currentOnly ? safeStr(chapterId) : "";
 
-  const listRef = useRef(null);
-  const sampleItemRef = useRef(null);
+  const serverSort = useMemo(() => {
+    if (filterMode === FILTER.CREATED) return "createdAt:desc";
+    return "updatedAt:desc";
+  }, [filterMode]);
+
+  const fetchNotes = useCallback(
+    async (sortOverride) => {
+      if (!open) return;
+
+      setLoading(true);
+      setError("");
+
+      try {
+        const qs = new URLSearchParams();
+        if (bibleId) qs.set("bibleId", bibleId);
+        if (scopeChapterId) qs.set("chapterId", scopeChapterId);
+        qs.set("sort", sortOverride || serverSort);
+        qs.set("limit", "200");
+        qs.set("offset", "0");
+
+        const res = await fetch(`${API_BASE}/notes/list?${qs.toString()}`, {
+          method: "GET",
+          credentials: "include",
+          headers: { accept: "application/json" },
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const json = await res.json();
+        const arr = Array.isArray(json?.notes) ? json.notes : [];
+        setNotes(arr);
+        setTotal(Number(json?.total || 0));
+      } catch (e) {
+        setNotes([]);
+        setTotal(0);
+        setError("Failed to load notes.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [open, bibleId, scopeChapterId, serverSort]
+  );
 
   useEffect(() => {
     if (!open) return;
-
-    const el = listRef.current;
-    if (!el) return;
-
-    const compute = () => {
-      const h = el.clientHeight || 0;
-      const itemH = sampleItemRef.current?.getBoundingClientRect?.().height || 88;
-      const full = itemH + ITEM_GAP_PX;
-      const fit = Math.max(3, Math.min(30, Math.floor(h / full) || 8));
-
-      setPageSize((prev) => (prev === fit ? prev : fit));
-    };
-
-    compute();
-
-    const ro = new ResizeObserver(compute);
-    ro.observe(el);
-
-    const t = setTimeout(compute, 0);
-
-    return () => {
-      clearTimeout(t);
-      ro.disconnect();
-    };
+    setFilterMode(FILTER.UPDATED);
+    setCurrentOnly(false);
   }, [open]);
 
   useEffect(() => {
-    setPage(1);
-  }, [open, bibleId, bookId, chapterId, q, sort, scope]);
-
-  const offset = useMemo(() => (page - 1) * pageSize, [page, pageSize]);
-  const totalPages = useMemo(
-    () => Math.max(1, Math.ceil(total / pageSize) || 1),
-    [total, pageSize]
-  );
-
-  const fetchNotes = useCallback(async () => {
     if (!open) return;
-
-    try {
-      setErr("");
-      setLoading(true);
-
-      const res = await listNotes({
-        q,
-        bibleId,
-        bookId,
-        chapterId: scope === "all" ? "" : chapterId,
-        sort,
-        limit: pageSize,
-        offset,
-      });
-
-      const incoming = Array.isArray(res?.notes) ? res.notes : [];
-      const incomingTotal = Number.isFinite(res?.total) ? res.total : 0;
-
-      setNotes(incoming);
-      setTotal(incomingTotal);
-
-      const maxPage = Math.max(1, Math.ceil(incomingTotal / pageSize) || 1);
-      if (page > maxPage) setPage(maxPage);
-    } catch (e) {
-      setErr(e?.message || "Failed to load notes");
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    open,
-    listNotes,
-    q,
-    bibleId,
-    bookId,
-    chapterId,
-    scope,
-    sort,
-    pageSize,
-    offset,
-    page,
-  ]);
+    fetchNotes("updatedAt:desc");
+  }, [open, bibleId, fetchNotes]);
 
   useEffect(() => {
+    if (!open) return;
     fetchNotes();
-  }, [fetchNotes]);
+  }, [open, fetchNotes]);
 
-  const onPrev = useCallback(() => setPage((p) => Math.max(1, p - 1)), []);
-  const onNext = useCallback(() => setPage((p) => Math.min(totalPages, p + 1)), [totalPages]);
+  const visibleNotes = useMemo(() => (Array.isArray(notes) ? notes : []), [notes]);
 
-  const onOpenNote = useCallback((id) => setActiveNoteId(id), []);
+  const recentlyUpdated = useMemo(() => {
+    return [...visibleNotes].sort((a, b) => updatedTs(b) - updatedTs(a));
+  }, [visibleNotes]);
 
-  const onTrash = useCallback(
-    async (noteId) => {
-      if (!noteId || deletingId) return;
+  const recentlyCreated = useMemo(() => {
+    return [...visibleNotes].sort((a, b) => createdTs(b) - createdTs(a));
+  }, [visibleNotes]);
 
-      const ok = window.confirm("Delete this note? This cannot be undone.");
-      if (!ok) return;
+  const sortByBook = useMemo(() => {
+    return [...visibleNotes].sort((a, b) => {
+      const ab = bookKeyFromNote(a).toLowerCase();
+      const bb = bookKeyFromNote(b).toLowerCase();
+      if (ab < bb) return -1;
+      if (ab > bb) return 1;
 
-      try {
-        setErr("");
-        setDeletingId(noteId);
-        await deleteNote(noteId);
+      const ac = Number(safeStr(a?.chapterId).split(".")[1] || 0);
+      const bc = Number(safeStr(b?.chapterId).split(".")[1] || 0);
+      if (ac !== bc) return ac - bc;
 
-        setNotes((prev) => prev.filter((n) => String(n._id) !== String(noteId)));
-        setTotal((t) => Math.max(0, t - 1));
-      } catch (e) {
-        setErr(e?.message || "Failed to delete note");
-      } finally {
-        setDeletingId(null);
-      }
-    },
-    [deleteNote, deletingId]
-  );
+      return updatedTs(b) - updatedTs(a);
+    });
+  }, [visibleNotes]);
 
-  const onDeletedFromModal = useCallback((id) => {
-    setNotes((prev) => prev.filter((n) => String(n._id) !== String(id)));
-    setTotal((t) => Math.max(0, t - 1));
-  }, []);
+  const sortByVersion = useMemo(() => {
+    return [...visibleNotes].sort((a, b) => {
+      const av = versionKeyFromNote(a).toLowerCase();
+      const bv = versionKeyFromNote(b).toLowerCase();
+      if (av < bv) return -1;
+      if (av > bv) return 1;
+      return updatedTs(b) - updatedTs(a);
+    });
+  }, [visibleNotes]);
 
-  const onUpdatedFromModal = useCallback(
-    (updated) => {
-      if (!updated?._id) return;
+  const showDefaultTwoSections = filterMode === FILTER.UPDATED;
 
-      setNotes((prev) => {
-        const idx = prev.findIndex((n) => String(n._id) === String(updated._id));
-        if (idx === -1) return prev;
+  const singleList = useMemo(() => {
+    if (filterMode === FILTER.CREATED) return recentlyCreated;
+    if (filterMode === FILTER.BOOK) return sortByBook;
+    if (filterMode === FILTER.VERSION) return sortByVersion;
+    return recentlyUpdated;
+  }, [filterMode, recentlyUpdated, recentlyCreated, sortByBook, sortByVersion]);
 
-        const merged = {
-          ...prev[idx],
-          ...updated,
-          preview: updated.preview ?? shortPreview(updated.text),
-        };
+  const handleClose = () => onClose?.();
 
-        const next = prev.slice();
-        next[idx] = merged;
+  const toggleScope = () => {
+    if (!chapterId) return;
+    setCurrentOnly((v) => !v);
+  };
 
-        if (isUpdatedAtDesc(sort)) {
-          next.splice(idx, 1);
-          next.unshift(merged);
-        }
+  const renderItem = (n) => {
+    const id = n?._id || n?.id || `${n?.chapterId}-${n?.createdAt}-${n?.updatedAt}`;
+    const title = safeStr(n?.title).trim() || "Untitled";
+    const ref = safeStr(n?.chapterId);
+    const preview = shortPreview(n?.preview || n?.text || "");
+    const version = versionKeyFromNote(n);
+    const u = updatedTs(n);
+    const c = createdTs(n);
 
-        return next;
-      });
-    },
-    [sort]
-  );
+    return (
+      <li key={id}>
+        <button type="button" className="NotesListItemBtn" onClick={() => onOpenPassage?.(n)}>
+          <div className="NotesListItemTop">
+            <div className="NotesListItemTitle">{title}</div>
+            <div className="NotesListItemRef">{ref}</div>
+          </div>
 
-  if (!open) return null;
+          {preview ? <div className="NotesListItemPreview">{preview}</div> : null}
 
-  return (
-    <div className="NotesListOverlay" onMouseDown={onClose}>
+          <div className="NotesListItemMeta">
+            <div className="NotesListItemFlex">
+              <span>{version ? `Version: ${version}` : ""}</span>
+              <span>
+                {u ? `Updated ${new Date(u).toLocaleDateString()}` : ""}
+                {c ? ` • Created ${new Date(c).toLocaleDateString()}` : ""}
+              </span>
+            </div>
+          </div>
+        </button>
+      </li>
+    );
+  };
+
+  return open ? (
+    <div className="NotesListOverlay" onMouseDown={handleClose}>
       <div className="NotesListCard" onMouseDown={(e) => e.stopPropagation()}>
         <div className="NotesListHeader">
           <div className="NotesListTitle">Notes</div>
-          <button type="button" className="NotesListClose" onClick={onClose} aria-label="Close">
-            ✕
+          <button type="button" className="NotesListClose" onClick={handleClose}>
+            ×
+          </button>
+        </div>
+
+        <div className="NotesListSub">
+          <span>
+            {currentOnly ? "Current chapter only" : "All notes"}
+            {total ? ` • ${total}` : ""}
+          </span>
+          <button type="button" className="NotesListPagerBtn" onClick={() => fetchNotes()} disabled={loading}>
+            Refresh
           </button>
         </div>
 
         <div className="NotesListControls">
           <div className="NotesListControl">
-            <div className="NotesListControlLabel">Sort</div>
-            <select className="NotesListSelect" value={sort} onChange={(e) => setSort(e.target.value)}>
-              <option value="updatedAt:desc">Updated (new → old)</option>
-              <option value="updatedAt:asc">Updated (old → new)</option>
-              <option value="createdAt:desc">Created (new → old)</option>
-              <option value="createdAt:asc">Created (old → new)</option>
-              <option value="title:asc">Title (A → Z)</option>
-              <option value="title:desc">Title (Z → A)</option>
-              <option value="chapterId:asc">Chapter (A → Z)</option>
-              <option value="chapterId:desc">Chapter (Z → A)</option>
-            </select>
+            <div className="NotesListControlLabel">Scope</div>
+            <button
+              type="button"
+              className={`NotesListToggleBtn ${currentOnly ? "isOn" : ""}`}
+              onClick={toggleScope}
+              disabled={!chapterId}
+              title={!chapterId ? "Open a chapter first" : ""}
+            >
+              {currentOnly ? "Current Chapter Only" : "All Notes"}
+            </button>
           </div>
 
           <div className="NotesListControl">
-            <div className="NotesListControlLabel">View</div>
-            <select className="NotesListSelect" value={scope} onChange={(e) => setScope(e.target.value)}>
-              <option value="chapter">Current chapter</option>
-              <option value="all">All chapters</option>
+            <div className="NotesListControlLabel">Filter</div>
+            <select
+              className="NotesListSelect"
+              value={filterMode}
+              onChange={(e) => setFilterMode(e.target.value)}
+            >
+              <option value={FILTER.UPDATED}>Recently Updated</option>
+              <option value={FILTER.CREATED}>Recently Created</option>
+              <option value={FILTER.BOOK}>Sort by Book</option>
+              <option value={FILTER.VERSION}>Sort by Version</option>
             </select>
           </div>
-
-          <div className="NotesListControl" style={{ flex: 1, minWidth: 0 }}>
-            <div className="NotesListControlLabel">Search</div>
-            <input
-              className="NotesListSelect"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search title or text…"
-            />
-          </div>
         </div>
 
-        <div className="NotesListSub">
-          <div>
-            Total: <b>{total}</b>
-          </div>
-          <div>
-            Page <b>{page}</b> / {totalPages}
-          </div>
-        </div>
-
-        {err && (
-          <div className="NotesListError" role="alert">
-            {err}
-          </div>
-        )}
+        {error ? <div className="NotesListError">{error}</div> : null}
 
         {loading ? (
           <div className="NotesListLoading">Loading…</div>
-        ) : notes.length === 0 ? (
-          <div className="NotesListEmpty">No notes found.</div>
-        ) : (
-          <ul className="NotesList" ref={listRef}>
-            {notes.map((note, i) => {
-              const preview = note.preview ?? shortPreview(note.text);
-              const refText = formatRef(note);
+        ) : visibleNotes.length === 0 ? (
+          <div className="NotesListEmpty">No notes to show.</div>
+        ) : showDefaultTwoSections ? (
+          <div className="NotesListScroll">
+            <div className="NotesListSectionTitle">Recently Updated</div>
+            <ul className="NotesList">{recentlyUpdated.map(renderItem)}</ul>
 
-              return (
-                <li key={note._id}>
-                  <button
-                    type="button"
-                    className="NotesListItemBtn"
-                    onClick={() => onOpenNote(note._id)}
-                    ref={i === 0 ? sampleItemRef : undefined}
-                  >
-                    <div className="NotesListItemFlex">
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div className="NotesListItemTop">
-                          <div className="NotesListItemTitle">{note.title || "(Untitled)"}</div>
-
-                          <div className="NotesListItemTopRight">
-                            <div className="NotesListItemRef">{refText}</div>
-
-                            <button
-                              type="button"
-                              className="NotesListTrashBtn"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                onTrash(note._id);
-                              }}
-                              disabled={!!deletingId}
-                              aria-label="Delete note"
-                              title="Delete note"
-                            >
-                              {deletingId === note._id ? "…" : "🗑"}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="NotesListItemPreview">{preview}</div>
-
-                        {note.updatedAt && (
-                          <div className="NotesListItemMeta">
-                            Updated: {new Date(note.updatedAt).toLocaleString()}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        <div className="NotesListPager">
-          <button className="NotesListPagerBtn" onClick={onPrev} disabled={page <= 1}>
-            Prev
-          </button>
-
-          <div className="NotesListPagerText">
-            Page <b>{page}</b> / {totalPages} · {pageSize} per page
+            <div className="NotesListSectionTitle NotesListSectionTitle--spaced">Recently Created</div>
+            <ul className="NotesList">{recentlyCreated.map(renderItem)}</ul>
           </div>
-
-          <button className="NotesListPagerBtn" onClick={onNext} disabled={page >= totalPages}>
-            Next
-          </button>
-        </div>
-
-        <NoteDetailModal
-          noteId={activeNoteId}
-          onClose={() => setActiveNoteId(null)}
-          onOpenPassage={onOpenPassage}
-          onDeleted={onDeletedFromModal}
-          onUpdated={onUpdatedFromModal}
-        />
+        ) : (
+          <ul className="NotesList">{singleList.map(renderItem)}</ul>
+        )}
       </div>
     </div>
-  );
-};
-
-export default NotesListDrawer;
+  ) : null;
+}
