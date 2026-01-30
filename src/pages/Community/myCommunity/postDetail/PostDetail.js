@@ -60,9 +60,7 @@ const PostDetail = () => {
   } = usePostReplies({ communityId, postId, post, onPostChanged: refetchPost });
 
   const replyTree = useReplyTree(replies);
-
-  const { expanded, toggleExpanded, deepExpanded, toggleDeepExpanded } =
-    useThreadExpansion();
+  const { expanded, toggleExpanded, deepExpanded, toggleDeepExpanded } = useThreadExpansion();
 
   if (loading) {
     return (
@@ -146,7 +144,6 @@ const PostDetail = () => {
           childReplyBoxRef={childReplyBoxRef}
           editBoxRef={editBoxRef}
         />
-
       </section>
 
       <Footer />

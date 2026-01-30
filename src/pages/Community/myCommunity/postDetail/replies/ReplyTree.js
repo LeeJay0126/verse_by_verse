@@ -1,66 +1,68 @@
-import { useMemo } from "react";
+import ReplyNode from "../ReplyNode";
 
-const asArray = (v) => (Array.isArray(v) ? v : []);
+const ReplyTree = ({
+  rootReplies,
+  byParent,
+  myUserId,
+  replySubmitting,
+  expanded,
+  toggleExpanded,
+  deepExpanded,
+  toggleDeepExpanded,
+  activeReplyTo,
+  setActiveReplyTo,
+  childBody,
+  setChildBody,
+  editingReplyId,
+  editBody,
+  setEditBody,
+  editSubmitting,
+  startEditReply,
+  cancelEditReply,
+  onSaveEdit,
+  onDeleteReply,
+  onSubmitChildReply,
+  childReplyBoxRef,
+  editBoxRef,
+}) => {
+  const list = Array.isArray(rootReplies) ? rootReplies : [];
+  const map = byParent instanceof Map ? byParent : new Map();
 
-const toTime = (iso) => {
-  const t = new Date(iso || 0).getTime();
-  return Number.isFinite(t) ? t : 0;
+  return (
+    <ol className="PostDetailRepliesList">
+      {list.map((r, idx) => (
+        <ReplyNode
+          key={String(r.id)}
+          reply={r}
+          depth={0}
+          ancestorHasNext={[]}
+          isLast={idx === list.length - 1}
+          byParent={map}
+          myUserId={myUserId}
+          replySubmitting={replySubmitting}
+          expanded={expanded}
+          toggleExpanded={toggleExpanded}
+          deepExpanded={deepExpanded}
+          toggleDeepExpanded={toggleDeepExpanded}
+          activeReplyTo={activeReplyTo}
+          setActiveReplyTo={setActiveReplyTo}
+          childBody={childBody}
+          setChildBody={setChildBody}
+          editingReplyId={editingReplyId}
+          editBody={editBody}
+          setEditBody={setEditBody}
+          editSubmitting={editSubmitting}
+          startEditReply={startEditReply}
+          cancelEditReply={cancelEditReply}
+          onSaveEdit={onSaveEdit}
+          onDeleteReply={onDeleteReply}
+          onSubmitChildReply={onSubmitChildReply}
+          childReplyBoxRef={childReplyBoxRef}
+          editBoxRef={editBoxRef}
+        />
+      ))}
+    </ol>
+  );
 };
 
-const useReplyTree = (replies) => {
-  return useMemo(() => {
-    const list = asArray(replies);
-
-    const byParent = new Map();
-    const byId = new Map();
-
-    for (const r of list) {
-      if (!r || r.id == null) continue;
-
-      const id = String(r.id);
-      byId.set(id, r);
-
-      const parentKey = r.parentReplyId != null ? String(r.parentReplyId) : "root";
-      const arr = byParent.get(parentKey);
-      if (arr) arr.push(r);
-      else byParent.set(parentKey, [r]);
-    }
-
-    const statsCache = new Map();
-
-    const getStats = (id) => {
-      if (statsCache.has(id)) return statsCache.get(id);
-
-      const children = byParent.get(id) || [];
-      let count = children.length;
-
-      for (const c of children) {
-        if (!c || c.id == null) continue;
-        const s = getStats(String(c.id));
-        count += s.count;
-      }
-
-      const result = { count };
-      statsCache.set(id, result);
-      return result;
-    };
-
-    const sortFn = (a, b) => {
-      const sa = getStats(String(a.id));
-      const sb = getStats(String(b.id));
-
-      if (sb.count !== sa.count) return sb.count - sa.count;
-
-      // tie-breaker: oldest -> newest (newest at end)
-      return toTime(a.createdAt) - toTime(b.createdAt);
-    };
-
-    for (const [, arr] of byParent.entries()) {
-      arr.sort(sortFn);
-    }
-
-    return { byParent };
-  }, [replies]);
-};
-
-export default useReplyTree;
+export default ReplyTree;
