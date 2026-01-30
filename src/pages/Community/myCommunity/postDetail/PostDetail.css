@@ -168,7 +168,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.008);
 }
 
@@ -352,6 +351,52 @@
   color: rgba(160, 0, 0, 0.75);
 }
 
+.replyActionsRow {
+  display: flex;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+
+.PostDetailPager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.PostDetailPagerNumbers {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.PostDetailPagerEllipsis {
+  opacity: 0.7;
+  padding: 0 4px;
+}
+
+.ReplyActionBtn--active {
+  text-decoration: underline;
+}
+
+.PostDetailRepliesPagerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.PostDetailRepliesPagerBottom {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.PostDetailPagerMeta {
+  opacity: 0.85;
+  font-size: 0.95rem;
+}
 
 @keyframes replyFlash {
   0% {
