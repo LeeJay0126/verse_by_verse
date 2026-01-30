@@ -14,7 +14,7 @@ import CommunityWalkthrough from "./pages/Community/CommunityWalkthrough";
 import Notifications from "./pages/Account/userMenu/Notifications";
 import Profile from "./pages/Account/userMenu/Profile";
 import CommunityInfo from "./pages/Community/browseCommunity/CommunityInfo";
-import PostDetail from "./pages/Community/myCommunity/PostDetail";
+import PostDetail from "./pages/Community/myCommunity/postDetail/PostDetail";
 
 import { AuthProvider } from "./component/context/AuthContext";
 import { NotificationProvider } from "./component/context/NotificationContext";
