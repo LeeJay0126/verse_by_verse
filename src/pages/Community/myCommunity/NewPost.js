@@ -1,26 +1,22 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import "./MyCommunity.css";
-
-const POST_TYPES = [
-  { value: "general",      label: "General",       className: "general" },
-  { value: "questions",    label: "Questions",     className: "questions" },
-  { value: "announcements",label: "Announcements", className: "announcements" },
-  { value: "poll",         label: "Poll",          className: "poll" },   
-];
+import { COMMUNITY_TYPES, getTypeByApiValue } from "../communityTypes";
 
 const NewPostModal = ({ onClose, onSubmit }) => {
+  const typeOptions = useMemo(() => COMMUNITY_TYPES, []);
+
   const [title, setTitle] = useState("");
-  const [type, setType] = useState(POST_TYPES[0].value);
+  const [type, setType] = useState(typeOptions[0]?.apiValue || "general");
   const [description, setDescription] = useState("");
 
-  // Poll-specific state
-  const [pollOptions, setPollOptions] = useState(["", ""]); // start with 2 blank options
+  const [pollOptions, setPollOptions] = useState(["", ""]);
   const [allowMultiple, setAllowMultiple] = useState(false);
   const [anonymous, setAnonymous] = useState(true);
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState("");
 
-  const isPoll = type === "poll";
+  const selectedType = useMemo(() => getTypeByApiValue(type), [type]);
+  const isPoll = !!selectedType?.isPoll;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -32,26 +28,21 @@ const NewPostModal = ({ onClose, onSubmit }) => {
       return;
     }
 
-    // For non-poll posts, description is required like before
     if (!isPoll && !description.trim()) {
       setGlobalError("Description is required.");
       return;
     }
 
-    const selectedType = POST_TYPES.find((t) => t.value === type);
-
     let payload = {
       title: title.trim(),
       description: description.trim(),
-      typeValue: type,
+      typeValue: selectedType?.apiValue || "general",
       typeLabel: selectedType?.label || "General",
       typeClass: selectedType?.className || "general",
     };
 
     if (isPoll) {
-      const cleanedOptions = pollOptions
-        .map((opt) => opt.trim())
-        .filter(Boolean);
+      const cleanedOptions = pollOptions.map((opt) => opt.trim()).filter(Boolean);
 
       if (cleanedOptions.length < 2) {
         setErrors((prev) => ({
@@ -61,7 +52,6 @@ const NewPostModal = ({ onClose, onSubmit }) => {
         return;
       }
 
-      // Attach poll config to payload for later backend work
       payload = {
         ...payload,
         poll: {
@@ -95,7 +85,7 @@ const NewPostModal = ({ onClose, onSubmit }) => {
 
   const handleRemovePollOption = (index) => {
     setPollOptions((prev) => {
-      if (prev.length <= 2) return prev; // keep at least 2 inputs
+      if (prev.length <= 2) return prev;
       return prev.filter((_, i) => i !== index);
     });
   };
@@ -115,16 +105,11 @@ const NewPostModal = ({ onClose, onSubmit }) => {
           </button>
         </header>
 
-        {globalError && (
-          <div className="NewPostGlobalError">{globalError}</div>
-        )}
+        {globalError && <div className="NewPostGlobalError">{globalError}</div>}
 
         <form className="NewPostForm" onSubmit={handleSubmit}>
-          {/* Title */}
           <div className="NewPostField">
-            <label htmlFor="post-title">
-              {isPoll ? "Poll question" : "Title"}
-            </label>
+            <label htmlFor="post-title">{isPoll ? "Poll question" : "Title"}</label>
             <input
               id="post-title"
               type="text"
@@ -139,7 +124,6 @@ const NewPostModal = ({ onClose, onSubmit }) => {
             />
           </div>
 
-          {/* Type */}
           <div className="NewPostField">
             <label htmlFor="post-type">Post type</label>
             <select
@@ -147,22 +131,17 @@ const NewPostModal = ({ onClose, onSubmit }) => {
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
-              {POST_TYPES.map((option) => (
-                <option key={option.value} value={option.value}>
+              {typeOptions.map((option) => (
+                <option key={option.apiValue} value={option.apiValue}>
                   {option.label}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Poll-specific UI */}
           {isPoll && (
             <>
-              <div
-                className={`NewPostField ${
-                  errors.pollOptions ? "has-error" : ""
-                }`}
-              >
+              <div className={`NewPostField ${errors.pollOptions ? "has-error" : ""}`}>
                 <label>Poll options</label>
                 <div className="PollOptionsList">
                   {pollOptions.map((opt, index) => (
@@ -170,9 +149,7 @@ const NewPostModal = ({ onClose, onSubmit }) => {
                       <input
                         type="text"
                         value={opt}
-                        onChange={(e) =>
-                          handlePollOptionChange(index, e.target.value)
-                        }
+                        onChange={(e) => handlePollOptionChange(index, e.target.value)}
                         placeholder={`Option ${index + 1}`}
                       />
                       <button
@@ -187,6 +164,7 @@ const NewPostModal = ({ onClose, onSubmit }) => {
                     </div>
                   ))}
                 </div>
+
                 <button
                   type="button"
                   className="PollAddOptionButton"
@@ -194,10 +172,9 @@ const NewPostModal = ({ onClose, onSubmit }) => {
                 >
                   + Add option
                 </button>
+
                 {errors.pollOptions && (
-                  <div className="NewPostErrorText">
-                    {errors.pollOptions}
-                  </div>
+                  <div className="NewPostErrorText">{errors.pollOptions}</div>
                 )}
               </div>
 
@@ -225,7 +202,6 @@ const NewPostModal = ({ onClose, onSubmit }) => {
             </>
           )}
 
-          {/* Description (optional for polls, required for others) */}
           <div className="NewPostField">
             <label htmlFor="post-description">
               {isPoll ? "Description (optional)" : "Description"}
