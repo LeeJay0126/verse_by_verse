@@ -20,6 +20,7 @@ import {
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
 const DEFAULT_HERO = "/community/CommunityDefaultHero.png";
+const MAX_ANNOUNCEMENTS_PER_COMMUNITY = 3;
 
 const MyCommunity = () => {
   const { communityId } = useParams();
@@ -32,7 +33,9 @@ const MyCommunity = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+
   const [showNewPostModal, setShowNewPostModal] = useState(false);
+  const [newPostError, setNewPostError] = useState("");
 
   const fileInputRef = useRef(null);
   const [uploadingHero, setUploadingHero] = useState(false);
@@ -89,11 +92,33 @@ const MyCommunity = () => {
     return () => window.removeEventListener(COMMUNITY_ACTIVITY_EVENT, onActivity);
   }, [fetchCommunity, fetchPosts]);
 
-  const handleNewPostClick = () => setShowNewPostModal(true);
-  const handleCloseModal = () => setShowNewPostModal(false);
+  const handleNewPostClick = () => {
+    setNewPostError("");
+    setShowNewPostModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setNewPostError("");
+    setShowNewPostModal(false);
+  };
+
+  const announcementCount = useMemo(() => {
+    return posts.filter((p) => String(p.type || "").toLowerCase() === "announcements").length;
+  }, [posts]);
 
   const handleCreatePost = async (newPostPayload) => {
     try {
+      setNewPostError("");
+
+      if (
+        String(newPostPayload?.typeValue || "").toLowerCase() === "announcements" &&
+        announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY
+      ) {
+        const message = `This community already has ${MAX_ANNOUNCEMENTS_PER_COMMUNITY} announcements.`;
+        setNewPostError(message);
+        return { ok: false, message };
+      }
+
       const res = await apiFetch(`/community/${communityId}/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -108,7 +133,9 @@ const MyCommunity = () => {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok || !data.ok) {
-        return { ok: false, message: data.error || "Failed to create post." };
+        const message = data.error || "Failed to create post.";
+        setNewPostError(message);
+        return { ok: false, message };
       }
 
       await fetchPosts();
@@ -120,7 +147,9 @@ const MyCommunity = () => {
       return { ok: true };
     } catch (error) {
       console.error("[MyCommunity] handleCreatePost error:", error);
-      return { ok: false, message: error.message || "Failed to create post." };
+      const message = error.message || "Failed to create post.";
+      setNewPostError(message);
+      return { ok: false, message };
     }
   };
 
@@ -291,7 +320,17 @@ const MyCommunity = () => {
       </section>
 
       {showNewPostModal && (
-        <NewPostModal onClose={handleCloseModal} onSubmit={handleCreatePost} />
+        <NewPostModal
+          onClose={handleCloseModal}
+          onSubmit={handleCreatePost}
+          announcementCount={announcementCount}
+        />
+      )}
+
+      {newPostError && (
+        <div className="NewPostGlobalError" style={{ margin: "0 0 24px" }}>
+          {newPostError}
+        </div>
       )}
 
       <Footer />

@@ -2,7 +2,9 @@ import { useMemo, useState } from "react";
 import "./MyCommunity.css";
 import { COMMUNITY_TYPES, getTypeByApiValue } from "../communityTypes";
 
-const NewPostModal = ({ onClose, onSubmit }) => {
+const MAX_ANNOUNCEMENTS_PER_COMMUNITY = 3;
+
+const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
   const typeOptions = useMemo(() => COMMUNITY_TYPES, []);
 
   const [title, setTitle] = useState("");
@@ -18,6 +20,10 @@ const NewPostModal = ({ onClose, onSubmit }) => {
   const selectedType = useMemo(() => getTypeByApiValue(type), [type]);
   const isPoll = !!selectedType?.isPoll;
 
+  const announcementsDisabled =
+    selectedType?.apiValue === "announcements" &&
+    announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY;
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setGlobalError("");
@@ -25,6 +31,14 @@ const NewPostModal = ({ onClose, onSubmit }) => {
 
     if (!title.trim()) {
       setGlobalError("Title is required.");
+      return;
+    }
+
+    if (
+      selectedType?.apiValue === "announcements" &&
+      announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY
+    ) {
+      setGlobalError(`This community already has ${MAX_ANNOUNCEMENTS_PER_COMMUNITY} announcements.`);
       return;
     }
 
@@ -131,12 +145,29 @@ const NewPostModal = ({ onClose, onSubmit }) => {
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
-              {typeOptions.map((option) => (
-                <option key={option.apiValue} value={option.apiValue}>
-                  {option.label}
-                </option>
-              ))}
+              {typeOptions.map((option) => {
+                const isAnnouncements = option.apiValue === "announcements";
+                const disabled =
+                  isAnnouncements && announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY;
+
+                return (
+                  <option
+                    key={option.apiValue}
+                    value={option.apiValue}
+                    disabled={disabled}
+                  >
+                    {option.label}
+                    {disabled ? " (limit reached)" : ""}
+                  </option>
+                );
+              })}
             </select>
+
+            {announcementsDisabled && (
+              <div className="NewPostErrorText">
+                This community already has {MAX_ANNOUNCEMENTS_PER_COMMUNITY} announcements.
+              </div>
+            )}
           </div>
 
           {isPoll && (
