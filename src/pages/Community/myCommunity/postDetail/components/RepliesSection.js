@@ -36,19 +36,29 @@ const RepliesSection = ({
   childReplyBoxRef,
   editBoxRef,
 }) => {
-  const rootReplies = useMemo(() => {
-    return replyTree?.byParent?.get("root") || [];
+  const byParent = useMemo(() => {
+    const m = replyTree?.byParent;
+    return m instanceof Map ? m : new Map();
   }, [replyTree]);
+
+  const rootReplies = useMemo(() => {
+    const list = byParent.get("root");
+    return Array.isArray(list) ? list : [];
+  }, [byParent]);
+
+  const [page, setPage] = useState(1);
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(rootReplies.length / PER_PAGE));
   }, [rootReplies.length]);
 
-  const [page, setPage] = useState(1);
-
   useEffect(() => {
     setPage(1);
   }, [rootReplies.length]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
 
   const pageReplies = useMemo(() => {
     const start = (page - 1) * PER_PAGE;
@@ -65,7 +75,7 @@ const RepliesSection = ({
   return (
     <section className="PostDetailReplies">
       <h2 className="PostDetailSubTitle">
-        Replies ( {post.replyCount ?? (replies || []).length} )
+        Replies ( {post?.replyCount ?? (Array.isArray(replies) ? replies.length : 0)} )
       </h2>
 
       {replyError && <p className="communityError smallError">{replyError}</p>}
@@ -85,7 +95,7 @@ const RepliesSection = ({
 
           <ReplyTree
             rootReplies={pageReplies}
-            byParent={replyTree.byParent}
+            byParent={byParent}
             myUserId={myUserId}
             replySubmitting={replySubmitting}
             expanded={expanded}
