@@ -61,6 +61,7 @@
 .PostDetailRepliesEmpty {
   font-size: 14px;
   color: #777;
+  text-align: center;
 }
 
 .PostDetailRepliesList {
@@ -98,6 +99,7 @@
   flex: 0 0 auto;
   width: calc(var(--depth) * var(--thread-col));
   min-width: calc(var(--depth) * var(--thread-col));
+  display: none;
 }
 
 .ThreadContent {
@@ -114,46 +116,27 @@
   bottom: 0;
   left: calc(var(--i) * var(--thread-col));
   width: var(--thread-col);
+  display: none;
 }
 
 .ThreadCol.on::before {
-  content: "";
-  position: absolute;
-  left: calc((var(--thread-col) - var(--thread-line)) / 2);
-  top: 0;
-  bottom: 0;
-  width: var(--thread-line);
-  background: var(--thread-color);
-  border-radius: 999px;
+  content: none;
 }
 
 .ThreadElbow::after {
-  content: "";
-  position: absolute;
-  left: calc((var(--thread-col) - var(--thread-line)) / 2);
-  top: var(--thread-elbow-y);
-  width: 14px;
-  height: var(--thread-line);
-  background: var(--thread-color);
-  border-radius: 999px;
+  content: none;
 }
 
 .ThreadElbow::before {
-  content: "";
-  position: absolute;
-  left: calc((var(--thread-col) - var(--thread-line)) / 2);
-  top: 0;
-  width: var(--thread-line);
-  background: var(--thread-color);
-  border-radius: 999px;
+  content: none;
 }
 
 .ThreadElbow.continue::before {
-  bottom: 0;
+  bottom: auto;
 }
 
 .ThreadElbow.stop::before {
-  bottom: calc(100% - var(--thread-elbow-y));
+  bottom: auto;
 }
 
 .ThreadDepthCapDot {
@@ -161,14 +144,14 @@
   height: 8px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.16);
-  display: inline-block;
+  display: none;
 }
 
 .PostDetailReplyHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.008);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .PostDetailReplyHeaderLeft {
@@ -249,8 +232,7 @@
   padding-bottom: 20px;
 }
 
-.PostDetailPollMeta,
-.PostDetailRepliesEmpty {
+.PostDetailPollMeta {
   text-align: center;
   font-size: 14px;
   color: #666;
