@@ -41,6 +41,11 @@ const MyCommunity = () => {
   const [uploadingHero, setUploadingHero] = useState(false);
   const [uploadError, setUploadError] = useState("");
 
+  const [deletingPostId, setDeletingPostId] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
+
+  const currentUserId = String(user?.id || user?._id || "");
+
   const handleRowClick = (postId) => {
     navigate(`/community/${communityId}/posts/${postId}`);
   };
@@ -69,7 +74,7 @@ const MyCommunity = () => {
       if (!res.ok || !data.ok) {
         throw new Error(data.error || `Failed to load posts (${res.status})`);
       }
-      setPosts(data.posts || []);
+      setPosts(Array.isArray(data.posts) ? data.posts : []);
     } catch (error) {
       console.error("[MyCommunity] fetchPosts error:", error);
       setErr(error.message || "Failed to load posts.");
@@ -161,9 +166,7 @@ const MyCommunity = () => {
     return Time(date);
   };
 
-  const heroBackgroundUrl = community?.heroImageUrl
-    ? `${API_BASE}${community.heroImageUrl}`
-    : DEFAULT_HERO;
+  const heroBackgroundUrl = community?.heroImageUrl ? `${API_BASE}${community.heroImageUrl}` : DEFAULT_HERO;
 
   const heroStyle = {
     backgroundImage: `url("${heroBackgroundUrl}")`,
@@ -212,15 +215,12 @@ const MyCommunity = () => {
   const canEditHero = (() => {
     if (!community || !user) return false;
 
-    const currentUserId = user.id || user._id;
-    const isOwner = community.owner && community.owner.id === currentUserId;
+    const currentId = user.id || user._id;
+    const isOwner = community.owner && (community.owner.id === currentId || community.owner._id === currentId);
 
     const isLeader =
       Array.isArray(community.members) &&
-      community.members.some(
-        (m) =>
-          (m.role === "Leader" || m.role === "Owner") && m.id === currentUserId
-      );
+      community.members.some((m) => (m.role === "Leader" || m.role === "Owner") && (m.id === currentId || m._id === currentId));
 
     return isOwner || isLeader;
   })();
@@ -228,6 +228,69 @@ const MyCommunity = () => {
   const orderedPosts = useMemo(() => {
     return sortPostsPinnedAnnouncementsLatestFirst(posts);
   }, [posts]);
+
+  const canModeratePosts = useMemo(() => {
+    if (!community || !user) return false;
+
+    const currentId = String(user.id || user._id || "");
+
+    const inMembers =
+      Array.isArray(community.members) &&
+      community.members.some(
+        (m) =>
+          (m.role === "Leader" || m.role === "Owner") &&
+          String(m.id || m._id || "") === currentId
+      );
+
+    return inMembers;
+  }, [community, user]);
+
+  const canEditOrDeletePost = useCallback(
+    (post) => {
+      const authorId = String(post?.authorId || "");
+      if (!currentUserId) return false;
+
+      const isAuthor = authorId && authorId === currentUserId;
+      return isAuthor || canModeratePosts;
+    },
+    [currentUserId, canModeratePosts]
+  );
+
+
+  const handleDeletePost = useCallback(
+    async (postId) => {
+      if (!postId) return;
+      if (deletingPostId) return;
+
+      setDeleteError("");
+      const ok = window.confirm("Delete this post? This cannot be undone.");
+      if (!ok) return;
+
+      try {
+        setDeletingPostId(String(postId));
+
+        const res = await apiFetch(`/community/${communityId}/posts/${postId}`, {
+          method: "DELETE",
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to delete post.");
+        }
+
+        setPosts((prev) => prev.filter((p) => String(p.id) !== String(postId)));
+
+        emitCommunityActivityUpdated();
+      } catch (e) {
+        console.error("[MyCommunity] delete post error:", e);
+        setDeleteError(e.message || "Failed to delete post.");
+      } finally {
+        setDeletingPostId(null);
+      }
+    },
+    [communityId, deletingPostId]
+  );
 
   return (
     <section className="ForumContainer">
@@ -240,9 +303,7 @@ const MyCommunity = () => {
             {community?.subheader ||
               "Temporary SubHeader Temporary SubHeader Temporary SubHeader Temporary SubHeader Temporary SubHeader"}
           </h2>
-          {communityErr && (
-            <p className="communityError smallError">{communityErr}</p>
-          )}
+          {communityErr && <p className="communityError smallError">{communityErr}</p>}
         </div>
 
         {canEditHero && (
@@ -266,9 +327,7 @@ const MyCommunity = () => {
         )}
       </div>
 
-      {uploadError && (
-        <div className="HeroUploadError NewPostGlobalError">{uploadError}</div>
-      )}
+      {uploadError && <div className="HeroUploadError NewPostGlobalError">{uploadError}</div>}
 
       <section className="ForumBody">
         <div className="ForumActions">
@@ -278,11 +337,10 @@ const MyCommunity = () => {
         </div>
 
         {err && <p className="communityError">{err}</p>}
+        {deleteError && <p className="communityError">{deleteError}</p>}
         {loading && <p>Loading…</p>}
 
-        {!loading && !err && !hasRealPosts && (
-          <p>You don’t have any posts in this community yet.</p>
-        )}
+        {!loading && !err && !hasRealPosts && <p>You don’t have any posts in this community yet.</p>}
 
         {!loading && !err && hasRealPosts && (
           <table className="ForumTable">
@@ -292,6 +350,7 @@ const MyCommunity = () => {
                 <th>Category</th>
                 <th>Replies</th>
                 <th>Activity</th>
+                <th className="ForumActionsCol">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -306,12 +365,40 @@ const MyCommunity = () => {
                     <div className="subtitle">{post.subtitle}</div>
                   </td>
                   <td>
-                    <span className={`Tag ${getTypeTagClass(post)}`}>
-                      {getTypeLabel(post)}
-                    </span>
+                    <span className={`Tag ${getTypeTagClass(post)}`}>{getTypeLabel(post)}</span>
                   </td>
                   <td>{post.replyCount}</td>
                   <td>{formatActivity(post)}</td>
+                  {/* Forum delete / edit section */}
+                  <td className="ForumActionsCell" onClick={(e) => e.stopPropagation()}>
+                    {canEditOrDeletePost(post) ? (
+                      <div className="PostActionButtons">
+                        <button
+                          type="button"
+                          className="PostIconButton"
+                          aria-label="Edit post"
+                          title="Edit"
+                          onClick={() => navigate(`/community/${communityId}/posts/${post.id}/edit`)}
+                          disabled={deletingPostId === String(post.id)}
+                        >
+                          ✎
+                        </button>
+
+                        <button
+                          type="button"
+                          className="PostIconButton PostIconButton--danger"
+                          aria-label="Delete post"
+                          title="Delete"
+                          onClick={() => handleDeletePost(post.id)}
+                          disabled={deletingPostId === String(post.id)}
+                        >
+                          🗑
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="PostActionPlaceholder">—</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
