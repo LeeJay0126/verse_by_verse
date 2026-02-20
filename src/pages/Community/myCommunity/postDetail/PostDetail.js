@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import PageHeader from "../../../../component/PageHeader";
 import Footer from "../../../../component/Footer";
 import "../MyCommunity.css";
@@ -13,6 +14,8 @@ import usePostDetailData from "./hooks/usePostDetailData";
 import usePostReplies from "./hooks/usePostReplies";
 import useReplyTree from "./hooks/useReplyTree";
 import useThreadExpansion from "./hooks/useThreadExpansion";
+
+import { apiFetch } from "../../../../component/utils/ApiFetch";
 
 const PostDetail = () => {
   const {
@@ -62,6 +65,52 @@ const PostDetail = () => {
   const replyTree = useReplyTree(replies);
   const { expanded, toggleExpanded, deepExpanded, toggleDeepExpanded } = useThreadExpansion();
 
+  const canEditPost = useMemo(() => {
+    if (!post) return false;
+
+    const currentId = String(myUserId || "");
+    if (!currentId) return false;
+
+    const authorId = String(post.authorId || "");
+    const isAuthor = authorId && authorId === currentId;
+
+    const isLeaderOrOwner =
+      Array.isArray(community?.members) &&
+      community.members.some(
+        (m) =>
+          (m.role === "Owner" || m.role === "Leader") &&
+          String(m.id || m._id || "") === currentId
+      );
+
+    return isAuthor || isLeaderOrOwner;
+  }, [post, myUserId, community]);
+
+  const handleSavePostHeader = useCallback(
+    async (payload) => {
+      try {
+        if (!communityId || !postId) return { ok: false, error: "Missing communityId/postId." };
+
+        const res = await apiFetch(`/community/${communityId}/posts/${postId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          return { ok: false, error: data.error || "Failed to save post." };
+        }
+
+        await refetchPost();
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: e?.message || "Failed to save post." };
+      }
+    },
+    [communityId, postId, refetchPost]
+  );
+
   if (loading) {
     return (
       <PostDetailShell heroStyle={heroStyle} PageHeader={PageHeader} Footer={Footer}>
@@ -92,14 +141,11 @@ const PostDetail = () => {
     <section className="ForumContainer">
       <div className="ForumHero ForumHero--small" style={heroStyle}>
         <PageHeader />
-        <PostHeroHeader
-          communityHeader={community?.header || "Community"}
-          communityId={communityId}
-        />
+        <PostHeroHeader communityHeader={community?.header || "Community"} communityId={communityId} />
       </div>
 
       <section className="ForumBody PostDetailBody">
-        <PostHeader post={post} />
+        <PostHeader post={post} canEdit={canEditPost} onSave={handleSavePostHeader} />
 
         {post.type === "poll" && (
           <PollSection

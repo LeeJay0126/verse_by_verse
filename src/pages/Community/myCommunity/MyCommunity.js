@@ -7,6 +7,8 @@ import Footer from "../../../component/Footer";
 import NewPostModal from "./NewPost";
 import Time from "../../../component/utils/Time";
 import { apiFetch } from "../../../component/utils/ApiFetch";
+import { FiTrash2 } from "react-icons/fi";
+
 import {
   COMMUNITY_ACTIVITY_EVENT,
   emitCommunityActivityUpdated,
@@ -370,33 +372,22 @@ const MyCommunity = () => {
                   <td>{post.replyCount}</td>
                   <td>{formatActivity(post)}</td>
                   {/* Forum delete / edit section */}
-                  <td className="ForumActionsCell" onClick={(e) => e.stopPropagation()}>
-                    {canEditOrDeletePost(post) ? (
-                      <div className="PostActionButtons">
-                        <button
-                          type="button"
-                          className="PostIconButton"
-                          aria-label="Edit post"
-                          title="Edit"
-                          onClick={() => navigate(`/community/${communityId}/posts/${post.id}/edit`)}
-                          disabled={deletingPostId === String(post.id)}
-                        >
-                          ✎
-                        </button>
-
-                        <button
-                          type="button"
-                          className="PostIconButton PostIconButton--danger"
-                          aria-label="Delete post"
-                          title="Delete"
-                          onClick={() => handleDeletePost(post.id)}
-                          disabled={deletingPostId === String(post.id)}
-                        >
-                          🗑
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="PostActionPlaceholder">—</span>
+                  <td
+                    className={`ForumActionsCell ${canEditOrDeletePost(post) ? "can-delete" : ""
+                      }`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {canEditOrDeletePost(post) && (
+                      <button
+                        type="button"
+                        className="PostDeleteIcon"
+                        aria-label="Delete post"
+                        title="Delete"
+                        onClick={() => handleDeletePost(post.id)}
+                        disabled={deletingPostId === String(post.id)}
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
                     )}
                   </td>
                 </tr>
