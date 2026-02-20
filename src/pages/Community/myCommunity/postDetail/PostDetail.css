@@ -53,6 +53,145 @@
   color: #333;
 }
 
+.PostDetailEditableGroup {
+  position: relative;
+  border-radius: 10px;
+}
+
+.PostDetailEditableGroup.can-edit {
+  padding-top: 2px;
+}
+
+.PostDetailEditIcon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  border: none;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.PostDetailEditableGroup.can-edit:hover .PostDetailEditIcon {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.PostDetailEditIcon:hover {
+  background: rgba(255, 255, 255, 0.95);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.PostDetailEditPanel {
+  margin-top: 10px;
+  padding: 14px 14px 12px;
+  border-radius: 12px;
+  background: #fffdf9;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.PostDetailEditError {
+  background: #fbe4e4;
+  color: #6b2020;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.PostDetailEditField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.PostDetailEditField label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #333;
+}
+
+.PostDetailEditField input,
+.PostDetailEditField textarea {
+  border-radius: 8px;
+  border: 1px solid #c7b9a4;
+  padding: 10px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fffdf9;
+}
+
+.PostDetailEditField input:focus,
+.PostDetailEditField textarea:focus {
+  outline: 2px solid #0f0f0f;
+  outline-offset: 1px;
+}
+
+.PostDetailEditField textarea {
+  resize: vertical;
+  min-height: 140px;
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.PostDetailEditActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.PostDetailEditPrimary {
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.PostDetailEditSecondary {
+  background: transparent;
+  color: #333;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #c7b9a4;
+  cursor: pointer;
+}
+
+.PostDetailEditPrimary:disabled,
+.PostDetailEditSecondary:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.PostDetailEditPrimary:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.PostDetailEditSecondary:hover:not(:disabled) {
+  background: #f0e4d4;
+}
+
+.PostDetailEditHint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
 .PostDetailSubTitle {
   font-size: 18px;
   padding: 20px 0;
