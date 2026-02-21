@@ -8,7 +8,7 @@ export async function apiFetch(path, options = {}) {
 
   const opts = {
     ...options,
-    credentials: "include", // ✅ ALWAYS send session cookie
+    credentials: "include",
     headers: {
       ...(options.headers || {}),
     },

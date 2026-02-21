@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import PageHeader from "../../../component/PageHeader";
 import Footer from "../../../component/Footer";
 import { apiFetch } from "../../../component/utils/ApiFetch";
 import "../Account.css";
 
-const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+export default function CheckEmail() {
+  const location = useLocation();
+  const emailFromState = location.state?.email || "";
+  const sentFromState = location.state?.sent;
 
-export default function FindPw() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState("");
+  const [email, setEmail] = useState(emailFromState);
+  const [status, setStatus] = useState(
+    sentFromState === false ? "Email failed to send. Please resend." : ""
+  );
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -23,11 +27,10 @@ export default function FindPw() {
     const v = String(email || "").trim();
     if (!v) return false;
     if (v.length > 254) return false;
-    return emailRegex.test(v);
+    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
   }, [email]);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleResend() {
     setError("");
     setStatus("");
 
@@ -38,7 +41,7 @@ export default function FindPw() {
 
     setSending(true);
     try {
-      const res = await apiFetch("/auth/forgot-password", {
+      const res = await apiFetch(`/auth/resend-verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim().toLowerCase() }),
@@ -46,13 +49,12 @@ export default function FindPw() {
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data?.ok === false) {
-        throw new Error(data?.error || "Failed to send reset email.");
+        throw new Error(data?.error || "Failed to resend.");
       }
 
-      // Important: same message whether or not the account exists
-      setStatus("If an account exists for that email, we sent a password reset link. Please check your inbox and spam.");
-    } catch (err) {
-      setError(err?.message || "Network error");
+      setStatus("Verification email sent. Please check your inbox.");
+    } catch (e) {
+      setError(e?.message || "Network error");
     } finally {
       setSending(false);
     }
@@ -61,13 +63,16 @@ export default function FindPw() {
   return (
     <section className="Account">
       <PageHeader />
-
       <div className="account-content">
         <div className="account-card">
-          <h1 className="account-title">Forgot password?</h1>
+          <h1 className="account-title">Check your email</h1>
 
           <div className="account-subtitle">
-            Enter the email for your account and we’ll send you a reset link.
+            We sent a verification link to your email. Open it to verify your account.
+          </div>
+
+          <div className="account-info" role="note">
+            If you don’t see it, check spam/junk. Some providers delay new senders by a few minutes.
           </div>
 
           {status && (
@@ -82,37 +87,40 @@ export default function FindPw() {
             </div>
           )}
 
-          <form className="account-form" onSubmit={handleSubmit}>
+          <div className="account-form">
             <label className="account-label">
               Email
               <input
                 ref={inputRef}
                 type="email"
-                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="account-input"
                 placeholder="Email Address"
                 maxLength={254}
               />
-              <div className="account-help-small">
-                You may need to check spam/junk. Some providers delay new senders by a few minutes.
-              </div>
+              <div className="account-help-small">Didn’t get it? Resend below.</div>
             </label>
 
-            <button type="submit" className="account-btn" disabled={sending || !emailOk}>
-              {sending ? "Sending…" : "Send reset link"}
+            <button
+              type="button"
+              className="account-btn"
+              onClick={handleResend}
+              disabled={sending || !emailOk}
+            >
+              {sending ? "Sending…" : "Resend verification email"}
             </button>
 
             <div className="account-signup-findpw" style={{ justifyContent: "center" }}>
               <p className="account-help">
-                <Link to="/account">Back to Sign In</Link>
+                <Link to="/account" state={{ email: email.trim() }}>
+                  Back to Sign In
+                </Link>
               </p>
             </div>
-          </form>
+          </div>
         </div>
       </div>
-
       <Footer />
     </section>
   );

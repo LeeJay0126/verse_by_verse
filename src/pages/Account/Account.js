@@ -1,6 +1,6 @@
 import "./Account.css";
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import PageHeader from "../../component/PageHeader";
 import Footer from "../../component/Footer";
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
@@ -12,10 +12,24 @@ export default function Account() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const idRef = useRef(null);
 
+  const idRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, login } = useAuth();
+
+  const verifiedBanner = useMemo(() => {
+    return !!location.state?.verified;
+  }, [location.state]);
+
+  const prefillEmail = useMemo(() => {
+    const e = location.state?.email;
+    return typeof e === "string" ? e : "";
+  }, [location.state]);
+
+  useEffect(() => {
+    if (prefillEmail) setId(prefillEmail);
+  }, [prefillEmail]);
 
   useEffect(() => {
     idRef.current?.focus();
@@ -27,7 +41,9 @@ export default function Account() {
     }
   }, [user, navigate]);
 
-  const isValid = id.trim().length >= 3 && pw.length >= 4;
+  const isValid = useMemo(() => {
+    return id.trim().length >= 3 && pw.length >= 4;
+  }, [id, pw]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -41,10 +57,19 @@ export default function Account() {
     setSubmitting(true);
 
     try {
-      await login(id, pw); // `id` can be email OR username
+      await login(id, pw);
       navigate("/", { replace: true });
     } catch (err) {
-      setError(err.message || "Network Error");
+      // If backend blocks login until verified, send user to check-email
+      if (err?.code === "EMAIL_NOT_VERIFIED") {
+        navigate("/check-email", {
+          replace: true,
+          state: { email: err.email || id },
+        });
+        return;
+      }
+
+      setError(err?.message || "Network Error");
     } finally {
       setSubmitting(false);
     }
@@ -57,13 +82,19 @@ export default function Account() {
         <div className="account-card">
           <h1 className="account-title">Sign In</h1>
 
+          {verifiedBanner && (
+            <div className="account-success" role="status">
+              Email verified! You can sign in now.
+            </div>
+          )}
+
           {error && (
             <div className="account-error" role="alert">
               {error}
             </div>
           )}
 
-          <form className="account-form" onSubmit={handleSubmit}>
+          <form className="account-form" onSubmit={handleSubmit} noValidate>
             <label className="account-label">
               Username / Email
               <input
@@ -100,11 +131,7 @@ export default function Account() {
               </div>
             </label>
 
-            <button
-              type="submit"
-              className="account-btn"
-              disabled={submitting || !isValid}
-            >
+            <button type="submit" className="account-btn" disabled={submitting || !isValid}>
               {submitting ? "Logging in…" : "Log In"}
             </button>
           </form>

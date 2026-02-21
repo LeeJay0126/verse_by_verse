@@ -15,6 +15,9 @@ import Notifications from "./pages/Account/userMenu/Notifications";
 import Profile from "./pages/Account/userMenu/Profile";
 import CommunityInfo from "./pages/Community/browseCommunity/CommunityInfo";
 import PostDetail from "./pages/Community/myCommunity/postDetail/PostDetail";
+import CheckEmail from "./pages/Account/email/CheckEmail";
+import VerifyEmail from "./pages/Account/email/VerifyEmail";
+import ResetPassword from "./pages/Account/findUser/ResetPassword";
 
 import { AuthProvider } from "./component/context/AuthContext";
 import { NotificationProvider } from "./component/context/NotificationContext";
@@ -59,6 +62,9 @@ function App() {
                   <Route path="/bible/walkthrough" element={<BibleWalkthrough />} />
                   <Route path="/notes" element={<NotesPage />} />
                   <Route path="/notes/:noteId" element={<NotePage />} />
+                  <Route path="/check-email" element={<CheckEmail />} />
+                  <Route path="/verify-email" element={<VerifyEmail />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                 </Routes>
               </ToastProvider>
             </NotificationProvider>
