@@ -43,7 +43,6 @@ export default function VerifyEmail() {
         setStatus("Email verified successfully!");
         setDone(true);
 
-        // Auto-redirect to sign in with a banner + prefilled email
         setTimeout(() => {
           navigate("/account", { replace: true, state: { verified: true, email } });
         }, 800);
@@ -67,17 +66,17 @@ export default function VerifyEmail() {
         <div className="account-card">
           <h1 className="account-title">Verify Email</h1>
 
-          {status && (
+          {status ? (
             <div className="account-success" role="status">
               {status}
             </div>
-          )}
+          ) : null}
 
-          {error && (
+          {error ? (
             <div className="account-error" role="alert">
               {error}
             </div>
-          )}
+          ) : null}
 
           <div className="account-signup-findpw" style={{ justifyContent: "center" }}>
             {done ? (

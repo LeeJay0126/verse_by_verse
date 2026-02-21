@@ -5,27 +5,30 @@ const API_BASE =
 
 export const getApiBase = () => API_BASE;
 
-export async function apiFetch(path, options = {}) {
-  const url =
-    path.startsWith("http")
-      ? path
-      : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+export async function apiFetch(path, options = {}, timeoutMs = 15000) {
+  const url = path.startsWith("http")
+    ? path
+    : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
 
   const opts = {
     ...options,
     credentials: "include",
-    headers: {
-      ...(options.headers || {}),
-    },
+    signal: controller.signal,
+    headers: { ...(options.headers || {}) },
   };
 
-  // Only add JSON content-type when body is JSON
   if (opts.body && !(opts.body instanceof FormData)) {
-    if (!opts.headers["Content-Type"]) {
-      opts.headers["Content-Type"] = "application/json";
-    }
+    if (!opts.headers["Content-Type"]) opts.headers["Content-Type"] = "application/json";
   }
 
   console.log("[apiFetch]", opts.method || "GET", url);
-  return fetch(url, opts);
+
+  try {
+    return await fetch(url, opts);
+  } finally {
+    clearTimeout(t);
+  }
 }
