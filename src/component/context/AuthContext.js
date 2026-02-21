@@ -21,11 +21,8 @@ export function AuthProvider({ children }) {
 
         const data = await res.json().catch(() => ({}));
         if (!cancelled) {
-          if (data?.ok && data.user) {
-            setUser(data.user);
-          } else {
-            setUser(null);
-          }
+          if (data?.ok && data.user) setUser(data.user);
+          else setUser(null);
         }
       } catch (err) {
         console.error("[auth] /auth/me error", err);
@@ -47,25 +44,23 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ identifier, password }),
     });
 
-
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || data?.ok === false) {
-      throw new Error(data?.error || "Login failed");
+      const err = new Error(data?.error || "Login failed");
+      // preserve backend info for UI routing
+      err.code = data?.code;
+      err.email = data?.email;
+      throw err;
     }
 
     setUser(data.user);
     return data.user;
   }
 
-
-  // Logout: call /auth/logout, clear `user`
   async function logout() {
     try {
-      await apiFetch(`/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      await apiFetch(`/auth/logout`, { method: "POST", credentials: "include" });
     } catch (err) {
       console.error("[auth] logout error", err);
     } finally {
@@ -84,11 +79,8 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used inside <AuthProvider>");
-  }
+  if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
   return ctx;
 }
