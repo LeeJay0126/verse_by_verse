@@ -29,7 +29,7 @@ const CreateCommunity = () => {
 
   try {
     setSubmitting(true);
-
+    console.log("SUBMIT START");
     const res = await apiFetch("/community", {
       method: "POST",
       headers: {
@@ -37,7 +37,7 @@ const CreateCommunity = () => {
       },
       body: JSON.stringify(form),
     });
-
+    console.log("SUBMIT GOT RESPONSE", res.status);
     let data;
     try {
       data = await res.json();
