@@ -1,44 +1,87 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import PageHeader from "../../../component/PageHeader";
 import Footer from "../../../component/Footer";
 import { useNotifications } from "../../../component/context/NotificationContext";
 import "../Account.css";
 import { FaTrash } from "react-icons/fa";
-import { apiFetch } from "../../../component/utils/ApiFetch";
+import { apiFetch, getApiBase } from "../../../component/utils/ApiFetch";
+
+const REQUEST_TIMEOUT_MS = 10000;
 
 const Notifications = () => {
-  const {
-    unreadCount,
-    refreshUnreadCount,
-  } = useNotifications();
+  const { refreshUnreadCount } = useNotifications();
 
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [phase, setPhase] = useState("idle"); // "idle" | "loading" | "success" | "error"
   const [error, setError] = useState("");
+
   const [actingId, setActingId] = useState(null);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
-  // --- Load notifications from server ---
-  const fetchNotifications = useCallback(async () => {
+  const safeJson = async (res) => {
     try {
-      setLoading(true);
-      setError("");
+      return await res.json();
+    } catch {
+      return null;
+    }
+  };
 
-      const res = await apiFetch("/notifications");
-      const data = await res.json();
+  const fetchWithTimeout = async (path, options = {}) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || "Failed to load notifications");
+    try {
+      const res = await apiFetch(path, { ...options, signal: controller.signal });
+      return res;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  };
+
+  const fetchNotifications = useCallback(async () => {
+    setPhase("loading");
+    setError("");
+
+    try {
+      // helpful debug: confirms what base URL you are ACTUALLY calling
+      console.log("[Notifications] API_BASE =", getApiBase());
+      console.log("[Notifications] GET /notifications");
+
+      const res = await fetchWithTimeout("/notifications");
+      const data = await safeJson(res);
+
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || `Failed to load notifications (${res.status})`);
       }
 
-      setNotifications(data.notifications || []);
+      if (!mountedRef.current) return;
+
+      setNotifications(Array.isArray(data.notifications) ? data.notifications : []);
+      setPhase("success");
     } catch (err) {
+      if (!mountedRef.current) return;
+
+      const isAbort =
+        err?.name === "AbortError" ||
+        String(err?.message || "").toLowerCase().includes("aborted");
+
+      setNotifications([]);
+      setError(
+        isAbort
+          ? `Request timed out after ${Math.round(REQUEST_TIMEOUT_MS / 1000)}s. Check API_BASE / server / CORS.`
+          : err?.message || "Error loading notifications"
+      );
+      setPhase("error");
       console.error("[notifications fetch error]", err);
-      setError(err.message || "Error loading notifications");
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -46,123 +89,129 @@ const Notifications = () => {
     fetchNotifications();
   }, [fetchNotifications]);
 
+  const isUnread = useCallback((n) => !n?.readAt, []);
+  const isPendingAction = useCallback(
+    (n) =>
+      n?.status === "pending" &&
+      (n?.type === "COMMUNITY_INVITE" || n?.type === "COMMUNITY_JOIN_REQUEST"),
+    []
+  );
 
-
-  
- async function handleDeleteOne(id) {
-  console.log("🧪 about to DELETE", id);
-
-  try {
-    const res = await apiFetch(`/notifications/${id}`, {
-      method: "DELETE",
+  const sortedNotifications = useMemo(() => {
+    return [...notifications].sort((a, b) => {
+      const ta = new Date(a?.createdAt || 0).getTime();
+      const tb = new Date(b?.createdAt || 0).getTime();
+      return tb - ta;
     });
+  }, [notifications]);
 
-    console.log("🧪 DELETE response", res);
-  } catch (e) {
-    console.error("🧪 DELETE failed before network", e);
+  const hasAny = notifications.length > 0;
+
+  async function handleDeleteOne(id) {
+    if (!id) return;
+
+    try {
+      setDeletingId(id);
+      setError("");
+
+      const res = await fetchWithTimeout(`/notifications/${id}`, { method: "DELETE" });
+      const data = await safeJson(res);
+
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || `Failed to delete notification (${res.status})`);
+      }
+
+      setNotifications((prev) => prev.filter((n) => (n?._id || n?.id) !== id));
+      refreshUnreadCount();
+    } catch (e) {
+      console.error("[notification delete-one error]", e);
+      setError(e?.message || "Failed to delete notification");
+    } finally {
+      setDeletingId(null);
+    }
   }
-}
 
-
-
-
-
-  // --- Per-notification action (accept / decline) ---
   async function handleNotificationAction(id, action) {
     if (!id) return;
     if (!["accept", "decline"].includes(action)) return;
 
     try {
       setActingId(id);
+      setError("");
 
-      const res = await apiFetch(`/notifications/${id}/act`, {
+      const res = await fetchWithTimeout(`/notifications/${id}/act`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || "Failed to update notification");
+      const data = await safeJson(res);
+
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || `Failed to update notification (${res.status})`);
       }
 
-      // Update the item in local state
       setNotifications((prev) =>
-        prev.map((n) => (n._id === id || n.id === id ? data.notification : n))
+        prev.map((n) => ((n?._id || n?.id) === id ? data.notification : n))
       );
 
-      // unread count might have changed
       refreshUnreadCount();
     } catch (err) {
       console.error("[notification act error]", err);
-      setError(err.message || "Failed to update notification");
+      setError(err?.message || "Failed to update notification");
     } finally {
       setActingId(null);
     }
   }
 
-  // --- Mark all as read (server + context) ---
   async function handleMarkAllRead() {
+    if (!hasAny) return;
+
     try {
       setBulkLoading(true);
       setError("");
 
-      const res = await apiFetch("/notifications/read-all", {
-        method: "POST",
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || "Failed to mark all as read");
+      const res = await fetchWithTimeout("/notifications/read-all", { method: "POST" });
+      const data = await safeJson(res);
+
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || `Failed to mark all as read (${res.status})`);
       }
 
-      // update local list
       const now = new Date().toISOString();
-      setNotifications((prev) =>
-        prev.map((n) => ({
-          ...n,
-          readAt: n.readAt || now,
-          status: n.status || n.status, // leave status alone
-        }))
-      );
-
-      // sync global badge
+      setNotifications((prev) => prev.map((n) => ({ ...n, readAt: n?.readAt || now })));
       refreshUnreadCount();
     } catch (err) {
       console.error("[notifications mark-all-read error]", err);
-      setError(err.message || "Failed to mark all as read");
+      setError(err?.message || "Failed to mark all as read");
     } finally {
       setBulkLoading(false);
     }
   }
 
-  // --- Delete all notifications ---
   async function handleDeleteAll() {
+    if (!hasAny) return;
+
     try {
       setBulkLoading(true);
       setError("");
 
-      const res = await apiFetch("/notifications", {
-        method: "DELETE",
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || "Failed to delete notifications");
+      const res = await fetchWithTimeout("/notifications", { method: "DELETE" });
+      const data = await safeJson(res);
+
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || `Failed to delete notifications (${res.status})`);
       }
 
       setNotifications([]);
       refreshUnreadCount();
     } catch (err) {
       console.error("[notifications delete-all error]", err);
-      setError(err.message || "Failed to delete notifications");
+      setError(err?.message || "Failed to delete notifications");
     } finally {
       setBulkLoading(false);
     }
   }
-
-  const isUnread = (n) => !n.readAt;
-  const isPendingAction = (n) =>
-    n.status === "pending" &&
-    (n.type === "COMMUNITY_INVITE" || n.type === "COMMUNITY_JOIN_REQUEST");
 
   return (
     <section className="Account">
@@ -170,88 +219,102 @@ const Notifications = () => {
       <div className="account-content">
         <div className="account-card">
           <h1 className="account-title">Notifications</h1>
-          <p className="account-subtitle">
-            Stay up-to-date with your communities and studies.
-          </p>
+          <p className="account-subtitle">Stay up-to-date with your communities and studies.</p>
 
-          {loading && <p>Loading notifications…</p>}
-          {error && <p className="account-error">{error}</p>}
+          {phase === "loading" && <p>Loading notifications…</p>}
 
-          {!loading && notifications.length === 0 && (
+          {phase === "error" && (
+            <>
+              <p className="account-error">{error}</p>
+              <button
+                type="button"
+                className="notifications-toolbar-btn"
+                onClick={fetchNotifications}
+                disabled={phase === "loading"}
+              >
+                Retry
+              </button>
+            </>
+          )}
+
+          {phase === "success" && !hasAny && (
             <p className="account-subtitle">You don’t have any notifications yet.</p>
           )}
 
-          <ul className="notifications-list">
-            {notifications.map((n) => {
-              const id = n._id || n.id;
-              return (
-                <li
-                  key={id}
-                  className={`notification-item ${isUnread(n) ? "notification-item--unread" : ""
-                    }`}
-                >
-                  <div className="notification-main">
-                    <div className="notification-title">{n.message}</div>
-                    {/* you can later have a subtitle based on type */}
-                    {/* <div className="notification-body">More details...</div> */}
-                  </div>
-                  <div className="notification-meta">
-                    {/* For now just show createdAt short; you can plug your Time() util later */}
-                    <span className="notification-time">
-                      {new Date(n.createdAt).toLocaleString()}
-                    </span>
+          {hasAny && (
+            <ul className="notifications-list">
+              {sortedNotifications.map((n) => {
+                const id = n?._id || n?.id;
+                const pending = isPendingAction(n);
 
-                    {isPendingAction(n) && (
-                      <div className="notification-actions">
-                        <button
-                          type="button"
-                          className="notification-action-btn"
-                          disabled={actingId === id}
-                          onClick={() => handleNotificationAction(id, "accept")}
-                        >
-                          {actingId === id ? "Accepting…" : "Accept"}
-                        </button>
-                        <button
-                          type="button"
-                          className="notification-action-btn notification-action-btn--secondary"
-                          disabled={actingId === id}
-                          onClick={() => handleNotificationAction(id, "decline")}
-                        >
-                          {actingId === id ? "Declining…" : "Decline"}
-                        </button>
-                      </div>
-                    )}
-                    <button
-                      type="button"
-                      className="notification-delete-btn"
-                      onClick={() => handleDeleteOne(id)}
-                      disabled={deletingId === id}
-                      aria-label="Delete notification"
-                      title="Delete notification"
-                    >
-                      {deletingId === id ? "…" : <FaTrash />}
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                return (
+                  <li
+                    key={id}
+                    className={`notification-item ${isUnread(n) ? "notification-item--unread" : ""}`}
+                  >
+                    <div className="notification-main">
+                      <div className="notification-title">{n?.message}</div>
+                    </div>
+
+                    <div className="notification-meta">
+                      <span className="notification-time">
+                        {n?.createdAt ? new Date(n.createdAt).toLocaleString() : ""}
+                      </span>
+
+                      {pending && (
+                        <div className="notification-actions">
+                          <button
+                            type="button"
+                            className="notification-action-btn"
+                            disabled={actingId === id || bulkLoading}
+                            onClick={() => handleNotificationAction(id, "accept")}
+                          >
+                            {actingId === id ? "Accepting…" : "Accept"}
+                          </button>
+                          <button
+                            type="button"
+                            className="notification-action-btn notification-action-btn--secondary"
+                            disabled={actingId === id || bulkLoading}
+                            onClick={() => handleNotificationAction(id, "decline")}
+                          >
+                            {actingId === id ? "Declining…" : "Decline"}
+                          </button>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        className="notification-delete-btn"
+                        onClick={() => handleDeleteOne(id)}
+                        disabled={deletingId === id || bulkLoading}
+                        aria-label="Delete notification"
+                        title="Delete notification"
+                      >
+                        {deletingId === id ? "…" : <FaTrash />}
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
           <div className="notifications-toolbar">
             <button
               type="button"
               className="notifications-toolbar-btn"
               onClick={handleMarkAllRead}
-              disabled={bulkLoading || notifications.length === 0}
+              disabled={bulkLoading || !hasAny}
             >
-              Mark all as read
+              {bulkLoading ? "Working…" : "Mark all as read"}
             </button>
             <button
               type="button"
               className="notifications-toolbar-btn notifications-toolbar-btn--danger"
               onClick={handleDeleteAll}
-              disabled={bulkLoading || notifications.length === 0}
+              disabled={bulkLoading || !hasAny}
             >
-              Delete all
+              {bulkLoading ? "Working…" : "Delete all"}
             </button>
           </div>
         </div>
