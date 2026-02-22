@@ -10,7 +10,7 @@ export default function CheckEmail() {
   const emailFromState = location.state?.email || "";
   const sentFromState = location.state?.sent;
 
-  const [email, setEmail] = useState(emailFromState);
+  const email = emailFromState;
   const [status, setStatus] = useState(
     sentFromState === false ? "Email failed to send. Please resend." : ""
   );
@@ -72,7 +72,8 @@ export default function CheckEmail() {
           </div>
 
           <div className="account-info" role="note">
-            If you don’t see it, check spam/junk. Some providers delay new senders by a few minutes.
+            If you don’t see it, check spam/junk. <br/>
+            Some providers delay new senders by a few minutes.
           </div>
 
           {status && (
@@ -91,12 +92,10 @@ export default function CheckEmail() {
             <label className="account-label">
               Email
               <input
-                ref={inputRef}
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                readOnly
                 className="account-input"
-                placeholder="Email Address"
                 maxLength={254}
               />
               <div className="account-help-small">Didn’t get it? Resend below.</div>
