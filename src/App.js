@@ -30,6 +30,7 @@ import BibleWalkthrough from "./pages/Study/BibleWalkthrough";
 import NotesPage from "./pages/Study/Notes/NotesPage";
 import NotePage from "./pages/Study/Notes/NotePage";
 import CommunityOverview from "./pages/Community/myCommunity/CommunityOverview";
+import MemberManage from "./pages/Community/myCommunity/MemberManage";
 
 function App() {
   return (
@@ -65,6 +66,7 @@ function App() {
                   <Route path="/check-email" element={<CheckEmail />} />
                   <Route path="/verify-email" element={<VerifyEmail />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/community/:communityId/members/manage" element={<MemberManage />} />
                 </Routes>
               </ToastProvider>
             </NotificationProvider>

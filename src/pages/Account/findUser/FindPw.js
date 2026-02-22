@@ -49,7 +49,6 @@ export default function FindPw() {
         throw new Error(data?.error || "Failed to send reset email.");
       }
 
-      // Important: same message whether or not the account exists
       setStatus("If an account exists for that email, we sent a password reset link. Please check your inbox and spam.");
     } catch (err) {
       setError(err?.message || "Network error");
@@ -94,6 +93,7 @@ export default function FindPw() {
                 className="account-input"
                 placeholder="Email Address"
                 maxLength={254}
+                readOnly={!!status}
               />
               <div className="account-help-small">
                 You may need to check spam/junk. Some providers delay new senders by a few minutes.

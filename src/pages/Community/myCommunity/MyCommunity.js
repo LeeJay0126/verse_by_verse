@@ -218,13 +218,18 @@ const MyCommunity = () => {
     if (!community || !user) return false;
 
     const currentId = user.id || user._id;
-    const isOwner = community.owner && (community.owner.id === currentId || community.owner._id === currentId);
+    const isOwnerLocal =
+      community.owner && (community.owner.id === currentId || community.owner._id === currentId);
 
-    const isLeader =
+    const isLeaderLocal =
       Array.isArray(community.members) &&
-      community.members.some((m) => (m.role === "Leader" || m.role === "Owner") && (m.id === currentId || m._id === currentId));
+      community.members.some(
+        (m) =>
+          (m.role === "Leader" || m.role === "Owner") &&
+          (m.id === currentId || m._id === currentId)
+      );
 
-    return isOwner || isLeader;
+    return isOwnerLocal || isLeaderLocal;
   })();
 
   const orderedPosts = useMemo(() => {
@@ -257,7 +262,6 @@ const MyCommunity = () => {
     },
     [currentUserId, canModeratePosts]
   );
-
 
   const handleDeletePost = useCallback(
     async (postId) => {
@@ -293,6 +297,33 @@ const MyCommunity = () => {
     },
     [communityId, deletingPostId]
   );
+
+  const isOwner = useMemo(() => {
+    const ownerId = String(community?.owner?.id || community?.owner?._id || "");
+    return ownerId && ownerId === currentUserId;
+  }, [community, currentUserId]);
+
+  const isLeader = useMemo(() => {
+    return (
+      Array.isArray(community?.members) &&
+      community.members.some(
+        (m) =>
+          (String(m.role || "").toLowerCase() === "leader" ||
+            String(m.role || "").toLowerCase() === "owner") &&
+          String(m.id || m._id || "") === currentUserId
+      )
+    );
+  }, [community, currentUserId]);
+
+  const leadersCanManageMembers = Boolean(community?.settings?.leadersCanManageMembers);
+
+  const canManageMembers = useMemo(() => {
+    return isOwner || (isLeader && leadersCanManageMembers);
+  }, [isOwner, isLeader, leadersCanManageMembers]);
+
+  const handleManageMembersClick = () => {
+    navigate(`/community/${communityId}/members/manage`);
+  };
 
   return (
     <section className="ForumContainer">
@@ -333,6 +364,11 @@ const MyCommunity = () => {
 
       <section className="ForumBody">
         <div className="ForumActions">
+          {canManageMembers && (
+            <button className="ManageButton" onClick={handleManageMembersClick}>
+              Manage
+            </button>
+          )}
           <button className="NewPostButton" onClick={handleNewPostClick}>
             New Post
           </button>
@@ -357,11 +393,7 @@ const MyCommunity = () => {
             </thead>
             <tbody>
               {orderedPosts.map((post) => (
-                <tr
-                  key={post.id}
-                  className="ForumRow"
-                  onClick={() => handleRowClick(post.id)}
-                >
+                <tr key={post.id} className="ForumRow" onClick={() => handleRowClick(post.id)}>
                   <td className="topic">
                     <div className="title">{post.title}</div>
                     <div className="subtitle">{post.subtitle}</div>
@@ -371,10 +403,8 @@ const MyCommunity = () => {
                   </td>
                   <td>{post.replyCount}</td>
                   <td>{formatActivity(post)}</td>
-                  {/* Forum delete / edit section */}
                   <td
-                    className={`ForumActionsCell ${canEditOrDeletePost(post) ? "can-delete" : ""
-                      }`}
+                    className={`ForumActionsCell ${canEditOrDeletePost(post) ? "can-delete" : ""}`}
                     onClick={(e) => e.stopPropagation()}
                   >
                     {canEditOrDeletePost(post) && (

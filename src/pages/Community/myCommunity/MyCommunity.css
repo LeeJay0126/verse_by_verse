@@ -33,6 +33,23 @@
   padding-top: 20px;
   display: flex;
   justify-content: end;
+  gap: 10px;
+  align-items: center;
+}
+
+.ManageButton {
+  background: transparent;
+  color: #000;
+  font-size: 16px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  margin-bottom: 24px;
+}
+
+.ManageButton:hover {
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .ForumHero {

@@ -1,0 +1,302 @@
+.MemberManagePage {
+  background: #fdfcfa;
+  min-height: 100vh;
+}
+
+.MemberManageBody {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 18px 50px;
+}
+
+.MemberManageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.MemberManageTitle {
+  margin: 0;
+  font-size: 28px;
+}
+
+.MemberManageSub {
+  margin: 6px 0 0;
+}
+
+.MemberManageBack {
+  color: #3b3b3b;
+  text-decoration: underline;
+}
+
+.MemberManageTabsRow {
+  margin: 12px 0 10px;
+}
+
+.MemberManageTabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.TabBtn {
+  border: 1px solid #e7dfd4;
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.TabBtn:hover {
+  background: #faf7f2;
+}
+
+.TabBtn.active {
+  border-color: #111;
+  background: #111;
+  color: #fff;
+}
+
+.TabCount {
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.TabBtn.active .TabCount {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.MemberManageError {
+  background: #ffe9e9;
+  color: #8a1f1f;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin: 10px 0 10px;
+  border: 1px solid #ffb7b7;
+}
+
+.MemberManageSuccess {
+  background: #eaf7ee;
+  color: #1e5b2b;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin: 10px 0 10px;
+  border: 1px solid #b8e7c4;
+}
+
+.MemberManageGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .MemberManageHeader {
+    flex-direction: column;
+  }
+
+  .MemberManageGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.Panel {
+  background: #fff;
+  border: 1px solid #ece6dd;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.PanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.CountPill {
+  background: #f1ede6;
+  border: 1px solid #e7dfd4;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.EmptyText {
+  margin: 10px 0 0;
+  color: #666;
+}
+
+.List {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ListRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #f0ebe2;
+}
+
+.ListRow:first-child {
+  border-top: none;
+}
+
+.RowMain {
+  min-width: 0;
+}
+
+.RowTitle {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.RowSub {
+  font-size: 13px;
+  color: #666;
+  margin-top: 2px;
+  word-break: break-word;
+}
+
+.RowActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.Btn {
+  border: 1px solid #d9d1c6;
+  background: #faf7f2;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.Btn:hover {
+  background: #f3eee6;
+}
+
+.Btn.danger {
+  border: 1px solid #ffb7b7;
+  background: #ffecec;
+  color: #8a1f1f;
+}
+
+.Btn.primary {
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+}
+
+.Btn.primary:hover {
+  opacity: 0.92;
+}
+
+.RolePill {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #e4dccf;
+  background: #f4efe7;
+}
+
+.RolePill.owner {
+  border-color: #c9b06b;
+  background: #fff3d1;
+}
+
+.RolePill.leader {
+  border-color: #8db5d9;
+  background: #e9f3ff;
+}
+
+.MemberManageToggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #ece6dd;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.ToggleLabel {
+  font-size: 13px;
+  color: #444;
+  max-width: 260px;
+}
+
+.ToggleBtn {
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border: 1px solid #d9d1c6;
+  background: #faf7f2;
+}
+
+.ToggleBtn.on {
+  border-color: #8db5d9;
+  background: #e9f3ff;
+}
+
+.ToggleBtn.off {
+  border-color: #d9d1c6;
+  background: #faf7f2;
+}
+
+.InviteForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.InviteHint {
+  font-size: 13px;
+  color: #555;
+}
+
+.InviteRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .InviteRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.InviteInput {
+  flex: 1;
+  border: 1px solid #d9d1c6;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.InviteInput:focus {
+  border-color: #111;
+}
