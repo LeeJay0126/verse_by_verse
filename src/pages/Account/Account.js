@@ -138,10 +138,10 @@ export default function Account() {
 
           <div className="account-signup-findpw">
             <p className="account-help">
-              아직 계정이 없나요? <a href="/signup">회원가입</a>
+              Don’t have an account yet? <a href="/signup">Sign up</a>
             </p>
             <p className="account-help">
-              <a href="/findpw">비밀번호를 잊었습니까?</a>
+              <a href="/findpw">Forgot your password?</a>
             </p>
           </div>
         </div>

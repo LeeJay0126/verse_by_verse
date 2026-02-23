@@ -236,7 +236,7 @@ const SignUp = () => {
 
     if (!isValid) {
       focusFirstInvalid();
-      setError("입력값을 확인해주세요.");
+      setError("Please check your information.");
       return;
     }
 
@@ -259,7 +259,7 @@ const SignUp = () => {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok || data?.ok === false) {
-        throw new Error(data?.error || "회원가입 실패");
+        throw new Error(data?.error || "Sign up failed.");
       }
 
       navigate("/check-email", {
@@ -267,7 +267,7 @@ const SignUp = () => {
         state: { email: emailValue, sent: data?.verification?.sent ?? true },
       });
     } catch (err) {
-      setError(err.message || "네트워크 오류");
+      setError(err.message || "Network error.");
     } finally {
       setLoading(false);
     }
@@ -448,10 +448,10 @@ const SignUp = () => {
 
           <div className="account-signup-findpw">
             <p className="account-help">
-              이미 계정이 있나요? <a href="/account">로그인</a>
+              Already have an account? <a href="/account">Sign in</a>
             </p>
             <p className="account-help">
-              <a href="/findpw">비밀번호를 잊었습니까?</a>
+              <a href="/findpw">Forgot your password?</a>
             </p>
           </div>
         </div>
