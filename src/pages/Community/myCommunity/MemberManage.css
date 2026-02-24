@@ -96,18 +96,8 @@
 
 .MemberManageGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 14px;
-}
-
-@media (max-width: 900px) {
-  .MemberManageHeader {
-    flex-direction: column;
-  }
-
-  .MemberManageGrid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .Panel {
@@ -280,13 +270,6 @@
   align-items: center;
 }
 
-@media (max-width: 600px) {
-  .InviteRow {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
 .InviteInput {
   flex: 1;
   border: 1px solid #d9d1c6;
@@ -299,4 +282,63 @@
 
 .InviteInput:focus {
   border-color: #111;
+}
+
+.NotifRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #f0ebe2;
+}
+
+.NotifRow:first-child {
+  border-top: none;
+}
+
+.NotifLabel {
+  font-weight: 600;
+}
+
+.NotifHint {
+  font-size: 13px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.NotifLeft {
+  min-width: 0;
+}
+
+.NotifToggle {
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border: 1px solid #d9d1c6;
+  background: #faf7f2;
+  white-space: nowrap;
+}
+
+.NotifToggle.on {
+  border-color: #8db5d9;
+  background: #e9f3ff;
+}
+
+.NotifToggle.off {
+  border-color: #d9d1c6;
+  background: #faf7f2;
+}
+
+@media (max-width: 900px) {
+  .MemberManageHeader {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .InviteRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

@@ -14,7 +14,7 @@ const Notifications = () => {
   const { refreshUnreadCount } = useNotifications();
 
   const [notifications, setNotifications] = useState([]);
-  const [phase, setPhase] = useState("idle"); // "idle" | "loading" | "success" | "error"
+  const [phase, setPhase] = useState("idle");
   const [error, setError] = useState("");
 
   const [actingId, setActingId] = useState(null);
@@ -40,7 +40,6 @@ const Notifications = () => {
   const fetchWithTimeout = async (path, options = {}) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
     try {
       const res = await apiFetch(path, { ...options, signal: controller.signal });
       return res;
@@ -91,6 +90,7 @@ const Notifications = () => {
   }, [fetchNotifications]);
 
   const isUnread = useCallback((n) => !n?.readAt, []);
+
   const isPendingAction = useCallback(
     (n) =>
       n?.status === "pending" &&
@@ -107,6 +107,28 @@ const Notifications = () => {
   }, [notifications]);
 
   const hasAny = notifications.length > 0;
+
+  const getNotificationRoute = useCallback((n) => {
+    const communityId = n?.community ? String(n.community) : "";
+    const kind = n?.target?.kind ? String(n.target.kind) : "";
+
+    const postId =
+      kind === "COMMUNITY_POST" && n?.target?.id ? String(n.target.id) : "";
+
+    if (n?.type === "COMMUNITY_NEW_POST" && communityId && postId) {
+      return `/community/${communityId}/posts/${postId}`;
+    }
+
+    if (kind === "COMMUNITY_MANAGE" && communityId) {
+      return `/community/${communityId}/member-manage`;
+    }
+
+    if (communityId) {
+      return `/community/${communityId}/my-posts`;
+    }
+
+    return "";
+  }, []);
 
   async function handleDeleteOne(id) {
     if (!id) return;
@@ -137,23 +159,16 @@ const Notifications = () => {
     if (!id) return;
     if (bulkLoading || deletingId || actingId) return;
 
+    const route = getNotificationRoute(n);
+    if (route) navigate(route);
+
     const communityId = n?.community ? String(n.community) : "";
-    const postId =
-      n?.target?.kind === "COMMUNITY_POST" && n?.target?.id ? String(n.target.id) : "";
 
-    // Navigate first (feels snappy), then delete in background.
-    if (n?.type === "COMMUNITY_NEW_POST" && communityId && postId) {
-      navigate(`/community/${communityId}/posts/${postId}`);
-    }
-
-    // Cascade delete by community when possible, otherwise delete just one.
     try {
       setDeletingId(id);
       setError("");
 
-      const url =
-        communityId ? `/notifications/${id}?cascade=community` : `/notifications/${id}`;
-
+      const url = communityId ? `/notifications/${id}?cascade=community` : `/notifications/${id}`;
       const res = await fetchWithTimeout(url, { method: "DELETE" });
       const data = await safeJson(res);
 
@@ -162,9 +177,7 @@ const Notifications = () => {
       }
 
       setNotifications((prev) => {
-        if (communityId) {
-          return prev.filter((x) => String(x?.community || "") !== communityId);
-        }
+        if (communityId) return prev.filter((x) => String(x?.community || "") !== communityId);
         return prev.filter((x) => (x?._id || x?.id) !== id);
       });
 
@@ -296,9 +309,7 @@ const Notifications = () => {
                 return (
                   <li
                     key={id}
-                    className={`notification-item ${
-                      isUnread(n) ? "notification-item--unread" : ""
-                    }`}
+                    className={`notification-item ${isUnread(n) ? "notification-item--unread" : ""}`}
                     onClick={() => handleOpenNotification(n)}
                     role="button"
                     tabIndex={0}
@@ -316,10 +327,7 @@ const Notifications = () => {
                       </span>
 
                       {pending && (
-                        <div
-                          className="notification-actions"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                        <div className="notification-actions" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
                             className="notification-action-btn"

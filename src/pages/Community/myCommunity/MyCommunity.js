@@ -320,9 +320,18 @@ const MyCommunity = () => {
     return isOwner || (isLeader && leadersCanManageMembers);
   }, [isOwner, isLeader, leadersCanManageMembers]);
 
+  const isMember = useMemo(() => {
+    return (
+      Array.isArray(community?.members) &&
+      community.members.some((m) => String(m.id || m._id || "") === currentUserId)
+    );
+  }, [community, currentUserId]);
+
   const handleManageMembersClick = () => {
     navigate(`/community/${communityId}/members/manage`);
   };
+
+  const manageLabel = canManageMembers ? "Manage" : "Settings";
 
   return (
     <section className="ForumContainer">
@@ -363,9 +372,9 @@ const MyCommunity = () => {
 
       <section className="ForumBody">
         <div className="ForumActions">
-          {canManageMembers && (
+          {isMember && (
             <button className="ManageButton" onClick={handleManageMembersClick}>
-              Manage
+              {manageLabel}
             </button>
           )}
           <button className="NewPostButton" onClick={handleNewPostClick}>
