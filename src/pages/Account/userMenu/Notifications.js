@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import PageHeader from "../../../component/PageHeader";
 import Footer from "../../../component/Footer";
 import { useNotifications } from "../../../component/context/NotificationContext";
@@ -9,6 +10,7 @@ import { apiFetch, getApiBase } from "../../../component/utils/ApiFetch";
 const REQUEST_TIMEOUT_MS = 10000;
 
 const Notifications = () => {
+  const navigate = useNavigate();
   const { refreshUnreadCount } = useNotifications();
 
   const [notifications, setNotifications] = useState([]);
@@ -52,7 +54,6 @@ const Notifications = () => {
     setError("");
 
     try {
-      // helpful debug: confirms what base URL you are ACTUALLY calling
       console.log("[Notifications] API_BASE =", getApiBase());
       console.log("[Notifications] GET /notifications");
 
@@ -126,6 +127,51 @@ const Notifications = () => {
     } catch (e) {
       console.error("[notification delete-one error]", e);
       setError(e?.message || "Failed to delete notification");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  async function handleOpenNotification(n) {
+    const id = n?._id || n?.id;
+    if (!id) return;
+    if (bulkLoading || deletingId || actingId) return;
+
+    const communityId = n?.community ? String(n.community) : "";
+    const postId =
+      n?.target?.kind === "COMMUNITY_POST" && n?.target?.id ? String(n.target.id) : "";
+
+    // Navigate first (feels snappy), then delete in background.
+    if (n?.type === "COMMUNITY_NEW_POST" && communityId && postId) {
+      navigate(`/community/${communityId}/posts/${postId}`);
+    }
+
+    // Cascade delete by community when possible, otherwise delete just one.
+    try {
+      setDeletingId(id);
+      setError("");
+
+      const url =
+        communityId ? `/notifications/${id}?cascade=community` : `/notifications/${id}`;
+
+      const res = await fetchWithTimeout(url, { method: "DELETE" });
+      const data = await safeJson(res);
+
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || `Failed to delete notification (${res.status})`);
+      }
+
+      setNotifications((prev) => {
+        if (communityId) {
+          return prev.filter((x) => String(x?.community || "") !== communityId);
+        }
+        return prev.filter((x) => (x?._id || x?.id) !== id);
+      });
+
+      refreshUnreadCount();
+    } catch (e) {
+      console.error("[notification open+delete error]", e);
+      setError(e?.message || "Failed to remove notification");
     } finally {
       setDeletingId(null);
     }
@@ -250,7 +296,15 @@ const Notifications = () => {
                 return (
                   <li
                     key={id}
-                    className={`notification-item ${isUnread(n) ? "notification-item--unread" : ""}`}
+                    className={`notification-item ${
+                      isUnread(n) ? "notification-item--unread" : ""
+                    }`}
+                    onClick={() => handleOpenNotification(n)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") handleOpenNotification(n);
+                    }}
                   >
                     <div className="notification-main">
                       <div className="notification-title">{n?.message}</div>
@@ -262,7 +316,10 @@ const Notifications = () => {
                       </span>
 
                       {pending && (
-                        <div className="notification-actions">
+                        <div
+                          className="notification-actions"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button
                             type="button"
                             className="notification-action-btn"
@@ -285,7 +342,10 @@ const Notifications = () => {
                       <button
                         type="button"
                         className="notification-delete-btn"
-                        onClick={() => handleDeleteOne(id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteOne(id);
+                        }}
                         disabled={deletingId === id || bulkLoading}
                         aria-label="Delete notification"
                         title="Delete notification"

@@ -6,7 +6,7 @@
   flex-direction: column;
 }
 
-.ForumContainer > :last-child {
+.ForumContainer> :last-child {
   margin-top: auto;
 }
 
@@ -343,7 +343,7 @@
   cursor: default;
 }
 
-.Tag.general {
+.Tag.bible_study {
   background: #c8d1b2;
 }
 

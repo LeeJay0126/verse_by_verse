@@ -24,7 +24,7 @@ export const getTypeLabel = (post) => getTypeForPost(post).label;
 
 export const getTypeTagClass = (post) => {
   const t = getTypeForPost(post);
-  return post?.categoryClass || t.tagClass || "general";
+  return post?.categoryClass || t.tagClass || "bible_study";
 };
 
 const toTime = (v) => {

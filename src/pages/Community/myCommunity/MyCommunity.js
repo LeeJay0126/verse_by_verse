@@ -117,10 +117,9 @@ const MyCommunity = () => {
     try {
       setNewPostError("");
 
-      if (
-        String(newPostPayload?.typeValue || "").toLowerCase() === "announcements" &&
-        announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY
-      ) {
+      const payloadType = String(newPostPayload?.type || newPostPayload?.typeValue || "").toLowerCase();
+
+      if (payloadType === "announcements" && announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY) {
         const message = `This community already has ${MAX_ANNOUNCEMENTS_PER_COMMUNITY} announcements.`;
         setNewPostError(message);
         return { ok: false, message };
@@ -130,10 +129,10 @@ const MyCommunity = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: newPostPayload.title,
-          body: newPostPayload.description,
-          type: newPostPayload.typeValue,
-          poll: newPostPayload.poll,
+          title: newPostPayload?.title,
+          body: newPostPayload?.body,
+          type: newPostPayload?.type || newPostPayload?.typeValue || "bible_study",
+          poll: newPostPayload?.poll,
         }),
       });
 
