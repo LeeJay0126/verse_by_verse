@@ -8,7 +8,7 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
   const typeOptions = useMemo(() => COMMUNITY_TYPES, []);
 
   const [title, setTitle] = useState("");
-  const [type, setType] = useState(typeOptions[0]?.apiValue || "general");
+  const [type, setType] = useState(typeOptions[0]?.apiValue || "bible_study");
   const [description, setDescription] = useState("");
 
   const [pollOptions, setPollOptions] = useState(["", ""]);
@@ -29,30 +29,29 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
     setGlobalError("");
     setErrors({});
 
-    if (!title.trim()) {
+    const cleanTitle = title.trim();
+    const cleanBody = description.trim();
+    const cleanType = selectedType?.apiValue || "bible_study";
+
+    if (!cleanTitle) {
       setGlobalError("Title is required.");
       return;
     }
 
-    if (
-      selectedType?.apiValue === "announcements" &&
-      announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY
-    ) {
+    if (cleanType === "announcements" && announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY) {
       setGlobalError(`This community already has ${MAX_ANNOUNCEMENTS_PER_COMMUNITY} announcements.`);
       return;
     }
 
-    if (!isPoll && !description.trim()) {
+    if (!isPoll && !cleanBody) {
       setGlobalError("Description is required.");
       return;
     }
 
     let payload = {
-      title: title.trim(),
-      description: description.trim(),
-      typeValue: selectedType?.apiValue || "general",
-      typeLabel: selectedType?.label || "General",
-      typeClass: selectedType?.className || "general",
+      title: cleanTitle,
+      body: cleanBody,
+      type: cleanType,
     };
 
     if (isPoll) {
@@ -80,9 +79,7 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
   };
 
   const handleOverlayClick = (e) => {
-    if (e.target.classList.contains("NewPostOverlay")) {
-      onClose?.();
-    }
+    if (e.target.classList.contains("NewPostOverlay")) onClose?.();
   };
 
   const handlePollOptionChange = (index, value) => {
@@ -93,9 +90,7 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
     });
   };
 
-  const handleAddPollOption = () => {
-    setPollOptions((prev) => [...prev, ""]);
-  };
+  const handleAddPollOption = () => setPollOptions((prev) => [...prev, ""]);
 
   const handleRemovePollOption = (index) => {
     setPollOptions((prev) => {
@@ -140,22 +135,14 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
 
           <div className="NewPostField">
             <label htmlFor="post-type">Post type</label>
-            <select
-              id="post-type"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-            >
+            <select id="post-type" value={type} onChange={(e) => setType(e.target.value)}>
               {typeOptions.map((option) => {
                 const isAnnouncements = option.apiValue === "announcements";
                 const disabled =
                   isAnnouncements && announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY;
 
                 return (
-                  <option
-                    key={option.apiValue}
-                    value={option.apiValue}
-                    disabled={disabled}
-                  >
+                  <option key={option.apiValue} value={option.apiValue} disabled={disabled}>
                     {option.label}
                     {disabled ? " (limit reached)" : ""}
                   </option>
@@ -196,17 +183,11 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
                   ))}
                 </div>
 
-                <button
-                  type="button"
-                  className="PollAddOptionButton"
-                  onClick={handleAddPollOption}
-                >
+                <button type="button" className="PollAddOptionButton" onClick={handleAddPollOption}>
                   + Add option
                 </button>
 
-                {errors.pollOptions && (
-                  <div className="NewPostErrorText">{errors.pollOptions}</div>
-                )}
+                {errors.pollOptions && <div className="NewPostErrorText">{errors.pollOptions}</div>}
               </div>
 
               <div className="NewPostField PollSettingsField">
@@ -234,9 +215,7 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
           )}
 
           <div className="NewPostField">
-            <label htmlFor="post-description">
-              {isPoll ? "Description (optional)" : "Description"}
-            </label>
+            <label htmlFor="post-description">{isPoll ? "Description (optional)" : "Description"}</label>
             <textarea
               id="post-description"
               rows={5}
@@ -252,11 +231,7 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
           </div>
 
           <div className="NewPostActions">
-            <button
-              type="button"
-              className="NewPostSecondaryButton"
-              onClick={onClose}
-            >
+            <button type="button" className="NewPostSecondaryButton" onClick={onClose}>
               Cancel
             </button>
             <button type="submit" className="NewPostPrimaryButton">

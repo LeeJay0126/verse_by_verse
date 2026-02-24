@@ -1,13 +1,13 @@
 const bibleStudy = {
-  key: "general",
+  key: "bible_study",
   label: "📖 Bible Study",
-  tagClass: "general",
-  apiValue: "general",
+  apiValue: "bible_study",
+  className: "bible_study",
   isPoll: false,
   matches: (post) => {
     const type = String(post?.type || "").toLowerCase();
-    const category = String(post?.category || "").toLowerCase();
-    return type === "general" || category === "general";
+    const categoryClass = String(post?.categoryClass || "").toLowerCase();
+    return type === "bible_study" || categoryClass === "bible_study";
   },
 };
 
