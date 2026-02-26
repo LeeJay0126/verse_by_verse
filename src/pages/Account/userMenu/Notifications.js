@@ -112,15 +112,26 @@ const Notifications = () => {
     const communityId = n?.community ? String(n.community) : "";
     const kind = n?.target?.kind ? String(n.target.kind) : "";
 
-    const postId =
-      kind === "COMMUNITY_POST" && n?.target?.id ? String(n.target.id) : "";
+    const postId = kind === "COMMUNITY_POST" && n?.target?.id ? String(n.target.id) : "";
 
     if (n?.type === "COMMUNITY_NEW_POST" && communityId && postId) {
       return `/community/${communityId}/posts/${postId}`;
     }
 
+    if (n?.type === "COMMUNITY_JOIN_REQUEST" && communityId) {
+      return `/community/${communityId}/members/manage`;
+    }
+
+    if (n?.type === "COMMUNITY_ROLE_PROMOTION" && communityId) {
+      return `/community/${communityId}/members/manage`;
+    }
+
+    if (n?.type === "COMMUNITY_ROLE_DEMOTION" && communityId) {
+      return `/community/${communityId}/members/manage`;
+    }
+
     if (kind === "COMMUNITY_MANAGE" && communityId) {
-      return `/community/${communityId}/member-manage`;
+      return `/community/${communityId}/members/manage`;
     }
 
     if (communityId) {
