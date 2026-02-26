@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import PageHeader from "../../../component/PageHeader";
 import Footer from "../../../component/Footer";
 import { useAuth } from "../../../component/context/AuthContext";
@@ -15,6 +15,7 @@ const LABELS = {
 
 export default function MemberManage() {
   const { communityId } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const [community, setCommunity] = useState(null);
@@ -36,6 +37,11 @@ export default function MemberManage() {
 
   const [prefsSaving, setPrefsSaving] = useState(false);
   const lastSentRef = useRef(null);
+
+  const [pendingInvite, setPendingInvite] = useState(null);
+  const [inviteActing, setInviteActing] = useState(false);
+
+  const [leaveLoading, setLeaveLoading] = useState(false);
 
   const currentId = String(user?.id || user?._id || "");
   const communityHomePath = `/community/${communityId}/my-posts`;
@@ -69,30 +75,53 @@ export default function MemberManage() {
 
   const pageTitle = canManage ? "Manage Members" : "Community Settings";
 
+  const safeJson = async (res) => {
+    try {
+      return await res.json();
+    } catch {
+      return {};
+    }
+  };
+
   const fetchCommunityOnly = useCallback(async () => {
     const res = await apiFetch(`/community/${communityId}`);
-    const data = await res.json().catch(() => ({}));
+    const data = await safeJson(res);
     if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load community.");
     return data.community || null;
   }, [communityId]);
 
   const fetchMembersOnly = useCallback(async () => {
     const res = await apiFetch(`/community/${communityId}/members`);
-    const data = await res.json().catch(() => ({}));
+    const data = await safeJson(res);
     if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load members.");
     return Array.isArray(data.members) ? data.members : [];
   }, [communityId]);
 
   const fetchRequestsOnly = useCallback(async () => {
     const res = await apiFetch(`/community/${communityId}/join-requests`);
-    const data = await res.json().catch(() => ({}));
+    const data = await safeJson(res);
     if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load join requests.");
-    return Array.isArray(data.requests) ? data.requests : [];
+    const raw = Array.isArray(data.requests) ? data.requests : [];
+
+    return raw
+      .map((r) => {
+        const requestId = String(r.id || r._id || "");
+        const u = r.user || null;
+        const userId = String(u?.userId || u?.id || u?._id || "");
+        return {
+          requestId,
+          userId,
+          name: u?.name || "",
+          email: u?.email || "",
+          createdAt: r.createdAt || null,
+        };
+      })
+      .filter((x) => x.requestId && x.userId);
   }, [communityId]);
 
   const fetchPrefsOnly = useCallback(async () => {
     const res = await apiFetch(`/community/${communityId}/notification-prefs`);
-    const data = await res.json().catch(() => ({}));
+    const data = await safeJson(res);
     if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load notification preferences.");
     const p = data.notificationPrefs || {};
     return {
@@ -100,6 +129,28 @@ export default function MemberManage() {
       bible_study: p.bible_study !== false,
       questions: p.questions !== false,
       poll: p.poll !== false,
+    };
+  }, [communityId]);
+
+  const fetchPendingInviteOnly = useCallback(async () => {
+    const res = await apiFetch(`/notifications`);
+    const data = await safeJson(res);
+    if (!res.ok || !data.ok) return null;
+
+    const list = Array.isArray(data.notifications) ? data.notifications : [];
+    const match = list.find(
+      (n) =>
+        String(n?.type || "") === "COMMUNITY_INVITE" &&
+        String(n?.status || "") === "pending" &&
+        String(n?.community || "") === String(communityId)
+    );
+
+    if (!match) return null;
+
+    return {
+      id: String(match._id || match.id || ""),
+      message: match.message || "",
+      createdAt: match.createdAt || null,
     };
   }, [communityId]);
 
@@ -111,9 +162,10 @@ export default function MemberManage() {
       const c = await fetchCommunityOnly();
       setCommunity(c);
 
-      const [m, p] = await Promise.all([fetchMembersOnly(), fetchPrefsOnly()]);
+      const [m, p, inv] = await Promise.all([fetchMembersOnly(), fetchPrefsOnly(), fetchPendingInviteOnly()]);
       setMembers(m);
       setPrefs(p);
+      setPendingInvite(inv);
 
       if (canManage) {
         const r = await fetchRequestsOnly();
@@ -126,7 +178,7 @@ export default function MemberManage() {
     } finally {
       setLoading(false);
     }
-  }, [fetchCommunityOnly, fetchMembersOnly, fetchPrefsOnly, fetchRequestsOnly, canManage]);
+  }, [fetchCommunityOnly, fetchMembersOnly, fetchPrefsOnly, fetchRequestsOnly, fetchPendingInviteOnly, canManage]);
 
   useEffect(() => {
     fetchAll();
@@ -142,7 +194,7 @@ export default function MemberManage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leadersCanManageMembers: !leadersCanManageMembers }),
       });
-      const data = await res.json().catch(() => ({}));
+      const data = await safeJson(res);
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to update setting.");
       setCommunity((prev) => data.community || prev);
     } catch (e) {
@@ -150,13 +202,11 @@ export default function MemberManage() {
     }
   };
 
-  const acceptRequest = async (requestUserId) => {
+  const acceptRequest = async (requestId) => {
     try {
       setErr("");
-      const res = await apiFetch(`/community/${communityId}/join-requests/${requestUserId}/accept`, {
-        method: "POST",
-      });
-      const data = await res.json().catch(() => ({}));
+      const res = await apiFetch(`/community/${communityId}/join-requests/${requestId}/accept`, { method: "POST" });
+      const data = await safeJson(res);
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to accept request.");
       await fetchAll();
     } catch (e) {
@@ -164,13 +214,11 @@ export default function MemberManage() {
     }
   };
 
-  const rejectRequest = async (requestUserId) => {
+  const rejectRequest = async (requestId) => {
     try {
       setErr("");
-      const res = await apiFetch(`/community/${communityId}/join-requests/${requestUserId}/reject`, {
-        method: "POST",
-      });
-      const data = await res.json().catch(() => ({}));
+      const res = await apiFetch(`/community/${communityId}/join-requests/${requestId}/reject`, { method: "POST" });
+      const data = await safeJson(res);
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to reject request.");
       await fetchAll();
     } catch (e) {
@@ -185,10 +233,8 @@ export default function MemberManage() {
 
     try {
       setErr("");
-      const res = await apiFetch(`/community/${communityId}/members/${memberUserId}`, {
-        method: "DELETE",
-      });
-      const data = await res.json().catch(() => ({}));
+      const res = await apiFetch(`/community/${communityId}/members/${memberUserId}`, { method: "DELETE" });
+      const data = await safeJson(res);
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to expel member.");
       await fetchAll();
     } catch (e) {
@@ -205,7 +251,7 @@ export default function MemberManage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: "Leader" }),
       });
-      const data = await res.json().catch(() => ({}));
+      const data = await safeJson(res);
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to promote.");
       await fetchAll();
     } catch (e) {
@@ -222,7 +268,7 @@ export default function MemberManage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: "Member" }),
       });
-      const data = await res.json().catch(() => ({}));
+      const data = await safeJson(res);
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to demote.");
       await fetchAll();
     } catch (e) {
@@ -247,7 +293,7 @@ export default function MemberManage() {
         body: JSON.stringify({ identifier }),
       });
 
-      const data = await res.json().catch(() => ({}));
+      const data = await safeJson(res);
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to send invitation.");
 
       setInviteInput("");
@@ -288,7 +334,7 @@ export default function MemberManage() {
           body: signature,
         });
 
-        const data = await res.json().catch(() => ({}));
+        const data = await safeJson(res);
         if (!res.ok || !data.ok) throw new Error(data.error || "Failed to update notification preferences.");
 
         const p = data.notificationPrefs || {};
@@ -321,6 +367,67 @@ export default function MemberManage() {
     const next = { ...prefs, [key]: !prefs[key] };
     setPrefs(next);
     persistPrefs(next);
+  };
+
+  const actOnInvite = async (action) => {
+    if (!pendingInvite?.id) return;
+    if (!["accept", "decline"].includes(action)) return;
+
+    try {
+      setErr("");
+      setInviteActing(true);
+
+      const res = await apiFetch(`/notifications/${pendingInvite.id}/act`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+
+      const data = await safeJson(res);
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to update invitation.");
+
+      setPendingInvite(null);
+
+      if (action === "accept") {
+        navigate(`/community/${communityId}/my-posts`);
+        return;
+      }
+
+      navigate(`/community/discover`);
+    } catch (e) {
+      setErr(e.message || "Failed to update invitation.");
+    } finally {
+      setInviteActing(false);
+    }
+  };
+
+  const handleLeaveOrDisband = async () => {
+    if (leaveLoading) return;
+
+    const label = isOwner ? "Disband" : "Leave";
+    const msg = isOwner
+      ? "Disband this community? This will delete the community and its related data. This cannot be undone."
+      : "Leave this community? You will be removed from the community.";
+
+    const ok = window.confirm(msg);
+    if (!ok) return;
+
+    try {
+      setErr("");
+      setLeaveLoading(true);
+
+      const path = isOwner ? `/community/${communityId}/disband` : `/community/${communityId}/leave`;
+      const res = await apiFetch(path, { method: "DELETE" });
+      const data = await safeJson(res);
+
+      if (!res.ok || !data.ok) throw new Error(data.error || `Failed to ${label.toLowerCase()} community.`);
+
+      navigate(`/community/discover`);
+    } catch (e) {
+      setErr(e.message || "Failed to update membership.");
+    } finally {
+      setLeaveLoading(false);
+    }
   };
 
   if (loading) {
@@ -378,19 +485,19 @@ export default function MemberManage() {
               ) : (
                 <ul className="List">
                   {requests.map((r) => {
-                    const uid = String(r.userId || r.id || r._id || "");
+                    const rid = String(r.requestId || "");
                     return (
-                      <li key={uid} className="ListRow">
+                      <li key={rid} className="ListRow">
                         <div className="RowMain">
-                          <div className="RowTitle">{r.name || r.email || uid}</div>
+                          <div className="RowTitle">{r.name || r.email || r.userId}</div>
                           <div className="RowSub">{r.email || ""}</div>
                         </div>
 
                         <div className="RowActions">
-                          <button className="Btn" onClick={() => acceptRequest(uid)}>
+                          <button className="Btn" onClick={() => acceptRequest(rid)}>
                             Accept
                           </button>
-                          <button className="Btn danger" onClick={() => rejectRequest(uid)}>
+                          <button className="Btn danger" onClick={() => rejectRequest(rid)}>
                             Reject
                           </button>
                         </div>
@@ -514,6 +621,67 @@ export default function MemberManage() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {pendingInvite && (
+            <div className="Panel">
+              <div className="PanelHeader">
+                <h2>Invitation</h2>
+                <span className="CountPill">Pending</span>
+              </div>
+
+              <div className="List">
+                <div className="ListRow" style={{ borderTop: "none" }}>
+                  <div className="RowMain">
+                    <div className="RowTitle">{pendingInvite.message || "You were invited to join this community."}</div>
+                    <div className="RowSub">
+                      {pendingInvite.createdAt ? new Date(pendingInvite.createdAt).toLocaleString() : ""}
+                    </div>
+                  </div>
+
+                  <div className="RowActions">
+                    <button className="Btn" onClick={() => actOnInvite("accept")} disabled={inviteActing}>
+                      {inviteActing ? "Working…" : "Accept"}
+                    </button>
+                    <button className="Btn danger" onClick={() => actOnInvite("decline")} disabled={inviteActing}>
+                      {inviteActing ? "Working…" : "Decline"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="Panel">
+            <div className="PanelHeader">
+              <h2>{isOwner ? "Disband Community" : "Leave Community"}</h2>
+            </div>
+
+            <div className="List">
+              <div className="ListRow" style={{ borderTop: "none" }}>
+                <div className="RowMain">
+                  <div className="RowTitle">
+                    {isOwner ? "Delete this community permanently" : "Remove yourself from this community"}
+                  </div>
+                  <div className="RowSub">
+                    {isOwner
+                      ? "This will delete the community and related data."
+                      : "You will no longer be a member of this community."}
+                  </div>
+                </div>
+
+                <div className="RowActions">
+                  <button
+                    type="button"
+                    className={`Btn ${isOwner ? "danger" : "danger"}`}
+                    onClick={handleLeaveOrDisband}
+                    disabled={leaveLoading}
+                  >
+                    {leaveLoading ? "Working…" : isOwner ? "Disband" : "Leave"}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
