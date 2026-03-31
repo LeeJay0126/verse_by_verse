@@ -44,8 +44,6 @@ const Bible = () => {
 
   const [passageRange, setPassageRange] = useState(null);
 
-  const hasChapter = !!currChapterId;
-
   const requireAuthForNotes = useCallback(() => {
     if (!user) {
       navigate("/bible/walkthrough", { state: { from: "notes" } });
