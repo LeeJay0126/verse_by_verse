@@ -58,7 +58,11 @@ const NoteDetail = ({
         setNote(res?.note || null);
       } catch (e) {
         if (!alive) return;
-        setErr(e?.status === 401 ? "Please log in to view notes." : (e?.message || "Failed to load note"));
+        setErr(
+          e?.status === 401
+            ? "Please log in to view notes."
+            : e?.message || "Failed to load note"
+        );
       } finally {
         if (alive) setLoading(false);
       }
@@ -99,7 +103,11 @@ const NoteDetail = ({
         setDirty(false);
       }
     } catch (e) {
-      setErr(e?.status === 401 ? "Please log in to save notes." : (e?.message || "Failed to save"));
+      setErr(
+        e?.status === 401
+          ? "Please log in to save notes."
+          : e?.message || "Failed to save"
+      );
     } finally {
       setLoading(false);
     }
@@ -121,7 +129,11 @@ const NoteDetail = ({
       if (onClose) onClose();
       else navigate("/notes");
     } catch (e) {
-      setErr(e?.status === 401 ? "Please log in to delete notes." : (e?.message || "Failed to delete"));
+      setErr(
+        e?.status === 401
+          ? "Please log in to delete notes."
+          : e?.message || "Failed to delete"
+      );
     } finally {
       setLoading(false);
     }
@@ -131,11 +143,17 @@ const NoteDetail = ({
     if (!note) return;
 
     if (onOpenPassage) {
-      onOpenPassage(note);
+      onOpenPassage(note, { openedFromNote: true });
       return;
     }
 
-    navigate("/bible", { state: { note } });
+    navigate("/bible", {
+      state: {
+        note,
+        openedFromNote: true,
+        openedNoteId: note._id,
+      },
+    });
   };
 
   return (

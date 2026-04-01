@@ -1,5 +1,4 @@
 import Community from '../../pages/Community/Community';
-import Read from '../../pages/Read/Read';
 import Study from '../../pages/Study/Study';
 import Home from '../Home';
 import './HomeBody.css';
@@ -16,7 +15,7 @@ const HomeBodyCard = (props) => {
             link = (<Link to='/' element={<Home/>}>Learn More</Link>);
             break;
         case 'read':
-            link = (<Link to='/read' element={<Read />}>Learn More</Link>);
+            link = (<Link to='/read' element={<Study />}>Learn More</Link>);
             break;
         case 'study':
             link = (<Link to='/study' element={<Study />}>Learn More</Link>);
