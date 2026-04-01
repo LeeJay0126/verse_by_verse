@@ -39,7 +39,12 @@ study & reflect - self study and reflect as you read the bible verse by verse. (
 
 Community - Create & Join community to share studies and ask questions. User may create a community with an invitation code to invite other participants and authorized manager may remove participants from the community.
 
-/*
-    Color used
-*/
 
+
+
+
+Ideas for Version 2: 
+Programs for bible study features - Walk through program from Genesis 1 through the end of the bible (Example) 
+How about we implement something like 매일 성경 where we assign them bible study materials? Or could we use their API? Worth looking in to.
+
+and also improve settings page : Like having a default language and version.

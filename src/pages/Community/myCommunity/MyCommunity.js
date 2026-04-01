@@ -437,9 +437,11 @@ const MyCommunity = () => {
 
       {showNewPostModal && (
         <NewPostModal
+          communityId={communityId}
           onClose={handleCloseModal}
           onSubmit={handleCreatePost}
           announcementCount={announcementCount}
+          canCreateBibleStudy={isLeader || isOwner}
         />
       )}
 

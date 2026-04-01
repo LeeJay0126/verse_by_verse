@@ -1,10 +1,18 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./MyCommunity.css";
 import { COMMUNITY_TYPES, getTypeByApiValue } from "../communityTypes";
 
 const MAX_ANNOUNCEMENTS_PER_COMMUNITY = 3;
 
-const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
+const NewPostModal = ({
+  communityId,
+  onClose,
+  onSubmit,
+  announcementCount = 0,
+  canCreateBibleStudy = false,
+}) => {
+  const navigate = useNavigate();
   const typeOptions = useMemo(() => COMMUNITY_TYPES, []);
 
   const [title, setTitle] = useState("");
@@ -19,12 +27,13 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
 
   const selectedType = useMemo(() => getTypeByApiValue(type), [type]);
   const isPoll = !!selectedType?.isPoll;
+  const isBibleStudy = selectedType?.apiValue === "bible_study";
 
   const announcementsDisabled =
     selectedType?.apiValue === "announcements" &&
     announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setGlobalError("");
     setErrors({});
@@ -32,6 +41,22 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
     const cleanTitle = title.trim();
     const cleanBody = description.trim();
     const cleanType = selectedType?.apiValue || "bible_study";
+
+    if (cleanType === "bible_study") {
+      if (!canCreateBibleStudy) {
+        setGlobalError("Only community leaders or the owner can create Bible Study posts.");
+        return;
+      }
+
+      onClose?.();
+      navigate(`/community/${communityId}/bible-study/new`, {
+        state: {
+          draftTitle: cleanTitle,
+          draftBody: cleanBody,
+        },
+      });
+      return;
+    }
 
     if (!cleanTitle) {
       setGlobalError("Title is required.");
@@ -75,7 +100,7 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
       };
     }
 
-    onSubmit?.(payload);
+    await onSubmit?.(payload);
   };
 
   const handleOverlayClick = (e) => {
@@ -103,7 +128,9 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
     <div className="NewPostOverlay" onClick={handleOverlayClick}>
       <div className="NewPostModal">
         <header className="NewPostHeader">
-          <h2>{isPoll ? "Create Poll" : "Create New Post"}</h2>
+          <h2>
+            {isBibleStudy ? "Start Bible Study Post" : isPoll ? "Create Poll" : "Create New Post"}
+          </h2>
           <button
             type="button"
             className="NewPostCloseButton"
@@ -125,11 +152,12 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={
-                isPoll
+                isBibleStudy
+                  ? "Enter your Bible study title"
+                  : isPoll
                   ? "e.g. Which day works best for our study group?"
                   : "Enter a clear, descriptive title"
               }
-              required
             />
           </div>
 
@@ -138,13 +166,20 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
             <select id="post-type" value={type} onChange={(e) => setType(e.target.value)}>
               {typeOptions.map((option) => {
                 const isAnnouncements = option.apiValue === "announcements";
-                const disabled =
+                const disabledAnnouncement =
                   isAnnouncements && announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY;
+                const disabledBibleStudy =
+                  option.apiValue === "bible_study" && !canCreateBibleStudy;
 
                 return (
-                  <option key={option.apiValue} value={option.apiValue} disabled={disabled}>
+                  <option
+                    key={option.apiValue}
+                    value={option.apiValue}
+                    disabled={disabledAnnouncement || disabledBibleStudy}
+                  >
                     {option.label}
-                    {disabled ? " (limit reached)" : ""}
+                    {disabledAnnouncement ? " (limit reached)" : ""}
+                    {disabledBibleStudy ? " (leaders/owner only)" : ""}
                   </option>
                 );
               })}
@@ -155,7 +190,26 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
                 This community already has {MAX_ANNOUNCEMENTS_PER_COMMUNITY} announcements.
               </div>
             )}
+
+            {!canCreateBibleStudy && type === "bible_study" && (
+              <div className="NewPostErrorText">
+                Only community leaders or the owner can create Bible Study posts.
+              </div>
+            )}
           </div>
+
+          {isBibleStudy && (
+            <div className="NewPostField">
+              <label htmlFor="post-description">Optional opening note</label>
+              <textarea
+                id="post-description"
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="You can prefill a short opening note here. The full study composer opens next."
+              />
+            </div>
+          )}
 
           {isPoll && (
             <>
@@ -214,28 +268,26 @@ const NewPostModal = ({ onClose, onSubmit, announcementCount = 0 }) => {
             </>
           )}
 
-          <div className="NewPostField">
-            <label htmlFor="post-description">{isPoll ? "Description (optional)" : "Description"}</label>
-            <textarea
-              id="post-description"
-              rows={5}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={
-                isPoll
-                  ? "Add any additional context or instructions for your poll…"
-                  : "Share the details of your question, update, or reflection…"
-              }
-              required={!isPoll}
-            />
-          </div>
+          {!isPoll && !isBibleStudy && (
+            <div className="NewPostField">
+              <label htmlFor="post-description">Description</label>
+              <textarea
+                id="post-description"
+                rows={5}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Share the details of your question, update, or reflection…"
+                required
+              />
+            </div>
+          )}
 
           <div className="NewPostActions">
             <button type="button" className="NewPostSecondaryButton" onClick={onClose}>
               Cancel
             </button>
             <button type="submit" className="NewPostPrimaryButton">
-              {isPoll ? "Create Poll" : "Post"}
+              {isBibleStudy ? "Continue" : isPoll ? "Create Poll" : "Post"}
             </button>
           </div>
         </form>

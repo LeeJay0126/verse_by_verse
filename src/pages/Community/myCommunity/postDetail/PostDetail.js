@@ -1,4 +1,5 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import PageHeader from "../../../../component/PageHeader";
 import Footer from "../../../../component/Footer";
 import "../MyCommunity.css";
@@ -9,15 +10,16 @@ import PostHeader from "./components/PostHeader";
 import PollSection from "./components/PollSection";
 import RepliesSection from "./components/RepliesSection";
 import PostDetailShell from "./components/PostDetailShell";
+import BibleStudyContent from "./components/BibleStudyContent";
 
 import usePostDetailData from "./hooks/usePostDetailData";
 import usePostReplies from "./hooks/usePostReplies";
 import useReplyTree from "./hooks/useReplyTree";
 import useThreadExpansion from "./hooks/useThreadExpansion";
 
-import { apiFetch } from "../../../../component/utils/ApiFetch";
-
 const PostDetail = () => {
+  const navigate = useNavigate();
+
   const {
     communityId,
     postId,
@@ -85,31 +87,14 @@ const PostDetail = () => {
     return isAuthor || isLeaderOrOwner;
   }, [post, myUserId, community]);
 
-  const handleSavePostHeader = useCallback(
-    async (payload) => {
-      try {
-        if (!communityId || !postId) return { ok: false, error: "Missing communityId/postId." };
+  const handleEditPost = () => {
+    if (!post || !communityId || !postId) return;
 
-        const res = await apiFetch(`/community/${communityId}/posts/${postId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok || !data.ok) {
-          return { ok: false, error: data.error || "Failed to save post." };
-        }
-
-        await refetchPost();
-        return { ok: true };
-      } catch (e) {
-        return { ok: false, error: e?.message || "Failed to save post." };
-      }
-    },
-    [communityId, postId, refetchPost]
-  );
+    if (post.type === "bible_study") {
+      navigate(`/community/${communityId}/bible-study/${postId}/edit`);
+      return;
+    }
+  };
 
   if (loading) {
     return (
@@ -145,7 +130,13 @@ const PostDetail = () => {
       </div>
 
       <section className="ForumBody PostDetailBody">
-        <PostHeader post={post} canEdit={canEditPost} onSave={handleSavePostHeader} />
+        <PostHeader
+          post={post}
+          canEdit={canEditPost}
+          onEdit={handleEditPost}
+        />
+
+        {post.type === "bible_study" && <BibleStudyContent post={post} />}
 
         {post.type === "poll" && (
           <PollSection
@@ -160,6 +151,7 @@ const PostDetail = () => {
 
         <RepliesSection
           post={post}
+          communityId={communityId}
           replies={replies}
           replyTree={replyTree}
           myUserId={myUserId}

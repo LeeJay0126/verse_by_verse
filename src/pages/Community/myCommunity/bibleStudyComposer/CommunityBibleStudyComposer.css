@@ -1,0 +1,215 @@
+.BibleStudyComposerBody {
+  max-width: 1000px;
+  width: 86%;
+  margin: 0 auto 40px;
+  padding: 24px 0 40px;
+}
+
+.BibleStudyComposerBreadcrumbs {
+  margin-bottom: 10px;
+}
+
+.BibleStudyComposerBreadcrumbs a {
+  color: #f9f4ea;
+  text-decoration: underline;
+  font-size: 14px;
+}
+
+.BibleStudyComposerForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.BibleStudyComposerCard {
+  background: #fffdf9;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.BibleStudyComposerCardHeader {
+  margin-bottom: 14px;
+}
+
+.BibleStudyComposerCardHeader h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.BibleStudyComposerCardHeader p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.BibleStudyPassageGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.BibleStudyField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.BibleStudyField label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #333;
+}
+
+.BibleStudyField input,
+.BibleStudyField select,
+.BibleStudyField textarea {
+  border-radius: 8px;
+  border: 1px solid #c7b9a4;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fffdf9;
+}
+
+.BibleStudyField input:focus,
+.BibleStudyField select:focus,
+.BibleStudyField textarea:focus {
+  outline: 2px solid #111;
+  outline-offset: 1px;
+}
+
+.BibleStudyField textarea {
+  resize: vertical;
+  min-height: 110px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.BibleStudyReferenceBar {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f5efe6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.BibleStudyVersePreview {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #faf7f2;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.BibleStudyVersePreviewMeta {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.BibleStudyVerseList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.BibleStudyVerseItem {
+  margin: 0;
+  line-height: 1.7;
+  color: #333;
+}
+
+.BibleStudyVerseItem sup {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7b5d2a;
+  margin-right: 4px;
+}
+
+.BibleStudyQuestionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.BibleStudyQuestionRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.BibleStudyComposerActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.BibleStudyComposerPrimary,
+.BibleStudyComposerSecondary,
+.BibleStudyComposerIconButton {
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.BibleStudyComposerPrimary {
+  border: none;
+  background: #111;
+  color: #fff;
+}
+
+.BibleStudyComposerSecondary,
+.BibleStudyComposerIconButton {
+  border: 1px solid #c7b9a4;
+  background: #fffdf9;
+  color: #222;
+}
+
+.BibleStudyComposerPrimary:disabled,
+.BibleStudyComposerSecondary:disabled,
+.BibleStudyComposerIconButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.BibleStudyComposerError {
+  background: #fbe4e4;
+  color: #6b2020;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 980px) {
+  .BibleStudyPassageGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .BibleStudyComposerBody {
+    width: 92%;
+  }
+
+  .BibleStudyPassageGrid,
+  .BibleStudyQuestionRow {
+    grid-template-columns: 1fr;
+  }
+
+  .BibleStudyComposerActions {
+    flex-direction: column;
+  }
+}

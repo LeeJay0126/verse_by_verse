@@ -30,6 +30,8 @@ import NotesPage from "./pages/Study/Notes/NotesPage";
 import NotePage from "./pages/Study/Notes/NotePage";
 import CommunityOverview from "./pages/Community/myCommunity/CommunityOverview";
 import MemberManage from "./pages/Community/myCommunity/MemberManage";
+import CommunityBibleStudyComposer from "./pages/Community/myCommunity/bibleStudyComposer/CommunityBibleStudyComposer";
+import BibleStudyShare from "./pages/Community/myCommunity/postDetail/BibleStudyShare";
 
 function App() {
   return (
@@ -57,6 +59,18 @@ function App() {
                   <Route path="/community/:communityId/info" element={<CommunityInfo />} />
                   <Route path="/community/:communityId/my-posts" element={<MyCommunity />} />
                   <Route path="/community/:communityId/posts/:postId" element={<PostDetail />} />
+                  <Route
+                    path="/community/:communityId/bible-study/new"
+                    element={<CommunityBibleStudyComposer />}
+                  />
+                  <Route
+                    path="/community/:communityId/bible-study/:postId/edit"
+                    element={<CommunityBibleStudyComposer />}
+                  />
+                  <Route
+                    path="/community/:communityId/posts/:postId/share"
+                    element={<BibleStudyShare />}
+                  />
                   <Route path="/study/notes" element={<Notes />} />
                   <Route path="/bible/walkthrough" element={<BibleWalkthrough />} />
                   <Route path="/notes" element={<NotesPage />} />
@@ -71,7 +85,7 @@ function App() {
           </NotesProvider>
         </AuthProvider>
       </BrowserRouter>
-    </div >
+    </div>
   );
 }
 
