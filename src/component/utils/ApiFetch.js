@@ -1,34 +1,27 @@
-const API_BASE =
-  process.env.REACT_APP_API_BASE_URL ||
-  process.env.REACT_APP_API_URL ||
-  "http://localhost:4000";
+import { buildApiUrl, getApiBase } from "./ApiConfig";
 
-export const getApiBase = () => API_BASE;
+export { getApiBase };
 
 export async function apiFetch(path, options = {}, timeoutMs = 15000) {
-  const url = path.startsWith("http")
-    ? path
-    : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
-
+  const url = buildApiUrl(path);
   const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), timeoutMs);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   const opts = {
-    ...options,
     credentials: "include",
-    signal: controller.signal,
-    headers: { ...(options.headers || {}) },
+    ...options,
+    signal: options.signal || controller.signal,
+    headers: {
+      ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+      ...(options.headers || {}),
+    },
   };
-
-  if (opts.body && !(opts.body instanceof FormData)) {
-    if (!opts.headers["Content-Type"]) opts.headers["Content-Type"] = "application/json";
-  }
 
   console.log("[apiFetch]", opts.method || "GET", url);
 
   try {
     return await fetch(url, opts);
   } finally {
-    clearTimeout(t);
+    clearTimeout(timer);
   }
 }

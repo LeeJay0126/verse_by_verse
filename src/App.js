@@ -32,6 +32,8 @@ import CommunityOverview from "./pages/Community/myCommunity/CommunityOverview";
 import MemberManage from "./pages/Community/myCommunity/MemberManage";
 import CommunityBibleStudyComposer from "./pages/Community/myCommunity/bibleStudyComposer/CommunityBibleStudyComposer";
 import BibleStudyShare from "./pages/Community/myCommunity/postDetail/BibleStudyShare";
+import RequireAuth from "./component/routes/RequireAuth";
+import RequireCommunityAccess from "./component/routes/RequireCommunityAccess";
 
 function App() {
   return (
@@ -44,32 +46,94 @@ function App() {
               <ToastProvider>
                 <Routes>
                   <Route path="/" exact element={<Home />} />
-                  <Route path="/community/:communityId" element={<CommunityOverview />} />
                   <Route path="/study" exact element={<Study />} />
                   <Route path="/community" exact element={<Community />} />
                   <Route path="/contact" exact element={<Contact />} />
                   <Route path="/account" exact element={<Account />} />
                   <Route path="/signup" exact element={<SignUp />} />
                   <Route path="/findpw" exact element={<FindPw />} />
-                  <Route path="/create-community" exact element={<CreateCommunity />} />
+                  <Route
+                    path="/create-community"
+                    exact
+                    element={
+                      <RequireAuth>
+                        <CreateCommunity />
+                      </RequireAuth>
+                    }
+                  />
                   <Route path="/browse-community" exact element={<BrowseCommunity />} />
                   <Route path="/community-how" exact element={<CommunityWalkthrough />} />
-                  <Route path="/notifications" element={<Notifications />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/community/:communityId/info" element={<CommunityInfo />} />
-                  <Route path="/community/:communityId/my-posts" element={<MyCommunity />} />
-                  <Route path="/community/:communityId/posts/:postId" element={<PostDetail />} />
+                  <Route
+                    path="/notifications"
+                    element={
+                      <RequireAuth>
+                        <Notifications />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <RequireAuth>
+                        <Profile />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/community/:communityId/info"
+                    element={
+                      <RequireAuth>
+                        <CommunityInfo />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/community/:communityId"
+                    element={
+                      <RequireCommunityAccess>
+                        <CommunityOverview />
+                      </RequireCommunityAccess>
+                    }
+                  />
+                  <Route
+                    path="/community/:communityId/my-posts"
+                    element={
+                      <RequireCommunityAccess>
+                        <MyCommunity />
+                      </RequireCommunityAccess>
+                    }
+                  />
+                  <Route
+                    path="/community/:communityId/posts/:postId"
+                    element={
+                      <RequireCommunityAccess>
+                        <PostDetail />
+                      </RequireCommunityAccess>
+                    }
+                  />
                   <Route
                     path="/community/:communityId/bible-study/new"
-                    element={<CommunityBibleStudyComposer />}
+                    element={
+                      <RequireCommunityAccess mode="bible-study">
+                        <CommunityBibleStudyComposer />
+                      </RequireCommunityAccess>
+                    }
                   />
                   <Route
                     path="/community/:communityId/bible-study/:postId/edit"
-                    element={<CommunityBibleStudyComposer />}
+                    element={
+                      <RequireCommunityAccess mode="bible-study">
+                        <CommunityBibleStudyComposer />
+                      </RequireCommunityAccess>
+                    }
                   />
                   <Route
                     path="/community/:communityId/posts/:postId/share"
-                    element={<BibleStudyShare />}
+                    element={
+                      <RequireCommunityAccess>
+                        <BibleStudyShare />
+                      </RequireCommunityAccess>
+                    }
                   />
                   <Route path="/study/notes" element={<Notes />} />
                   <Route path="/bible/walkthrough" element={<BibleWalkthrough />} />
@@ -78,7 +142,14 @@ function App() {
                   <Route path="/check-email" element={<CheckEmail />} />
                   <Route path="/verify-email" element={<VerifyEmail />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/community/:communityId/members/manage" element={<MemberManage />} />
+                  <Route
+                    path="/community/:communityId/members/manage"
+                    element={
+                      <RequireCommunityAccess mode="manage-members">
+                        <MemberManage />
+                      </RequireCommunityAccess>
+                    }
+                  />
                 </Routes>
               </ToastProvider>
             </NotificationProvider>

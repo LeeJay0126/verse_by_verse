@@ -4,12 +4,11 @@ import PageHeader from "../../../../component/PageHeader";
 import Footer from "../../../../component/Footer";
 import { useAuth } from "../../../../component/context/AuthContext";
 import { apiFetch } from "../../../../component/utils/ApiFetch";
+import { buildHeroStyle } from "../../../../component/utils/ApiConfig";
 import { emitCommunityActivityUpdated } from "../../../../component/utils/CommunityEvents";
 import BibleStudyPassagePicker from "./BibleStudyPassagePicker";
 import "./CommunityBibleStudyComposer.css";
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
-const DEFAULT_HERO = "/community/CommunityDefaultHero.png";
 
 const CommunityBibleStudyComposer = () => {
   const { communityId, postId } = useParams();
@@ -137,19 +136,7 @@ const CommunityBibleStudyComposer = () => {
     );
   }, [community, currentUserId]);
 
-  const heroBackgroundUrl = community?.heroImageUrl
-    ? `${API_BASE}${community.heroImageUrl}`
-    : DEFAULT_HERO;
-
-  const heroStyle = useMemo(
-    () => ({
-      backgroundImage: `url("${heroBackgroundUrl}")`,
-      backgroundPosition: "center",
-      backgroundSize: "cover",
-      backgroundRepeat: "no-repeat",
-    }),
-    [heroBackgroundUrl]
-  );
+  const heroStyle = useMemo(() => buildHeroStyle(community?.heroImageUrl), [community]);
 
   const handleQuestionChange = (index, value) => {
     setQuestions((prev) => prev.map((item, idx) => (idx === index ? value : item)));

@@ -81,6 +81,7 @@ const ReplyNode = ({
   const isOwner =
     myUserId && reply.authorId && String(reply.authorId) === String(myUserId);
 
+  const isStudyShare = reply?.replyType === "study_share";
   const isEditing = editingReplyId === id;
 
   return (
@@ -150,7 +151,7 @@ const ReplyNode = ({
 
           <div className="PostDetailReplyActionsRow">
             <div className="replyActionsRow">
-              {!isEditing && canReplyHere ? (
+              {!isEditing && canReplyHere && !isStudyShare ? (
                 <button
                   type="button"
                   className="ReplyActionBtn"
@@ -181,7 +182,7 @@ const ReplyNode = ({
             </div>
 
             <div className="replyActionsRow">
-              {!isEditing && isOwner && (
+              {!isEditing && isOwner && !isStudyShare && (
                 <>
                   <button
                     type="button"

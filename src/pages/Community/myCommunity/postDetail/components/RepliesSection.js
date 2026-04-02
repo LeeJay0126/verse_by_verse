@@ -1,9 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import ReplyTree from "../replies/ReplyTree";
 import Pager from "./Pager";
-
-const PER_PAGE = 8;
 
 const RepliesSection = ({
   post,
@@ -37,49 +34,23 @@ const RepliesSection = ({
   replyBoxRef,
   childReplyBoxRef,
   editBoxRef,
+  replyMeta,
+  setReplyPage,
+  pageInfoText,
 }) => {
   const isBibleStudy = post?.type === "bible_study";
+  const rootReplies = Array.isArray(replyTree?.byParent?.get?.("root"))
+    ? replyTree.byParent.get("root")
+    : [];
 
-  const byParent = useMemo(() => {
-    const m = replyTree?.byParent;
-    return m instanceof Map ? m : new Map();
-  }, [replyTree]);
-
-  const rootReplies = useMemo(() => {
-    const list = byParent.get("root");
-    return Array.isArray(list) ? list : [];
-  }, [byParent]);
-
-  const [page, setPage] = useState(1);
-
-  const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(rootReplies.length / PER_PAGE));
-  }, [rootReplies.length]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [rootReplies.length]);
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
-
-  const pageReplies = useMemo(() => {
-    const start = (page - 1) * PER_PAGE;
-    return rootReplies.slice(start, start + PER_PAGE);
-  }, [rootReplies, page]);
-
-  const pageInfoText = useMemo(() => {
-    if (rootReplies.length === 0) return "";
-    const start = (page - 1) * PER_PAGE + 1;
-    const end = Math.min(page * PER_PAGE, rootReplies.length);
-    return `Showing ${start}–${end} of ${rootReplies.length} ${isBibleStudy ? "shares" : "comments"}`;
-  }, [rootReplies.length, page, isBibleStudy]);
+  const pageLabel = pageInfoText?.start
+    ? `Showing ${pageInfoText.start}–${pageInfoText.end} of ${replyMeta.totalRootReplies} ${isBibleStudy ? "shares" : "replies"}`
+    : "";
 
   return (
     <section className="PostDetailReplies">
       <h2 className="PostDetailSubTitle">
-        {isBibleStudy ? "Shares" : "Replies"} ( {post?.replyCount ?? (Array.isArray(replies) ? replies.length : 0)} )
+        {isBibleStudy ? "Shares" : "Replies"} ( {post?.replyCount ?? 0} )
       </h2>
 
       {replyError && <p className="communityError smallError">{replyError}</p>}
@@ -88,15 +59,10 @@ const RepliesSection = ({
         <div className="BibleStudyShareCtaCard">
           <div className="BibleStudyShareCtaText">
             <h3>Share your reflection</h3>
-            <p>
-              Open your guided sharing flow with the passage, leader reflection, and discussion questions.
-            </p>
+            <p>Open your guided sharing flow with the passage, leader reflection, and discussion questions.</p>
           </div>
 
-          <Link
-            className="BibleStudyShareCtaButton"
-            to={`/community/${communityId}/posts/${post?.id}/share`}
-          >
+          <Link className="BibleStudyShareCtaButton" to={`/community/${communityId}/posts/${post?.id}/share`}>
             Start my share
           </Link>
         </div>
@@ -111,13 +77,13 @@ const RepliesSection = ({
       ) : (
         <>
           <div className="PostDetailRepliesPagerTop">
-            <span className="PostDetailPagerMeta">{pageInfoText}</span>
-            <Pager page={page} totalPages={totalPages} onPageChange={setPage} />
+            <span className="PostDetailPagerMeta">{pageLabel}</span>
+            <Pager page={replyMeta.page} totalPages={replyMeta.totalPages} onPageChange={setReplyPage} />
           </div>
 
           <ReplyTree
-            rootReplies={pageReplies}
-            byParent={byParent}
+            rootReplies={rootReplies}
+            byParent={replyTree.byParent}
             myUserId={myUserId}
             replySubmitting={replySubmitting}
             expanded={expanded}
@@ -142,7 +108,7 @@ const RepliesSection = ({
           />
 
           <div className="PostDetailRepliesPagerBottom">
-            <Pager page={page} totalPages={totalPages} onPageChange={setPage} />
+            <Pager page={replyMeta.page} totalPages={replyMeta.totalPages} onPageChange={setReplyPage} />
           </div>
         </>
       )}

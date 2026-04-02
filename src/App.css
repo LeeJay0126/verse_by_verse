@@ -325,3 +325,21 @@ h3 {
     background: rgba(0, 0, 0, .12);
   }
 }
+.RouteGuardState {
+  min-height: 40vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.RouteGuardState--error {
+  flex-direction: column;
+  gap: 12px;
+}
+
+.RouteGuardState--error a {
+  color: inherit;
+  text-decoration: underline;
+}
