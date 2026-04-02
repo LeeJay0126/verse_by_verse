@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch } from "../../../../../component/utils/ApiFetch";
 import { emitCommunityActivityUpdated } from "../../../../../component/utils/CommunityEvents";
+
+const ROOT_REPLIES_PER_PAGE = 8;
 
 const isInViewport = (el) => {
   if (!el) return false;
@@ -13,6 +15,12 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
   const [replies, setReplies] = useState([]);
   const [repliesLoading, setRepliesLoading] = useState(true);
   const [replyError, setReplyError] = useState("");
+  const [replyMeta, setReplyMeta] = useState({
+    page: 1,
+    totalPages: 1,
+    totalRootReplies: 0,
+    limit: ROOT_REPLIES_PER_PAGE,
+  });
 
   const [replyBody, setReplyBody] = useState("");
   const [replySubmitting, setReplySubmitting] = useState(false);
@@ -34,27 +42,43 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
   const restoreScrollRef = useRef(false);
   const lastCreatedReplyIdRef = useRef(null);
 
-  const fetchReplies = useCallback(async () => {
-    try {
-      setRepliesLoading(true);
-      setReplyError("");
-      const res = await apiFetch(`/community/${communityId}/posts/${postId}/replies`);
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok)
-        throw new Error(data.error || "Failed to load replies.");
+  const fetchReplies = useCallback(
+    async ({ page = replyMeta.page, keepLoader = false } = {}) => {
+      try {
+        if (!keepLoader) setRepliesLoading(true);
+        setReplyError("");
 
-      setReplies(Array.isArray(data.replies) ? data.replies : []);
-      setMyUserId(data.myUserId ? String(data.myUserId) : null);
-    } catch (error) {
-      setReplyError(error.message || "Unable to load replies.");
-    } finally {
-      setRepliesLoading(false);
-    }
-  }, [communityId, postId]);
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: String(ROOT_REPLIES_PER_PAGE),
+        });
+
+        const res = await apiFetch(`/community/${communityId}/posts/${postId}/replies?${params.toString()}`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to load replies.");
+        }
+
+        setReplies(Array.isArray(data.replies) ? data.replies : []);
+        setMyUserId(data.myUserId ? String(data.myUserId) : null);
+        setReplyMeta({
+          page: Number(data.page || page || 1),
+          totalPages: Math.max(1, Number(data.totalPages || 1)),
+          totalRootReplies: Number(data.totalRootReplies || 0),
+          limit: Number(data.limit || ROOT_REPLIES_PER_PAGE),
+        });
+      } catch (error) {
+        setReplyError(error.message || "Unable to load replies.");
+      } finally {
+        if (!keepLoader) setRepliesLoading(false);
+      }
+    },
+    [communityId, postId, replyMeta.page]
+  );
 
   useEffect(() => {
-    fetchReplies();
-  }, [fetchReplies]);
+    fetchReplies({ page: replyMeta.page });
+  }, [fetchReplies, replyMeta.page]);
 
   useEffect(() => {
     if (!restoreScrollRef.current) return;
@@ -68,7 +92,9 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
 
     const el = document.getElementById(`reply-${newId}`);
     if (el) {
-      if (!isInViewport(el)) {}
+      if (!isInViewport(el)) {
+        el.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
       el.classList.add("is-new-highlight");
       window.setTimeout(() => el.classList.remove("is-new-highlight"), 1600);
     }
@@ -80,6 +106,15 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
     if (!editingReplyId) return;
     requestAnimationFrame(() => editBoxRef.current?.focus());
   }, [editingReplyId]);
+
+  const refreshAfterMutation = useCallback(
+    async (preferredPage = replyMeta.page) => {
+      await fetchReplies({ page: preferredPage });
+      if (onPostChanged) await onPostChanged({ showLoader: false });
+      emitCommunityActivityUpdated();
+    },
+    [fetchReplies, onPostChanged, replyMeta.page]
+  );
 
   const handleSubmitReply = useCallback(
     async (e) => {
@@ -95,29 +130,28 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
       try {
         const res = await apiFetch(`/community/${communityId}/posts/${postId}/replies`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ body: replyBody }),
         });
 
         const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.ok)
+        if (!res.ok || !data.ok) {
           throw new Error(data.error || "Failed to post reply.");
+        }
 
         lastCreatedReplyIdRef.current = data.reply?.id ? String(data.reply.id) : null;
-
         setReplyBody("");
+        setActiveReplyTo(null);
         requestAnimationFrame(() => replyBoxRef.current?.focus());
 
-        await fetchReplies();
-        if (onPostChanged) await onPostChanged({ showLoader: false });
-        emitCommunityActivityUpdated();
+        setReplyMeta((prev) => ({ ...prev, page: 1 }));
+        await refreshAfterMutation(1);
       } catch (error) {
         setReplyError(error.message || "Unable to post reply.");
       } finally {
         setReplySubmitting(false);
       }
     },
-    [communityId, postId, replyBody, fetchReplies, onPostChanged]
+    [communityId, postId, replyBody, refreshAfterMutation]
   );
 
   const handleSubmitChildReply = useCallback(
@@ -134,35 +168,33 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
       try {
         const res = await apiFetch(`/community/${communityId}/posts/${postId}/replies`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ body: childBody, parentReplyId: activeReplyTo }),
         });
 
         const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.ok)
+        if (!res.ok || !data.ok) {
           throw new Error(data.error || "Failed to post reply.");
+        }
 
         lastCreatedReplyIdRef.current = data.reply?.id ? String(data.reply.id) : null;
-
         setChildBody("");
         setActiveReplyTo(null);
         requestAnimationFrame(() => replyBoxRef.current?.focus());
 
-        await fetchReplies();
-        if (onPostChanged) await onPostChanged({ showLoader: false });
-        emitCommunityActivityUpdated();
+        await refreshAfterMutation(replyMeta.page);
       } catch (error) {
         setReplyError(error.message || "Unable to post reply.");
       } finally {
         setReplySubmitting(false);
       }
     },
-    [communityId, postId, childBody, activeReplyTo, fetchReplies, onPostChanged]
+    [communityId, postId, childBody, activeReplyTo, refreshAfterMutation, replyMeta.page]
   );
 
-  const startEditReply = useCallback((r) => {
-    setEditingReplyId(String(r.id));
-    setEditBody(r.body || "");
+  const startEditReply = useCallback((reply) => {
+    if (reply?.replyType === "study_share") return;
+    setEditingReplyId(String(reply.id));
+    setEditBody(reply.body || "");
     setActiveReplyTo(null);
   }, []);
 
@@ -183,30 +215,27 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
       setReplyError("");
 
       try {
-        const res = await apiFetch(
-          `/community/${communityId}/posts/${postId}/replies/${replyId}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ body: trimmed }),
-          }
-        );
+        const res = await apiFetch(`/community/${communityId}/posts/${postId}/replies/${replyId}`, {
+          method: "PUT",
+          body: JSON.stringify({ body: trimmed }),
+        });
 
         const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.ok)
+        if (!res.ok || !data.ok) {
           throw new Error(data.error || "Failed to update reply.");
+        }
 
         const updated = data.reply;
 
         setReplies((prev) =>
-          prev.map((x) =>
-            String(x.id) === String(replyId)
+          prev.map((item) =>
+            String(item.id) === String(replyId)
               ? {
-                  ...x,
-                  body: updated?.body ?? x.body,
-                  updatedAt: updated?.updatedAt ?? x.updatedAt,
+                  ...item,
+                  body: updated?.body ?? item.body,
+                  updatedAt: updated?.updatedAt ?? item.updatedAt,
                 }
-              : x
+              : item
           )
         );
 
@@ -226,9 +255,7 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
 
   const handleDeleteReply = useCallback(
     async (replyId) => {
-      const ok = window.confirm(
-        "Delete this reply? This will also delete any replies under it."
-      );
+      const ok = window.confirm("Delete this reply? This will also delete any replies under it.");
       if (!ok) return;
 
       scrollYRef.current = window.scrollY;
@@ -238,13 +265,13 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
       setReplyError("");
 
       try {
-        const res = await apiFetch(
-          `/community/${communityId}/posts/${postId}/replies/${replyId}`,
-          { method: "DELETE" }
-        );
+        const res = await apiFetch(`/community/${communityId}/posts/${postId}/replies/${replyId}`, {
+          method: "DELETE",
+        });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.ok)
+        if (!res.ok || !data.ok) {
           throw new Error(data.error || "Failed to delete reply.");
+        }
 
         if (editingReplyId === String(replyId)) cancelEditReply();
         if (activeReplyTo === String(replyId)) {
@@ -252,9 +279,12 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
           setChildBody("");
         }
 
-        await fetchReplies();
-        if (onPostChanged) await onPostChanged({ showLoader: false });
-        emitCommunityActivityUpdated();
+        const nextTotal = Math.max(0, replyMeta.totalRootReplies - Number(data.deletedRootCount || 0));
+        const nextTotalPages = Math.max(1, Math.ceil(nextTotal / ROOT_REPLIES_PER_PAGE));
+        const nextPage = Math.min(replyMeta.page, nextTotalPages);
+
+        setReplyMeta((prev) => ({ ...prev, page: nextPage }));
+        await refreshAfterMutation(nextPage);
       } catch (error) {
         setReplyError(error.message || "Unable to delete reply.");
       } finally {
@@ -262,15 +292,23 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
       }
     },
     [
-      communityId,
-      postId,
-      fetchReplies,
-      onPostChanged,
-      editingReplyId,
       activeReplyTo,
       cancelEditReply,
+      communityId,
+      editingReplyId,
+      postId,
+      refreshAfterMutation,
+      replyMeta.page,
+      replyMeta.totalRootReplies,
     ]
   );
+
+  const pageInfoText = useMemo(() => {
+    if (!replyMeta.totalRootReplies) return "";
+    const start = (replyMeta.page - 1) * replyMeta.limit + 1;
+    const end = Math.min(replyMeta.page * replyMeta.limit, replyMeta.totalRootReplies);
+    return { start, end };
+  }, [replyMeta]);
 
   return {
     replies,
@@ -297,6 +335,10 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
     replyBoxRef,
     childReplyBoxRef,
     editBoxRef,
+    replyMeta,
+    setReplyPage: (nextPage) => setReplyMeta((prev) => ({ ...prev, page: nextPage })),
+    pageInfoText,
+    refetchReplies: fetchReplies,
   };
 };
 

@@ -62,6 +62,9 @@ const PostDetail = () => {
     replyBoxRef,
     childReplyBoxRef,
     editBoxRef,
+    replyMeta,
+    setReplyPage,
+    pageInfoText,
   } = usePostReplies({ communityId, postId, post, onPostChanged: refetchPost });
 
   const replyTree = useReplyTree(replies);
@@ -181,6 +184,9 @@ const PostDetail = () => {
           replyBoxRef={replyBoxRef}
           childReplyBoxRef={childReplyBoxRef}
           editBoxRef={editBoxRef}
+          replyMeta={replyMeta}
+          setReplyPage={setReplyPage}
+          pageInfoText={pageInfoText}
         />
       </section>
 

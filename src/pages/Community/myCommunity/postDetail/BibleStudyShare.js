@@ -3,26 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../../../../component/PageHeader";
 import Footer from "../../../../component/Footer";
 import { apiFetch } from "../../../../component/utils/ApiFetch";
+import { buildHeroStyle } from "../../../../component/utils/ApiConfig";
 import "./PostDetail.css";
-
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
-const DEFAULT_HERO = "/community/CommunityDefaultHero.png";
-
-const formatReplyBody = ({ reflection, answers, questions }) => {
-  const blocks = [];
-
-  if (reflection.trim()) {
-    blocks.push(`Reflection\n${reflection.trim()}`);
-  }
-
-  questions.forEach((question, index) => {
-    const answer = String(answers[index] || "").trim();
-    if (!answer) return;
-    blocks.push(`Q${index + 1}. ${question}\n${answer}`);
-  });
-
-  return blocks.join("\n\n");
-};
 
 const BibleStudyShare = () => {
   const { communityId, postId } = useParams();
@@ -39,31 +21,43 @@ const BibleStudyShare = () => {
   const [reflection, setReflection] = useState("");
   const [answers, setAnswers] = useState([]);
   const [stepIndex, setStepIndex] = useState(0);
+  const [existingSubmissionId, setExistingSubmissionId] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setScreenError("");
 
-      const res = await apiFetch(`/community/${communityId}/posts/${postId}`);
-      const data = await res.json().catch(() => ({}));
+      const [postRes, submissionRes] = await Promise.all([
+        apiFetch(`/community/${communityId}/posts/${postId}`),
+        apiFetch(`/community/${communityId}/posts/${postId}/study-submissions/me`),
+      ]);
 
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || "Failed to load Bible Study.");
+      const postData = await postRes.json().catch(() => ({}));
+      const submissionData = await submissionRes.json().catch(() => ({}));
+
+      if (!postRes.ok || !postData.ok) {
+        throw new Error(postData.error || "Failed to load Bible Study.");
       }
 
-      if (data.post?.type !== "bible_study") {
+      if (postData.post?.type !== "bible_study") {
         throw new Error("This share flow only works for Bible Study posts.");
       }
 
-      setCommunity(data.community || null);
-      setPost(data.post || null);
+      setCommunity(postData.community || null);
+      setPost(postData.post || null);
 
-      const questionCount = Array.isArray(data.post?.studyContent?.questions)
-        ? data.post.studyContent.questions.filter((item) => String(item || "").trim()).length
-        : 0;
+      const questionList = Array.isArray(postData.post?.studyContent?.questions)
+        ? postData.post.studyContent.questions.filter((item) => String(item || "").trim())
+        : [];
 
-      setAnswers(Array.from({ length: questionCount }, () => ""));
+      const seededAnswers = Array.from({ length: questionList.length }, (_, index) => {
+        return String(submissionData?.submission?.answers?.[index] || "");
+      });
+
+      setReflection(String(submissionData?.submission?.reflection || ""));
+      setAnswers(seededAnswers);
+      setExistingSubmissionId(submissionData?.submission?.id || null);
     } catch (e) {
       setScreenError(e.message || "Failed to load Bible Study.");
     } finally {
@@ -75,19 +69,7 @@ const BibleStudyShare = () => {
     fetchData();
   }, [fetchData]);
 
-  const heroBackgroundUrl = community?.heroImageUrl
-    ? `${API_BASE}${community.heroImageUrl}`
-    : DEFAULT_HERO;
-
-  const heroStyle = useMemo(
-    () => ({
-      backgroundImage: `url("${heroBackgroundUrl}")`,
-      backgroundPosition: "center",
-      backgroundSize: "cover",
-      backgroundRepeat: "no-repeat",
-    }),
-    [heroBackgroundUrl]
-  );
+  const heroStyle = useMemo(() => buildHeroStyle(community?.heroImageUrl), [community]);
 
   const verses = Array.isArray(post?.passageSnapshot?.verses) ? post.passageSnapshot.verses : [];
   const questions = Array.isArray(post?.studyContent?.questions)
@@ -101,7 +83,6 @@ const BibleStudyShare = () => {
   const isReflectionStep = stepIndex === 0;
   const currentQuestionIndex = Math.max(0, stepIndex - 1);
   const isLastStep = stepIndex === totalSteps - 1;
-
   const currentValue = isReflectionStep ? reflection : answers[currentQuestionIndex] || "";
 
   const handleChangeCurrentValue = (value) => {
@@ -124,9 +105,10 @@ const BibleStudyShare = () => {
   };
 
   const handleSubmit = async () => {
-    const body = formatReplyBody({ reflection, answers, questions });
+    const cleanReflection = reflection.trim();
+    const cleanAnswers = answers.map((item) => String(item || "").trim());
 
-    if (!body.trim()) {
+    if (!cleanReflection && !cleanAnswers.some(Boolean)) {
       setSubmitError("Please write at least one response before submitting.");
       return;
     }
@@ -135,13 +117,11 @@ const BibleStudyShare = () => {
       setSubmitting(true);
       setSubmitError("");
 
-      const res = await apiFetch(`/community/${communityId}/posts/${postId}/replies`, {
+      const res = await apiFetch(`/community/${communityId}/posts/${postId}/study-submissions`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
-          body,
+          reflection: cleanReflection,
+          answers: cleanAnswers,
         }),
       });
 
@@ -151,6 +131,7 @@ const BibleStudyShare = () => {
         throw new Error(data.error || "Failed to submit your share.");
       }
 
+      setExistingSubmissionId(data.submission?.id || existingSubmissionId || null);
       navigate(`/community/${communityId}/posts/${postId}`);
     } catch (e) {
       setSubmitError(e.message || "Failed to submit your share.");
@@ -198,7 +179,7 @@ const BibleStudyShare = () => {
           <div className="BibleStudyComposerBreadcrumbs">
             <Link to={`/community/${communityId}/posts/${postId}`}>Back to Bible Study</Link>
           </div>
-          <h1 className="ForumHeader">Share your reflection</h1>
+          <h1 className="ForumHeader">{existingSubmissionId ? "Edit your reflection" : "Share your reflection"}</h1>
           <h2 className="ForumSubHeader">{post?.title}</h2>
         </div>
       </div>
@@ -309,7 +290,7 @@ const BibleStudyShare = () => {
                   onClick={handleSubmit}
                   disabled={submitting}
                 >
-                  {submitting ? "Submitting…" : "Submit"}
+                  {submitting ? "Submitting…" : existingSubmissionId ? "Save" : "Submit"}
                 </button>
               )}
             </div>

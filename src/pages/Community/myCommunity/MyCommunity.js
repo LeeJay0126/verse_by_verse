@@ -7,6 +7,7 @@ import Footer from "../../../component/Footer";
 import NewPostModal from "./NewPost";
 import Time from "../../../component/utils/Time";
 import { apiFetch } from "../../../component/utils/ApiFetch";
+import { buildHeroStyle } from "../../../component/utils/ApiConfig";
 import { FiTrash2 } from "react-icons/fi";
 
 import {
@@ -17,12 +18,18 @@ import {
 import {
   getTypeLabel,
   getTypeTagClass,
-  sortPostsPinnedAnnouncementsLatestFirst,
 } from "../communityTypes";
+import {
+  canCreateBibleStudy,
+  canManageMembers as canManageMembersAccess,
+  canModerateCommunityPosts,
+  getCommunityRole,
+  isCommunityMember,
+} from "../../../component/utils/communityAccess";
+import Pager from "./postDetail/components/Pager";
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
-const DEFAULT_HERO = "/community/CommunityDefaultHero.png";
 const MAX_ANNOUNCEMENTS_PER_COMMUNITY = 3;
+const POSTS_PER_PAGE = 12;
 
 const MyCommunity = () => {
   const { communityId } = useParams();
@@ -33,6 +40,12 @@ const MyCommunity = () => {
   const [communityErr, setCommunityErr] = useState("");
 
   const [posts, setPosts] = useState([]);
+  const [postsMeta, setPostsMeta] = useState({
+    page: 1,
+    totalPages: 1,
+    totalCount: 0,
+    limit: POSTS_PER_PAGE,
+  });
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
@@ -46,7 +59,10 @@ const MyCommunity = () => {
   const [deletingPostId, setDeletingPostId] = useState(null);
   const [deleteError, setDeleteError] = useState("");
 
+  const [page, setPage] = useState(1);
+
   const currentUserId = String(user?.id || user?._id || "");
+  const currentRole = useMemo(() => getCommunityRole(community, currentUserId), [community, currentUserId]);
 
   const handleRowClick = (postId) => {
     navigate(`/community/${communityId}/posts/${postId}`);
@@ -67,37 +83,55 @@ const MyCommunity = () => {
     }
   }, [communityId]);
 
-  const fetchPosts = useCallback(async () => {
-    try {
-      setLoading(true);
-      setErr("");
-      const res = await apiFetch(`/community/${communityId}/posts`);
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || `Failed to load posts (${res.status})`);
+  const fetchPosts = useCallback(
+    async (nextPage = page) => {
+      try {
+        setLoading(true);
+        setErr("");
+        const params = new URLSearchParams({
+          page: String(nextPage),
+          limit: String(POSTS_PER_PAGE),
+        });
+
+        const res = await apiFetch(`/community/${communityId}/posts?${params.toString()}`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || `Failed to load posts (${res.status})`);
+        }
+
+        setPosts(Array.isArray(data.posts) ? data.posts : []);
+        setPostsMeta({
+          page: Number(data.page || nextPage || 1),
+          totalPages: Math.max(1, Number(data.totalPages || 1)),
+          totalCount: Number(data.totalCount || 0),
+          limit: Number(data.limit || POSTS_PER_PAGE),
+        });
+      } catch (error) {
+        console.error("[MyCommunity] fetchPosts error:", error);
+        setErr(error.message || "Failed to load posts.");
+      } finally {
+        setLoading(false);
       }
-      setPosts(Array.isArray(data.posts) ? data.posts : []);
-    } catch (error) {
-      console.error("[MyCommunity] fetchPosts error:", error);
-      setErr(error.message || "Failed to load posts.");
-    } finally {
-      setLoading(false);
-    }
-  }, [communityId]);
+    },
+    [communityId, page]
+  );
 
   useEffect(() => {
     fetchCommunity();
-    fetchPosts();
-  }, [fetchCommunity, fetchPosts]);
+  }, [fetchCommunity]);
+
+  useEffect(() => {
+    fetchPosts(page);
+  }, [fetchPosts, page]);
 
   useEffect(() => {
     const onActivity = () => {
       fetchCommunity();
-      fetchPosts();
+      fetchPosts(page);
     };
     window.addEventListener(COMMUNITY_ACTIVITY_EVENT, onActivity);
     return () => window.removeEventListener(COMMUNITY_ACTIVITY_EVENT, onActivity);
-  }, [fetchCommunity, fetchPosts]);
+  }, [fetchCommunity, fetchPosts, page]);
 
   const handleNewPostClick = () => {
     setNewPostError("");
@@ -110,7 +144,7 @@ const MyCommunity = () => {
   };
 
   const announcementCount = useMemo(() => {
-    return posts.filter((p) => String(p.type || "").toLowerCase() === "announcements").length;
+    return posts.filter((post) => String(post.type || "").toLowerCase() === "announcements").length;
   }, [posts]);
 
   const handleCreatePost = async (newPostPayload) => {
@@ -120,14 +154,13 @@ const MyCommunity = () => {
       const payloadType = String(newPostPayload?.type || newPostPayload?.typeValue || "").toLowerCase();
 
       if (payloadType === "announcements" && announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY) {
-        const message = `This community already has ${MAX_ANNOUNCEMENTS_PER_COMMUNITY} announcements.`;
+        const message = `This community already has ${MAX_ANNOUNCEMENTS_PER_COMMUNITY} announcements on this page.`;
         setNewPostError(message);
         return { ok: false, message };
       }
 
       const res = await apiFetch(`/community/${communityId}/posts`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: newPostPayload?.title,
           body: newPostPayload?.body,
@@ -144,7 +177,8 @@ const MyCommunity = () => {
         return { ok: false, message };
       }
 
-      await fetchPosts();
+      setPage(1);
+      await fetchPosts(1);
       await fetchCommunity();
 
       emitCommunityActivityUpdated();
@@ -159,7 +193,7 @@ const MyCommunity = () => {
     }
   };
 
-  const hasRealPosts = posts.length > 0;
+  const hasRealPosts = postsMeta.totalCount > 0;
 
   const formatActivity = (post) => {
     const date = post.updatedAt || post.createdAt;
@@ -167,14 +201,7 @@ const MyCommunity = () => {
     return Time(date);
   };
 
-  const heroBackgroundUrl = community?.heroImageUrl ? `${API_BASE}${community.heroImageUrl}` : DEFAULT_HERO;
-
-  const heroStyle = {
-    backgroundImage: `url("${heroBackgroundUrl}")`,
-    backgroundPosition: "center",
-    backgroundSize: "cover",
-    backgroundRepeat: "no-repeat",
-  };
+  const heroStyle = useMemo(() => buildHeroStyle(community?.heroImageUrl), [community]);
 
   const handleHeroUploadButtonClick = () => {
     fileInputRef.current?.click();
@@ -213,43 +240,8 @@ const MyCommunity = () => {
     }
   };
 
-  const canEditHero = (() => {
-    if (!community || !user) return false;
-
-    const currentId = user.id || user._id;
-    const isOwnerLocal =
-      community.owner && (community.owner.id === currentId || community.owner._id === currentId);
-
-    const isLeaderLocal =
-      Array.isArray(community.members) &&
-      community.members.some(
-        (m) =>
-          (m.role === "Leader" || m.role === "Owner") &&
-          (m.id === currentId || m._id === currentId)
-      );
-
-    return isOwnerLocal || isLeaderLocal;
-  })();
-
-  const orderedPosts = useMemo(() => {
-    return sortPostsPinnedAnnouncementsLatestFirst(posts);
-  }, [posts]);
-
-  const canModeratePosts = useMemo(() => {
-    if (!community || !user) return false;
-
-    const currentId = String(user.id || user._id || "");
-
-    const inMembers =
-      Array.isArray(community.members) &&
-      community.members.some(
-        (m) =>
-          (m.role === "Leader" || m.role === "Owner") &&
-          String(m.id || m._id || "") === currentId
-      );
-
-    return inMembers;
-  }, [community, user]);
+  const canEditHero = currentRole === "Owner" || currentRole === "Leader";
+  const canModeratePosts = canModerateCommunityPosts(community, currentUserId);
 
   const canEditOrDeletePost = useCallback(
     (post) => {
@@ -264,8 +256,7 @@ const MyCommunity = () => {
 
   const handleDeletePost = useCallback(
     async (postId) => {
-      if (!postId) return;
-      if (deletingPostId) return;
+      if (!postId || deletingPostId) return;
 
       setDeleteError("");
       const ok = window.confirm("Delete this post? This cannot be undone.");
@@ -284,7 +275,13 @@ const MyCommunity = () => {
           throw new Error(data.error || "Failed to delete post.");
         }
 
-        setPosts((prev) => prev.filter((p) => String(p.id) !== String(postId)));
+        const nextTotal = Math.max(0, Number(postsMeta.totalCount || 0) - 1);
+        const nextTotalPages = Math.max(1, Math.ceil(nextTotal / POSTS_PER_PAGE));
+        const nextPage = Math.min(page, nextTotalPages);
+
+        setPage(nextPage);
+        await fetchPosts(nextPage);
+        await fetchCommunity();
 
         emitCommunityActivityUpdated();
       } catch (e) {
@@ -294,44 +291,20 @@ const MyCommunity = () => {
         setDeletingPostId(null);
       }
     },
-    [communityId, deletingPostId]
+    [communityId, deletingPostId, fetchCommunity, fetchPosts, page, postsMeta.totalCount]
   );
 
-  const isOwner = useMemo(() => {
-    const ownerId = String(community?.owner?.id || community?.owner?._id || "");
-    return ownerId && ownerId === currentUserId;
-  }, [community, currentUserId]);
-
-  const isLeader = useMemo(() => {
-    return (
-      Array.isArray(community?.members) &&
-      community.members.some(
-        (m) =>
-          (String(m.role || "").toLowerCase() === "leader" ||
-            String(m.role || "").toLowerCase() === "owner") &&
-          String(m.id || m._id || "") === currentUserId
-      )
-    );
-  }, [community, currentUserId]);
-
-  const leadersCanManageMembers = Boolean(community?.settings?.leadersCanManageMembers);
-
-  const canManageMembers = useMemo(() => {
-    return isOwner || (isLeader && leadersCanManageMembers);
-  }, [isOwner, isLeader, leadersCanManageMembers]);
-
-  const isMember = useMemo(() => {
-    return (
-      Array.isArray(community?.members) &&
-      community.members.some((m) => String(m.id || m._id || "") === currentUserId)
-    );
-  }, [community, currentUserId]);
+  const canManageMembers = canManageMembersAccess(community, currentUserId);
+  const isMember = isCommunityMember(community, currentUserId);
 
   const handleManageMembersClick = () => {
     navigate(`/community/${communityId}/members/manage`);
   };
 
   const manageLabel = canManageMembers ? "Manage" : "Settings";
+  const pageInfoText = hasRealPosts
+    ? `Showing page ${postsMeta.page} of ${postsMeta.totalPages} · ${postsMeta.totalCount} total posts`
+    : "";
 
   return (
     <section className="ForumContainer">
@@ -339,11 +312,8 @@ const MyCommunity = () => {
         <PageHeader />
 
         <div className="ForumHeaderContainer">
-          <h1 className="ForumHeader">{community?.header || "Temporary Header"}</h1>
-          <h2 className="ForumSubHeader">
-            {community?.subheader ||
-              "Temporary SubHeader Temporary SubHeader Temporary SubHeader Temporary SubHeader Temporary SubHeader"}
-          </h2>
+          <h1 className="ForumHeader">{community?.header || "Community"}</h1>
+          <h2 className="ForumSubHeader">{community?.subheader || ""}</h2>
           {communityErr && <p className="communityError smallError">{communityErr}</p>}
         </div>
 
@@ -389,49 +359,60 @@ const MyCommunity = () => {
         {!loading && !err && !hasRealPosts && <p>You don’t have any posts in this community yet.</p>}
 
         {!loading && !err && hasRealPosts && (
-          <table className="ForumTable">
-            <thead>
-              <tr>
-                <th>Topic</th>
-                <th>Category</th>
-                <th>Replies</th>
-                <th>Activity</th>
-                <th className="ForumActionsCol">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orderedPosts.map((post) => (
-                <tr key={post.id} className="ForumRow" onClick={() => handleRowClick(post.id)}>
-                  <td className="topic">
-                    <div className="title">{post.title}</div>
-                    <div className="subtitle">{post.subtitle}</div>
-                  </td>
-                  <td>
-                    <span className={`Tag ${getTypeTagClass(post)}`}>{getTypeLabel(post)}</span>
-                  </td>
-                  <td>{post.replyCount}</td>
-                  <td>{formatActivity(post)}</td>
-                  <td
-                    className={`ForumActionsCell ${canEditOrDeletePost(post) ? "can-delete" : ""}`}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {canEditOrDeletePost(post) && (
-                      <button
-                        type="button"
-                        className="PostDeleteIcon"
-                        aria-label="Delete post"
-                        title="Delete"
-                        onClick={() => handleDeletePost(post.id)}
-                        disabled={deletingPostId === String(post.id)}
-                      >
-                        <FiTrash2 size={16} />
-                      </button>
-                    )}
-                  </td>
+          <>
+            <div className="PostDetailRepliesPagerTop" style={{ marginBottom: 12 }}>
+              <span className="PostDetailPagerMeta">{pageInfoText}</span>
+              <Pager page={page} totalPages={postsMeta.totalPages} onPageChange={setPage} />
+            </div>
+
+            <table className="ForumTable">
+              <thead>
+                <tr>
+                  <th>Topic</th>
+                  <th>Category</th>
+                  <th>Replies</th>
+                  <th>Activity</th>
+                  <th className="ForumActionsCol">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {posts.map((post) => (
+                  <tr key={post.id} className="ForumRow" onClick={() => handleRowClick(post.id)}>
+                    <td className="topic">
+                      <div className="title">{post.title}</div>
+                      <div className="subtitle">{post.subtitle}</div>
+                    </td>
+                    <td>
+                      <span className={`Tag ${getTypeTagClass(post)}`}>{getTypeLabel(post)}</span>
+                    </td>
+                    <td>{post.replyCount}</td>
+                    <td>{formatActivity(post)}</td>
+                    <td
+                      className={`ForumActionsCell ${canEditOrDeletePost(post) ? "can-delete" : ""}`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {canEditOrDeletePost(post) && (
+                        <button
+                          type="button"
+                          className="PostDeleteIcon"
+                          aria-label="Delete post"
+                          title="Delete"
+                          onClick={() => handleDeletePost(post.id)}
+                          disabled={deletingPostId === String(post.id)}
+                        >
+                          <FiTrash2 size={16} />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="PostDetailRepliesPagerBottom">
+              <Pager page={page} totalPages={postsMeta.totalPages} onPageChange={setPage} />
+            </div>
+          </>
         )}
       </section>
 
@@ -441,7 +422,7 @@ const MyCommunity = () => {
           onClose={handleCloseModal}
           onSubmit={handleCreatePost}
           announcementCount={announcementCount}
-          canCreateBibleStudy={isLeader || isOwner}
+          canCreateBibleStudy={canCreateBibleStudy(community, currentUserId)}
         />
       )}
 

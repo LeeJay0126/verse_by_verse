@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiFetch } from "../../../../../component/utils/ApiFetch";
+import { buildHeroStyle } from "../../../../../component/utils/ApiConfig";
 import {
   COMMUNITY_ACTIVITY_EVENT,
   emitCommunityActivityUpdated,
 } from "../../../../../component/utils/CommunityEvents";
-
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
-const DEFAULT_HERO = "/community/CommunityDefaultHero.png";
 
 const usePostDetailData = () => {
   const { communityId, postId } = useParams();
@@ -39,8 +37,9 @@ const usePostDetailData = () => {
         setErr("");
         const res = await apiFetch(`/community/${communityId}/posts/${postId}`);
         const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.ok)
+        if (!res.ok || !data.ok) {
           throw new Error(data.error || "Failed to load post.");
+        }
         setPost(data.post || null);
         setPollResults(data.post?.pollResults || null);
         setMyVotes(data.post?.myVotes || []);
@@ -67,25 +66,21 @@ const usePostDetailData = () => {
 
   const handleVoteToggle = useCallback(
     async (optionIndex) => {
-      if (!post || post.type !== "poll") return;
-      if (voting) return;
+      if (!post || post.type !== "poll" || voting) return;
 
       setVoting(true);
       setVoteError("");
 
       try {
-        const res = await apiFetch(
-          `/community/${communityId}/posts/${post.id}/vote`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ optionIndex }),
-          }
-        );
+        const res = await apiFetch(`/community/${communityId}/posts/${post.id}/vote`, {
+          method: "POST",
+          body: JSON.stringify({ optionIndex }),
+        });
 
         const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.ok)
+        if (!res.ok || !data.ok) {
           throw new Error(data.error || "Failed to update vote.");
+        }
 
         setPollResults(data.pollResults || null);
         setMyVotes(Array.isArray(data.myVotes) ? data.myVotes : []);
@@ -99,20 +94,7 @@ const usePostDetailData = () => {
     [communityId, post, voting]
   );
 
-  const heroBackgroundUrl = community?.heroImageUrl
-    ? `${API_BASE}${community.heroImageUrl}`
-    : DEFAULT_HERO;
-
-  const heroStyle = useMemo(
-    () => ({
-      backgroundImage: `url("${heroBackgroundUrl}")`,
-      backgroundPosition: "center",
-      backgroundSize: "cover",
-      backgroundRepeat: "no-repeat",
-    }),
-    [heroBackgroundUrl]
-  );
-
+  const heroStyle = useMemo(() => buildHeroStyle(community?.heroImageUrl), [community]);
   const navigateBackUrl = `/community/${communityId}/my-posts`;
 
   return {
