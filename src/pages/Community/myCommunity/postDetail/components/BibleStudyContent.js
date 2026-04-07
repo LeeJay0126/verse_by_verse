@@ -1,9 +1,10 @@
+import "./BibleStudyContent.css"
 const Section = ({ title, children }) => {
   if (!children) return null;
 
   return (
     <section className="BibleStudyDetailSection">
-      <h3>{title}</h3>
+      <h3>Bible Study {title}</h3>
       <div className="BibleStudyDetailText">{children}</div>
     </section>
   );
@@ -25,16 +26,13 @@ const BibleStudyContent = ({ post }) => {
 
   return (
     <section className="BibleStudyDetailCard">
-      {referenceLabel && (
-        <div className="BibleStudyDetailReference">
-          <span>Passage</span>
-          <strong>{referenceLabel}</strong>
-        </div>
-      )}
-
       {!!verses.length && (
         <section className="BibleStudyDetailSection">
-          <h3>Passage</h3>
+          {referenceLabel && (
+            <div className="BibleStudyDetailReference">
+              <h3>Passage : <strong>{referenceLabel}</strong></h3>
+            </div>
+          )}
           <div className="BibleStudyDetailVerseList">
             {verses.map((verse) => (
               <p key={`${referenceLabel}-${verse.number}`} className="BibleStudyDetailVerseItem">
@@ -45,11 +43,11 @@ const BibleStudyContent = ({ post }) => {
         </section>
       )}
 
-      <Section title="Leader Notes">
+      <Section className="LeaderNotes" title="Leader Notes">
         <p>{leaderNotes}</p>
       </Section>
 
-      <Section title="성경나눔 / Reflection">
+      <Section className="Reflection" title="성경나눔 / Reflection">
         <p>{reflection}</p>
       </Section>
 

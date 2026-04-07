@@ -176,9 +176,6 @@ const BibleStudyShare = () => {
       <div className="ForumHero ForumHero--small" style={heroStyle}>
         <PageHeader />
         <div className="ForumHeaderContainer">
-          <div className="BibleStudyComposerBreadcrumbs">
-            <Link to={`/community/${communityId}/posts/${postId}`}>Back to Bible Study</Link>
-          </div>
           <h1 className="ForumHeader">{existingSubmissionId ? "Edit your reflection" : "Share your reflection"}</h1>
           <h2 className="ForumSubHeader">{post?.title}</h2>
         </div>
@@ -186,6 +183,9 @@ const BibleStudyShare = () => {
 
       <section className="ForumBody PostDetailBody BibleStudyShareBody">
         <section className="BibleStudyDetailCard">
+          <div className="BibleStudyComposerBreadcrumbs">
+            <Link className="shareLink" to={`/community/${communityId}/posts/${postId}`}>Back to Bible Study</Link>
+          </div>
           {!!post?.passage?.referenceLabel && (
             <div className="BibleStudyDetailReference">
               <span>Passage</span>

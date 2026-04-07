@@ -1,0 +1,41 @@
+.BibleStudyDetailReference {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-bottom: 20px;
+}
+
+.BibleStudyDetailSection h3 {
+    font-size: 24px;
+    font-weight: 600;
+    padding-bottom: 20px;
+}
+
+.BibleStudyDetailText {
+    font-size: 17px;
+    padding: 10px 0 20px 0;
+}
+
+.BibleStudyDetailVerseList {
+    width: 95%;
+    margin: 0 auto;
+    padding-bottom: 20px;
+}
+
+.BibleStudyDetailVerseItem {
+    line-height: 22px;
+    padding-bottom: 15px;
+    font-size: 17px;
+}
+
+.BibleStudyDetailQuestions {
+    /* overflow: hidden; */
+    overflow-wrap: break-word;
+    width: 90%;
+    margin: 0 auto;
+}
+
+.BibleStudyDetailQuestions li {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
