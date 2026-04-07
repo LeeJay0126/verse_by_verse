@@ -5,6 +5,7 @@ import Footer from "../../../component/Footer";
 import { useAuth } from "../../../component/context/AuthContext";
 import { apiFetch } from "../../../component/utils/ApiFetch";
 import "./MemberManage.css";
+import Header from "../../../component/Header";
 
 const LABELS = {
   announcements: { title: "Announcements", hint: "New announcements in this community." },
@@ -442,8 +443,6 @@ export default function MemberManage() {
 
   return (
     <section className="MemberManagePage">
-      <PageHeader />
-
       <div className="MemberManageBody">
         <div className="MemberManageHeader">
           <div className="MemberManageHeaderLeft">

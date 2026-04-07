@@ -21,6 +21,33 @@
   gap: 18px;
 }
 
+.ForumHeader,
+.ForumSubHeader {
+  font-family: "Playfair Display", serif;
+}
+
+.ForumHeader {
+  font-size: 32px;
+  font-weight: 400;
+}
+
+.ForumSubHeader {
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.createBibleStudyLink {
+  text-decoration: underline;
+  color: black;
+  padding-bottom: 15px;
+}
+
+.createBibleStudyLink:visited {
+  text-decoration: underline;
+  color: black;
+  padding-bottom: 15px;
+}
+
 .BibleStudyComposerCard {
   background: #fffdf9;
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -55,6 +82,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding-bottom: 10px;
 }
 
 .BibleStudyField label {
@@ -145,6 +173,11 @@
   grid-template-columns: 1fr auto;
   gap: 10px;
   align-items: start;
+  padding-bottom: 15px;
+}
+
+.BibleStudyQuestionRow textarea {
+  padding: 10px
 }
 
 .BibleStudyComposerActions {
