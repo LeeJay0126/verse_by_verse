@@ -15,11 +15,16 @@
   min-height: var(--header-h);
 }
 
-/* Make room for wrapped menus on tablets */
-@media (max-width: 992px) {
+/* Switch to compact header layout when drawer navigation takes over */
+@media (max-width: 940px) {
   .Header {
-    flex-wrap: wrap;
-    row-gap: 8px;
+    flex-wrap: nowrap;
+    row-gap: 0;
+    justify-content: flex-start;
+  }
+
+  .Header .MenuInline {
+    margin-left: auto;
   }
 }
 
@@ -57,6 +62,10 @@
 
 .MenuInline {
   display: flex;
+}
+
+.Hamburger {
+  margin-left: 0;
 }
 
 .MenuOptions {
