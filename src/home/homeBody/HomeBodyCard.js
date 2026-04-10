@@ -1,28 +1,24 @@
-import Community from '../../pages/Community/Community';
-import Study from '../../pages/Study/Study';
-import Home from '../Home';
-import './HomeBody.css';
-import { Link } from 'react-router-dom';
+import "./HomeBody.css";
+import { Link } from "react-router-dom";
 
 const HomeBodyCard = (props) => {
 
-    //About Page removed. Maybe add an about section to show how the web app should be used
-    //under the cards section and add a ref link to it to slide the page down to address it
     const cardType = props.type;
-    let link;
+    let link = null;
+
     switch (cardType) {
-        case 'about':
-            link = (<Link to='/' element={<Home/>}>Learn More</Link>);
+        case "about":
+            link = <Link to="/about">Learn More</Link>;
             break;
-        case 'read':
-            link = (<Link to='/read' element={<Study />}>Learn More</Link>);
+        case "read":
+        case "study":
+            link = <Link to="/study">Learn More</Link>;
             break;
-        case 'study':
-            link = (<Link to='/study' element={<Study />}>Learn More</Link>);
+        case "community":
+            link = <Link to="/community">Learn More</Link>;
             break;
-        case 'community':
-            link = (<Link to='/community' element={<Community />}>Learn More</Link>);
-            break;
+        default:
+            link = null;
     }
 
     return (

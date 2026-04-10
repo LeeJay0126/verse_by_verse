@@ -36,8 +36,15 @@ import CommunityBibleStudyComposer from "./pages/Community/myCommunity/bibleStud
 import BibleStudyShare from "./pages/Community/myCommunity/postDetail/BibleStudyShare";
 import RequireAuth from "./component/routes/RequireAuth";
 import RequireCommunityAccess from "./component/routes/RequireCommunityAccess";
+import MobileUnavailable, { useIsMobileViewport } from "./component/MobileUnavailable";
 
 function App() {
+  const isMobileViewport = useIsMobileViewport();
+
+  if (isMobileViewport) {
+    return <MobileUnavailable />;
+  }
+
   return (
     <div className="App">
       <BrowserRouter>

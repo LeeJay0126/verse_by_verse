@@ -1,16 +1,12 @@
-import Home from "../home/Home";
-import './PageLogo.css';
-import { Link } from 'react-router-dom';
+import "./PageLogo.css";
+import { Link } from "react-router-dom";
 
 const Logo = () => {
-
-    return (
-        <p className="PageLogo">
-            <Link to="/" element={<Home />}>
-                Verse by Verse
-            </Link>
-        </p>
-    );
+  return (
+    <p className="PageLogo">
+      <Link to="/">Verse by Verse</Link>
+    </p>
+  );
 };
 
 export default Logo;

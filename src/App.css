@@ -46,7 +46,7 @@ h3 {
   /* mobile drawer width */
   --drawer-max: 420px;
   /* max width */
-  --backdrop: rgba(0, 0, 0, .5);
+  --backdrop: rgba(0, 0, 0, .68);
 }
 
 /* Footer */
@@ -189,15 +189,23 @@ h3 {
 /* =================================================================
    ≤ 768px — MOBILE SIDEBAR DRAWER (fills width inside the drawer)
    ================================================================= */
-@media (max-width: 768px) {
+@media (max-width: 940px) {
 
-  /* show burger / hide inline menu */
+  /* keep inline nav mounted for the profile button only */
   .MenuInline {
-    display: none;
+    display: flex;
   }
 
   .Hamburger {
     display: flex;
+  }
+
+  .MenuInline .MenuOptions {
+    padding-right: 0;
+  }
+
+  .MenuInline .MenuOptions > li:not(.UserMenuWrapper) {
+    display: none;
   }
 
   /* Drawer panel (right) */

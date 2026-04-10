@@ -1,0 +1,60 @@
+.MobileUnavailable {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 22px;
+  background:
+    radial-gradient(circle at top, rgba(250, 225, 189, 0.95), rgba(244, 236, 224, 0.98) 38%, #f4ede3 100%);
+}
+
+.MobileUnavailableCard {
+  width: min(100%, 460px);
+  padding: 38px 30px 40px;
+  border-radius: 32px;
+  background: rgba(255, 250, 243, 0.96);
+  border: 1px solid rgba(127, 90, 54, 0.14);
+  box-shadow: 0 18px 48px rgba(71, 45, 25, 0.12);
+  text-align: center;
+}
+
+.MobileUnavailableIllustration {
+  width: min(100%, 260px);
+  margin: 0 auto 22px;
+}
+
+.MobileUnavailableIllustration svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.MobileUnavailableEyebrow {
+  margin: 0 0 14px;
+  color: #8f6840;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.MobileUnavailableTitle {
+  margin: 0 0 16px;
+  color: #2d2018;
+  font-size: clamp(2.15rem, 8vw, 2.7rem);
+  line-height: 1.02;
+}
+
+.MobileUnavailableMessage {
+  margin: 0 0 14px;
+  color: #4d3929;
+  font-size: 1.08rem;
+  line-height: 1.72;
+}
+
+.MobileUnavailableNote {
+  margin: 0;
+  color: #7b624d;
+  font-size: 1rem;
+  line-height: 1.65;
+}
