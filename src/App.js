@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Home from "./home/Home";
+import About from "./pages/About/About.js";
+import AboutFeatureDetail from "./pages/About/AboutFeatureDetail";
 import Study from "./pages/Study/Study";
 import Community from "./pages/Community/Community";
 import Account from "./pages/Account/Account";
@@ -46,6 +48,8 @@ function App() {
               <ToastProvider>
                 <Routes>
                   <Route path="/" exact element={<Home />} />
+                  <Route path="/about" exact element={<About />} />
+                  <Route path="/about/:featureSlug" exact element={<AboutFeatureDetail />} />
                   <Route path="/study" exact element={<Study />} />
                   <Route path="/community" exact element={<Community />} />
                   <Route path="/contact" exact element={<Contact />} />

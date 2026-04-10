@@ -5,6 +5,20 @@ const VISUAL_MAX_DEPTH = 6;
 const MAX_REPLY_DEPTH = 2;
 const MAX_CHILDREN_RENDER = 4;
 
+const formatStudyShareBlocks = (body) =>
+  String(body || "")
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => {
+      const [titleLine, ...contentLines] = block.split("\n");
+
+      return {
+        title: String(titleLine || "").trim(),
+        content: contentLines.join("\n").trim(),
+      };
+    });
+
 const ReplyNode = ({
   reply,
   depth,
@@ -83,6 +97,7 @@ const ReplyNode = ({
 
   const isStudyShare = reply?.replyType === "study_share";
   const isEditing = editingReplyId === id;
+  const studyShareBlocks = isStudyShare ? formatStudyShareBlocks(reply.body) : [];
 
   return (
     <li
@@ -112,7 +127,18 @@ const ReplyNode = ({
           </div>
 
           {!isEditing ? (
-            <p className="PostDetailReplyBody">{reply.body}</p>
+            isStudyShare ? (
+              <div className="PostDetailReplyBody PostDetailReplyBody--studyShare">
+                {studyShareBlocks.map((block, index) => (
+                  <div key={`${id}-block-${index}`} className="PostDetailReplyBlock">
+                    {!!block.title && <p className="PostDetailReplyBlockTitle">{block.title}</p>}
+                    {!!block.content && <p className="PostDetailReplyBlockContent">{block.content}</p>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="PostDetailReplyBody">{reply.body}</p>
+            )
           ) : (
             <form
               className="PostDetailInlineEditForm"
