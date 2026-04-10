@@ -314,6 +314,31 @@
   font-weight: 400;
   font-size: 13px;
   line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.PostDetailReplyBody--studyShare {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.PostDetailReplyBlock {
+  margin: 0;
+  padding-left: 14px;
+  border-left: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.PostDetailReplyBlockTitle {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.PostDetailReplyBlockContent {
+  margin: 0;
 }
 
 .PostDetailReplyActionsRow {
@@ -604,6 +629,10 @@
 }
 
 .BibleStudySharePrompt p {
+  padding: 5px 10px;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   margin: 0 0 12px;
   color: #444;
   line-height: 1.6;
@@ -633,6 +662,12 @@
   justify-content: flex-end;
   gap: 12px;
   margin-top: 14px;
+}
+
+.shareLink,
+.shareLink:visited {
+  margin-top: 15px;
+  color: black;
 }
 
 @media (max-width: 768px) {

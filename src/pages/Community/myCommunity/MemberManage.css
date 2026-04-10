@@ -1,9 +1,11 @@
 .MemberManagePage {
   background: #fdfcfa;
+  padding-top: 50px;
   min-height: 100vh;
 }
 
 .MemberManageBody {
+  width: 90%;
   max-width: 1100px;
   margin: 0 auto;
   padding: 24px 18px 50px;

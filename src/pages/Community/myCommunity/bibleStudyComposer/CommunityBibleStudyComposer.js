@@ -288,18 +288,18 @@ const CommunityBibleStudyComposer = () => {
 
         <div className="ForumHeaderContainer">
           <div className="BibleStudyComposerBreadcrumbs">
-            <Link to={isEditMode ? `/community/${communityId}/posts/${postId}` : `/community/${communityId}/my-posts`}>
-              {isEditMode ? "Back to Bible Study" : "Back to community posts"}
-            </Link>
           </div>
           <h1 className="ForumHeader">{isEditMode ? "Edit Bible Study" : "Create Bible Study"}</h1>
           <h2 className="ForumSubHeader">
-            Build a structured post with passage selection, notes, 성경나눔, and discussion questions.
+            Build a structured post with passage selection, notes, and discussion questions.
           </h2>
         </div>
       </div>
 
       <section className="ForumBody BibleStudyComposerBody">
+        <Link className="createBibleStudyLink" to={isEditMode ? `/community/${communityId}/posts/${postId}` : `/community/${communityId}/my-posts`}>
+          {isEditMode ? "Back to Bible Study" : "Back to community posts"}
+        </Link>
         {!canCreateBibleStudy && (
           <div className="BibleStudyComposerError">
             Only community leaders or the owner can create Bible Study posts in this community.
@@ -375,7 +375,7 @@ const CommunityBibleStudyComposer = () => {
               {questions.map((question, index) => (
                 <div className="BibleStudyQuestionRow" key={index}>
                   <textarea
-                    rows={2}
+                    rows={4}
                     value={question}
                     onChange={(e) => handleQuestionChange(index, e.target.value)}
                     placeholder={`Question ${index + 1}`}

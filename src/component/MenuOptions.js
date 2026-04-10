@@ -22,6 +22,10 @@ const MenuOptions = ({ page = true, onNavigate }) => {
       </li>
 
       <li className={item}>
+        <Link to="/about" onClick={onNavigate}>ABOUT</Link>
+      </li>
+
+      <li className={item}>
         <Link to="/study" onClick={onNavigate}>STUDY &amp; REFLECT</Link>
       </li>
 

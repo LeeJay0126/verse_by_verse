@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import ReplyTree from "../replies/ReplyTree";
 import Pager from "./Pager";
@@ -42,6 +43,15 @@ const RepliesSection = ({
   const rootReplies = Array.isArray(replyTree?.byParent?.get?.("root"))
     ? replyTree.byParent.get("root")
     : [];
+  const hasExistingStudyShare = useMemo(() => {
+    if (!isBibleStudy || !myUserId || !Array.isArray(replies)) return false;
+
+    return replies.some(
+      (reply) =>
+        reply?.replyType === "study_share" &&
+        String(reply.authorId || "") === String(myUserId)
+    );
+  }, [isBibleStudy, myUserId, replies]);
 
   const pageLabel = pageInfoText?.start
     ? `Showing ${pageInfoText.start}–${pageInfoText.end} of ${replyMeta.totalRootReplies} ${isBibleStudy ? "shares" : "replies"}`
@@ -63,7 +73,7 @@ const RepliesSection = ({
           </div>
 
           <Link className="BibleStudyShareCtaButton" to={`/community/${communityId}/posts/${post?.id}/share`}>
-            Start my share
+            {hasExistingStudyShare ? "Edit my share" : "Start my share"}
           </Link>
         </div>
       )}
