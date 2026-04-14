@@ -1,4 +1,32 @@
-# Getting Started with Create React App
+# Verse by Verse
+
+## Local mobile testing on a phone
+
+The mobile app reads `EXPO_PUBLIC_API_BASE_URL` for its API base.
+
+For local phone testing:
+
+1. Put your phone and computer on the same Wi-Fi network.
+2. Find your computer's LAN IP with `ipconfig`.
+3. Set `EXPO_PUBLIC_API_BASE_URL` to that LAN IP and backend port.
+4. Keep the web app on `REACT_APP_API_URL=http://localhost:4000` if you still want browser-local development.
+
+Example `.env`:
+
+```env
+REACT_APP_API_URL=http://localhost:4000
+EXPO_PUBLIC_API_BASE_URL=http://192.168.1.100:4000
+```
+
+There is also a starter example in [.env.example](C:/GitHub/verse_by_verse/.env.example:1).
+
+Your backend also needs to:
+
+- listen on `0.0.0.0`
+- allow your LAN origin / Expo requests
+- allow your phone to reach the port through your firewall
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

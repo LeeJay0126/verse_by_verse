@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import PageHeader from "../../../component/PageHeader";
 import Footer from "../../../component/Footer";
 import { apiFetch } from "../../../component/utils/ApiFetch";
+import { buildMobileAppHomeUrl } from "../../../component/utils/mobileDeepLinks";
 import "../Account.css";
 
 export default function VerifyEmail() {
@@ -11,6 +12,7 @@ export default function VerifyEmail() {
 
   const email = useMemo(() => (params.get("email") || "").trim(), [params]);
   const token = useMemo(() => (params.get("token") || "").trim(), [params]);
+  const mobileAppUrl = useMemo(() => buildMobileAppHomeUrl(), []);
 
   const [status, setStatus] = useState("Verifying…");
   const [error, setError] = useState("");
@@ -76,6 +78,19 @@ export default function VerifyEmail() {
             <div className="account-error" role="alert">
               {error}
             </div>
+          ) : null}
+
+          {done ? (
+            <div className="account-info" role="note">
+              Verified on the web. If you want to continue on your phone, open the mobile app and
+              sign in there.
+            </div>
+          ) : null}
+
+          {done ? (
+            <a className="account-btn account-btn--secondary" href={mobileAppUrl}>
+              Open mobile app
+            </a>
           ) : null}
 
           <div className="account-signup-findpw" style={{ justifyContent: "center" }}>

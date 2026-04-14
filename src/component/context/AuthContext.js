@@ -1,7 +1,10 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { apiFetch } from "../utils/ApiFetch";
+import { createAuthApi } from "@verse/shared";
 
 const AuthContext = createContext(null);
+
+const authApi = createAuthApi({ apiFetch });
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -12,18 +15,8 @@ export function AuthProvider({ children }) {
 
     (async () => {
       try {
-        const res = await apiFetch(`/auth/me`);
-
-        if (!res.ok) {
-          if (!cancelled) setUser(null);
-          return;
-        }
-
-        const data = await res.json().catch(() => ({}));
-        if (!cancelled) {
-          if (data?.ok && data.user) setUser(data.user);
-          else setUser(null);
-        }
+        const { user } = await authApi.getCurrentUser();
+        if (!cancelled) setUser(user);
       } catch (err) {
         console.error("[auth] /auth/me error", err);
         if (!cancelled) setUser(null);
@@ -38,29 +31,14 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function login(identifier, password) {
-    const res = await apiFetch(`/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ identifier, password }),
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok || data?.ok === false) {
-      const err = new Error(data?.error || "Login failed");
-      // preserve backend info for UI routing
-      err.code = data?.code;
-      err.email = data?.email;
-      throw err;
-    }
-
-    setUser(data.user);
-    return data.user;
+    const user = await authApi.login(identifier, password);
+    setUser(user);
+    return user;
   }
 
   async function logout() {
     try {
-      await apiFetch(`/auth/logout`, { method: "POST", credentials: "include" });
+      await authApi.logout();
     } catch (err) {
       console.error("[auth] logout error", err);
     } finally {

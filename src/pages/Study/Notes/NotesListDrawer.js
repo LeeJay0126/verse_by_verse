@@ -1,8 +1,7 @@
 import "./NotesListDrawer.css";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import NoteDetailModal from "./NoteDetailModal";
-
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
+import { apiFetch } from "../../../component/utils/ApiFetch";
 
 const FILTER = {
   UPDATED: "updated",
@@ -72,9 +71,8 @@ export default function NotesListDrawer({
         qs.set("limit", "200");
         qs.set("offset", "0");
 
-        const res = await fetch(`${API_BASE}/notes/list?${qs.toString()}`, {
+        const res = await apiFetch(`/notes/list?${qs.toString()}`, {
           method: "GET",
-          credentials: "include",
           headers: { accept: "application/json" },
         });
 

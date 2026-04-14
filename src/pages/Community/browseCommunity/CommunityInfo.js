@@ -6,6 +6,7 @@ import Time from "../../../component/utils/Time";
 import { useToast } from "../../../component/context/ToastContext";
 import "./CommunityInfo.css";
 import { apiFetch } from "../../../component/utils/ApiFetch";
+import { buildHeroStyle } from "../../../component/utils/ApiConfig";
 
 const CommunityInfo = () => {
   const { communityId } = useParams();
@@ -20,7 +21,6 @@ const CommunityInfo = () => {
   const [error, setError] = useState("");
   const [joinStatus, setJoinStatus] = useState("idle");
 
-  const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
   const DEFAULT_HERO = "/community/CommunityDefaultHero.png";
 
   useEffect(() => {
@@ -151,15 +151,10 @@ const CommunityInfo = () => {
     return "Unknown";
   };
 
-  const heroBackgroundUrl = heroImageUrl ? `${API_BASE}${heroImageUrl}` : DEFAULT_HERO;
-
   const heroStyle = {
-    backgroundImage: `url("${heroBackgroundUrl}")`,
+    ...buildHeroStyle(heroImageUrl, DEFAULT_HERO),
     backgroundColor: "#00000800",
     backgroundBlendMode: "saturation",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "cover",
   };
 
   const displayedLeaders = leaders.slice(0, MAX_DISPLAY_USERS);
