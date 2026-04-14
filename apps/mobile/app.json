@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Verse by Verse",
+    "slug": "verse-by-verse-mobile",
+    "scheme": "versebyverse",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "experiments": {
+      "autolinkingModuleResolution": true
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#f4ede3"
+      }
+    },
+    "plugins": ["expo-font"]
+  }
+}

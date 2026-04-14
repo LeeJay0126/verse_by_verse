@@ -2,6 +2,10 @@
   "name": "verse_by_verse",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/mobile",
+    "packages/shared"
+  ],
   "proxy": "http://localhost:4000",
   "dependencies": {
     "axios": "^1.9.0",
@@ -18,7 +22,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "mobile:start": "npm run start --workspace mobile",
+    "mobile:android": "npm run android --workspace mobile",
+    "mobile:ios": "npm run ios --workspace mobile",
+    "mobile:web": "npm run web --workspace mobile"
   },
   "eslintConfig": {
     "extends": [

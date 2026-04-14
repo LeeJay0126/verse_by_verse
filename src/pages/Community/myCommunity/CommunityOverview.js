@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./CommunityOverview.css";
 import { apiFetch } from "../../../component/utils/ApiFetch";
+import { buildHeroStyle } from "../../../component/utils/ApiConfig";
 import { normalizeCommunity } from "../../../component/utils/communityNormalize";
 import { useAuth } from "../../../component/context/AuthContext";
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
 const DEFAULT_HERO = "/community/CommunityDefaultHero.png";
 
 const CommunityOverview = () => {
@@ -61,17 +61,10 @@ const CommunityOverview = () => {
     });
   }, [community, currentUserId]);
 
-  const heroBackgroundUrl = community?.heroImageUrl
-    ? `${API_BASE}${community.heroImageUrl}`
-    : DEFAULT_HERO;
-
   const heroStyle = {
-    backgroundImage: `url("${heroBackgroundUrl}")`,
+    ...buildHeroStyle(community?.heroImageUrl, DEFAULT_HERO),
     backgroundColor: "#00000080",
     backgroundBlendMode: "saturation",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "cover",
   };
 
   if (loading) {

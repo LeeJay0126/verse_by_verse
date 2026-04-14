@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import PageHeader from "../../../component/PageHeader";
 import Footer from "../../../component/Footer";
 import { apiFetch } from "../../../component/utils/ApiFetch";
+import { buildMobileResetUrl } from "../../../component/utils/mobileDeepLinks";
 import "../Account.css";
 
 export default function ResetPassword() {
@@ -11,6 +12,7 @@ export default function ResetPassword() {
 
   const email = useMemo(() => (params.get("email") || "").trim(), [params]);
   const token = useMemo(() => (params.get("token") || "").trim(), [params]);
+  const mobileResetUrl = useMemo(() => buildMobileResetUrl({ email, token }), [email, token]);
 
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -105,6 +107,15 @@ export default function ResetPassword() {
               <div className="account-subtitle">
                 Choose a new password for <b>{email}</b>.
               </div>
+
+              <div className="account-info" role="note">
+                If you opened this link on a phone, you can continue here on the web or jump into
+                the mobile app.
+              </div>
+
+              <a className="account-btn account-btn--secondary" href={mobileResetUrl}>
+                Open in mobile app
+              </a>
 
               {status && (
                 <div className="account-success" role="status">
