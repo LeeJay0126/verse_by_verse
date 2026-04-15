@@ -1,7 +1,19 @@
 import { createApiClient } from "@verse/shared";
 
+const isProduction = process.env.NODE_ENV === "production";
+const webEnv = isProduction
+  ? {
+      NODE_ENV: process.env.NODE_ENV,
+      REACT_APP_API_BASE_URL: process.env.REACT_APP_API_BASE_URL,
+    }
+  : {
+      NODE_ENV: process.env.NODE_ENV,
+      REACT_APP_API_BASE_URL: process.env.REACT_APP_API_BASE_URL,
+      REACT_APP_API_URL: process.env.REACT_APP_API_URL,
+    };
+
 const { apiFetch, getApiBase } = createApiClient({
-  env: process.env,
+  env: webEnv,
   fetchImpl: fetch,
   onResolved: ({ source, value }) => {
     const pageProtocol =

@@ -257,6 +257,14 @@ const SignUp = () => {
       });
 
       const data = await res.json().catch(() => ({}));
+      console.info("[signup] response", {
+        status: res.status,
+        ok: res.ok,
+        bodyOk: data?.ok,
+        verificationSent: data?.verification?.sent,
+        code: data?.code,
+        error: data?.error,
+      });
 
       if (!res.ok || data?.ok === false) {
         throw new Error(data?.error || "Sign up failed.");
@@ -267,6 +275,7 @@ const SignUp = () => {
         state: { email: emailValue, sent: data?.verification?.sent ?? true },
       });
     } catch (err) {
+      console.error("[signup] submit error", err);
       setError(err.message || "Network error.");
     } finally {
       setLoading(false);

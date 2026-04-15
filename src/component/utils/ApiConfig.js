@@ -7,16 +7,28 @@ import {
 } from "@verse/shared";
 
 const env = process.env;
+const isProduction = env.NODE_ENV === "production";
 
-export const API_BASE = sharedGetApiBase(env);
+const webEnv = isProduction
+  ? {
+      NODE_ENV: env.NODE_ENV,
+      REACT_APP_API_BASE_URL: env.REACT_APP_API_BASE_URL,
+    }
+  : {
+      NODE_ENV: env.NODE_ENV,
+      REACT_APP_API_BASE_URL: env.REACT_APP_API_BASE_URL,
+      REACT_APP_API_URL: env.REACT_APP_API_URL,
+    };
+
+export const API_BASE = sharedGetApiBase(webEnv);
 
 export { DEFAULT_COMMUNITY_HERO };
 
-export const getApiBase = () => sharedGetApiBase(env);
+export const getApiBase = () => sharedGetApiBase(webEnv);
 
-export const buildApiUrl = (path = "") => sharedBuildApiUrl(path, env);
+export const buildApiUrl = (path = "") => sharedBuildApiUrl(path, webEnv);
 
-export const getAssetUrl = (path, fallback = "") => sharedGetAssetUrl(path, fallback, env);
+export const getAssetUrl = (path, fallback = "") => sharedGetAssetUrl(path, fallback, webEnv);
 
 export const buildHeroStyle = (heroImageUrl, fallback = DEFAULT_COMMUNITY_HERO) =>
-  sharedBuildHeroStyle(heroImageUrl, fallback, env);
+  sharedBuildHeroStyle(heroImageUrl, fallback, webEnv);
