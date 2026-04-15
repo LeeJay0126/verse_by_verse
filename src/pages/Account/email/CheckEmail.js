@@ -48,13 +48,33 @@ export default function CheckEmail() {
       });
 
       const data = await res.json().catch(() => ({}));
+      console.info("[check-email] resend response", {
+        email: email.trim().toLowerCase(),
+        status: res.status,
+        ok: res.ok,
+        bodyOk: data?.ok,
+        code: data?.code,
+        message: data?.message,
+        error: data?.error,
+      });
       if (!res.ok || data?.ok === false) {
-        throw new Error(data?.error || "Failed to resend.");
+        const nextError = new Error(data?.error || "Failed to resend.");
+        nextError.code = data?.code;
+        throw nextError;
       }
 
-      setStatus("Verification email sent. Please check your inbox.");
+      setStatus(
+        data?.code === "ALREADY_SENT"
+          ? "A verification email was already sent recently. Please check your inbox."
+          : "Verification email sent. Please check your inbox."
+      );
     } catch (e) {
-      setError(e?.message || "Network error");
+      console.error("[check-email] resend error", e);
+      if (e?.code === "TOO_SOON") {
+        setError("Please wait about 1 minute before resending the verification email.");
+      } else {
+        setError(e?.message || "Network error");
+      }
     } finally {
       setSending(false);
     }
