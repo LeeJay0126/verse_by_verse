@@ -2,6 +2,7 @@ import "./Verse.css";
 import { useEffect, useMemo, useState } from "react";
 import API from "../../../component/Key";
 import { useAuth } from "../../../component/context/AuthContext";
+import { apiFetch } from "../../../component/utils/ApiFetch";
 import { useNotesApi } from "../Notes/useNotesApi";
 
 const Verse = ({
@@ -69,7 +70,8 @@ const Verse = ({
         setIsNotesOpen?.(false);
 
         if (currVersionId === "kor") {
-          const res = await fetch(`/api/passage/${currVersionId}/${chapterId}`, {
+          const res = await apiFetch(`/api/passage/${currVersionId}/${chapterId}`, {
+            method: "GET",
             signal: controller.signal,
           });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
