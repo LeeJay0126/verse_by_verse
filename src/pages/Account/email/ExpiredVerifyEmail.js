@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import PageHeader from "../../../component/PageHeader";
 import Footer from "../../../component/Footer";
@@ -14,24 +14,27 @@ import {
 } from "./resendCooldown";
 import "../Account.css";
 
-export default function CheckEmail() {
+export default function ExpiredVerifyEmail() {
   const location = useLocation();
-  const emailFromState = location.state?.email || "";
-  const sentFromState = location.state?.sent;
+  const emailFromState = typeof location.state?.email === "string" ? location.state.email : "";
+  const initialError =
+    typeof location.state?.error === "string" && location.state.error.trim()
+      ? location.state.error.trim()
+      : "This verification link is invalid or expired. Request a new one.";
 
-  const email = String(emailFromState || "").trim();
-  const [status, setStatus] = useState(
-    sentFromState === false ? "Email failed to send. Please resend." : ""
-  );
-  const [error, setError] = useState("");
+  const email = useMemo(() => emailFromState.trim(), [emailFromState]);
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState(initialError);
   const [sending, setSending] = useState(false);
   const [cooldownUntil, setCooldownUntil] = useState(() => readCooldownUntil(emailFromState));
 
-  const inputRef = useRef(null);
+  const emailOk = useMemo(() => {
+    if (!email) return false;
+    if (email.length > 254) return false;
+    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  }, [email]);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+  const remainingSeconds = useMemo(() => getRemainingSeconds(cooldownUntil), [cooldownUntil]);
 
   useEffect(() => {
     const existing = readCooldownUntil(email);
@@ -41,23 +44,8 @@ export default function CheckEmail() {
     }
 
     clearCooldownUntil(email);
-
-    if (sentFromState === true) {
-      const nextCooldownUntil = Date.now() + RESEND_COOLDOWN_MS;
-      writeCooldownUntil(email, nextCooldownUntil);
-      setCooldownUntil(nextCooldownUntil);
-    } else {
-      setCooldownUntil(0);
-    }
-  }, [email, sentFromState]);
-
-  const emailOk = useMemo(() => {
-    if (!email) return false;
-    if (email.length > 254) return false;
-    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+    setCooldownUntil(0);
   }, [email]);
-
-  const remainingSeconds = useMemo(() => getRemainingSeconds(cooldownUntil), [cooldownUntil]);
 
   useEffect(() => {
     if (!cooldownUntil) return undefined;
@@ -80,11 +68,11 @@ export default function CheckEmail() {
   const resendDisabled = sending || !emailOk || remainingSeconds > 0;
 
   async function handleResend() {
-    setError("");
     setStatus("");
+    setError("");
 
     if (!emailOk) {
-      setError("Enter a valid email address.");
+      setError("We could not determine a valid email to resend to. Please sign in again.");
       return;
     }
 
@@ -97,18 +85,9 @@ export default function CheckEmail() {
       });
 
       const data = await res.json().catch(() => ({}));
-      console.info("[check-email] resend response", {
-        email: email.toLowerCase(),
-        status: res.status,
-        ok: res.ok,
-        bodyOk: data?.ok,
-        code: data?.code,
-        message: data?.message,
-        error: data?.error,
-      });
 
       if (!res.ok || data?.ok === false) {
-        const nextError = new Error(data?.error || "Failed to resend.");
+        const nextError = new Error(data?.error || "Failed to resend verification email.");
         nextError.code = data?.code;
         nextError.status = res.status;
         throw nextError;
@@ -121,7 +100,6 @@ export default function CheckEmail() {
         `A new verification email has been sent. Verification links expire in ${VERIFICATION_LINK_TTL_MINUTES} minutes.`
       );
     } catch (e) {
-      console.error("[check-email] resend error", e);
       if (e?.code === "TOO_SOON" || e?.status === 429) {
         const existing = readCooldownUntil(email);
         const nextCooldownUntil = existing > Date.now() ? existing : Date.now() + RESEND_COOLDOWN_MS;
@@ -131,7 +109,7 @@ export default function CheckEmail() {
           `Please wait before resending the verification email${getRemainingSeconds(nextCooldownUntil) > 0 ? ` (${formatCooldown(getRemainingSeconds(nextCooldownUntil))})` : ""}.`
         );
       } else {
-        setError(e?.message || "Network error");
+        setError(e?.message || "Failed to resend verification email.");
       }
     } finally {
       setSending(false);
@@ -143,17 +121,7 @@ export default function CheckEmail() {
       <PageHeader />
       <div className="account-content">
         <div className="account-card">
-          <h1 className="account-title">Check your email</h1>
-
-          <div className="account-subtitle">
-            We sent a verification link to your email. Open it to verify your account.
-          </div>
-
-          <div className="account-info" role="note">
-            If you do not see it, check spam or junk.
-            <br />
-            Verification links expire in {VERIFICATION_LINK_TTL_MINUTES} minutes.
-          </div>
+          <h1 className="account-title">Verify Email</h1>
 
           {status ? (
             <div className="account-success" role="status">
@@ -167,22 +135,19 @@ export default function CheckEmail() {
             </div>
           ) : null}
 
-          <div className="account-form">
+          <div className="account-info" role="note">
+            This can happen if the verification link is old or has already been replaced by a newer
+            one. Verification links expire in {VERIFICATION_LINK_TTL_MINUTES} minutes.
+          </div>
+
+          {email ? (
             <label className="account-label">
               Email
-              <input
-                ref={inputRef}
-                type="email"
-                value={email}
-                readOnly
-                className="account-input"
-                maxLength={254}
-              />
-              <div className="account-help-small">
-                Need another link? Request a new verification email below.
-              </div>
+              <input type="email" value={email} readOnly className="account-input" maxLength={254} />
             </label>
+          ) : null}
 
+          <div className="account-action-stack">
             <button
               type="button"
               className="account-btn"
@@ -196,13 +161,9 @@ export default function CheckEmail() {
                   : "Resend verification email"}
             </button>
 
-            <div className="account-signup-findpw" style={{ justifyContent: "center" }}>
-              <p className="account-help">
-                <Link to="/account" state={{ email }}>
-                  Back to Sign In
-                </Link>
-              </p>
-            </div>
+            <Link className="account-btn account-btn--secondary" to="/account" state={{ email }}>
+              Back to Sign In
+            </Link>
           </div>
         </div>
       </div>

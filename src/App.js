@@ -17,6 +17,7 @@ import Profile from "./pages/Account/userMenu/Profile";
 import CommunityInfo from "./pages/Community/browseCommunity/CommunityInfo";
 import PostDetail from "./pages/Community/myCommunity/postDetail/PostDetail";
 import CheckEmail from "./pages/Account/email/CheckEmail";
+import ExpiredVerifyEmail from "./pages/Account/email/ExpiredVerifyEmail";
 import VerifyEmail from "./pages/Account/email/VerifyEmail";
 import ResetPassword from "./pages/Account/findUser/ResetPassword";
 
@@ -152,6 +153,7 @@ function App() {
                   <Route path="/notes/:noteId" element={<NotePage />} />
                   <Route path="/check-email" element={<CheckEmail />} />
                   <Route path="/verify-email" element={<VerifyEmail />} />
+                  <Route path="/verify-email-expired" element={<ExpiredVerifyEmail />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route
                     path="/community/:communityId/members/manage"
