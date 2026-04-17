@@ -25,6 +25,8 @@
 
 .NoteDetailRef {
   font-weight: 600;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .NoteDetailTopActions {
@@ -54,6 +56,8 @@
   border: 1px solid rgba(255,255,255,0.15);
   background: rgba(0,0,0,0.08);
   color: inherit;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .NoteDetailText {
@@ -64,6 +68,9 @@
   background: rgba(0,0,0,0.08);
   color: inherit;
   resize: vertical;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .NoteDetailFooter {

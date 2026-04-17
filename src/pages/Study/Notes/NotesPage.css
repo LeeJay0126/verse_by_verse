@@ -116,6 +116,9 @@
 .NotesCardTitle {
   font-size: 18px;
   font-weight: 600;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .NotesCardRef {
@@ -128,6 +131,9 @@
   margin-top: 8px;
   opacity: 0.85;
   line-height: 1.35;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .NotesCardMeta {
