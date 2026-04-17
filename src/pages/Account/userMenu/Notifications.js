@@ -173,24 +173,18 @@ const Notifications = () => {
     const route = getNotificationRoute(n);
     if (route) navigate(route);
 
-    const communityId = n?.community ? String(n.community) : "";
-
     try {
       setDeletingId(id);
       setError("");
 
-      const url = communityId ? `/notifications/${id}?cascade=community` : `/notifications/${id}`;
-      const res = await fetchWithTimeout(url, { method: "DELETE" });
+      const res = await fetchWithTimeout(`/notifications/${id}`, { method: "DELETE" });
       const data = await safeJson(res);
 
       if (!res.ok || !data?.ok) {
         throw new Error(data?.error || `Failed to delete notification (${res.status})`);
       }
 
-      setNotifications((prev) => {
-        if (communityId) return prev.filter((x) => String(x?.community || "") !== communityId);
-        return prev.filter((x) => (x?._id || x?.id) !== id);
-      });
+      setNotifications((prev) => prev.filter((x) => (x?._id || x?.id) !== id));
 
       refreshUnreadCount();
     } catch (e) {

@@ -3,18 +3,24 @@
 ## Local mobile testing on a phone
 
 The mobile app reads `EXPO_PUBLIC_API_BASE_URL` for its API base.
+The web app uses `.env.development` for `npm start` and `.env.production` for `npm run build`.
 
 For local phone testing:
 
 1. Put your phone and computer on the same Wi-Fi network.
 2. Find your computer's LAN IP with `ipconfig`.
 3. Set `EXPO_PUBLIC_API_BASE_URL` to that LAN IP and backend port.
-4. Keep the web app on `REACT_APP_API_URL=http://localhost:4000` if you still want browser-local development.
+4. Keep `.env.development` on `REACT_APP_API_URL=http://localhost:4000` if you still want browser-local development.
 
-Example `.env`:
+Example local env files:
 
 ```env
+.env.development
 REACT_APP_API_URL=http://localhost:4000
+```
+
+```env
+.env
 EXPO_PUBLIC_API_BASE_URL=http://192.168.1.100:4000
 ```
 

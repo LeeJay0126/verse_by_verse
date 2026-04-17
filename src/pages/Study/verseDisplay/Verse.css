@@ -363,6 +363,8 @@
 
   background: rgba(255, 255, 255, 0.95);
   box-sizing: border-box;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .chapterNotesTextarea:disabled {
@@ -388,6 +390,8 @@
 
   background: rgba(255, 255, 255, 0.85);
   outline: none;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .chapterNotesTitleInput:focus {
