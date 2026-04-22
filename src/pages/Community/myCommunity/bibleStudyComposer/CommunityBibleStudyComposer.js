@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../../../../component/PageHeader";
 import Footer from "../../../../component/Footer";
@@ -34,6 +34,7 @@ const CommunityBibleStudyComposer = () => {
 
   const [saving, setSaving] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const savingRef = useRef(false);
 
   const currentUserId = String(user?.id || user?._id || "");
 
@@ -155,7 +156,7 @@ const CommunityBibleStudyComposer = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (saving) return;
+    if (savingRef.current) return;
 
     const cleanTitle = title.trim();
     const cleanBody = body.trim();
@@ -184,6 +185,7 @@ const CommunityBibleStudyComposer = () => {
     }
 
     try {
+      savingRef.current = true;
       setSaving(true);
       setSubmitError("");
 
@@ -246,6 +248,7 @@ const CommunityBibleStudyComposer = () => {
     } catch (e) {
       setSubmitError(e.message || (isEditMode ? "Failed to update Bible Study." : "Failed to create Bible Study."));
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   };

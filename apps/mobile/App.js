@@ -27,6 +27,8 @@ import {
 import SignInScreen from "./src/screens/SignInScreen";
 import AppTabs from "./src/navigation/AppTabs";
 
+const MAX_PASSWORD_LEN = 72;
+
 export default function App() {
   const env = process.env;
   const apiBase = getApiBase(env);
@@ -93,6 +95,7 @@ export default function App() {
   const [signUpStatus, setSignUpStatus] = useState("");
   const [verificationEmail, setVerificationEmail] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
+  const signUpSubmittingRef = React.useRef(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotStatus, setForgotStatus] = useState("");
   const [resetForm, setResetForm] = useState({
@@ -248,6 +251,8 @@ export default function App() {
   };
 
   const handleSignUp = async () => {
+    if (signUpSubmittingRef.current) return;
+
     const firstName = signUpForm.firstName.trim();
     const lastName = signUpForm.lastName.trim();
     const email = signUpForm.email.trim().toLowerCase();
@@ -278,11 +283,17 @@ export default function App() {
       return;
     }
 
+    if (nextPassword.length > MAX_PASSWORD_LEN) {
+      setError(`Password must be ${MAX_PASSWORD_LEN} characters or fewer.`);
+      return;
+    }
+
     if (nextPassword !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
+    signUpSubmittingRef.current = true;
     setSubmitting(true);
 
     try {
@@ -317,6 +328,7 @@ export default function App() {
     } catch (err) {
       setError(err?.message || "Unable to create account.");
     } finally {
+      signUpSubmittingRef.current = false;
       setSubmitting(false);
     }
   };
@@ -366,6 +378,11 @@ export default function App() {
 
     if (newPassword.length < 10) {
       setError("Password must be at least 10 characters.");
+      return;
+    }
+
+    if (newPassword.length > MAX_PASSWORD_LEN) {
+      setError(`Password must be ${MAX_PASSWORD_LEN} characters or fewer.`);
       return;
     }
 

@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { getLoggedOutRedirectPath } from "./authRedirects";
 
 const RequireAuth = ({ children }) => {
   const { user, initializing } = useAuth();
@@ -10,7 +11,13 @@ const RequireAuth = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/account" replace state={{ from: location }} />;
+    return (
+      <Navigate
+        to={getLoggedOutRedirectPath(location.pathname)}
+        replace
+        state={{ from: location }}
+      />
+    );
   }
 
   return children;

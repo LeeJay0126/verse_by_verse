@@ -177,7 +177,7 @@ const ReplyNode = ({
 
           <div className="PostDetailReplyActionsRow">
             <div className="replyActionsRow">
-              {!isEditing && canReplyHere && !isStudyShare ? (
+              {!isEditing && canReplyHere ? (
                 <button
                   type="button"
                   className="ReplyActionBtn"

@@ -7,6 +7,7 @@ import {
   canManageMembers,
   isCommunityMember,
 } from "../utils/communityAccess";
+import { getLoggedOutRedirectPath } from "./authRedirects";
 
 const hasRequiredAccess = ({ community, userId, mode }) => {
   if (!community || !userId) return false;
@@ -79,7 +80,13 @@ const RequireCommunityAccess = ({ children, mode = "member" }) => {
   }
 
   if (!user) {
-    return <Navigate to="/account" replace state={{ from: location }} />;
+    return (
+      <Navigate
+        to={getLoggedOutRedirectPath(location.pathname)}
+        replace
+        state={{ from: location }}
+      />
+    );
   }
 
   if (loading) {

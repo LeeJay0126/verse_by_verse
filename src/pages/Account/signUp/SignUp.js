@@ -61,6 +61,7 @@ const SignUp = () => {
   const usernameRef = useRef(null);
   const pwRef = useRef(null);
   const confirmPwRef = useRef(null);
+  const submittingRef = useRef(false);
 
   const navigate = useNavigate();
 
@@ -212,6 +213,31 @@ const SignUp = () => {
 
   const markTouched = (key) => setTouched((t) => ({ ...t, [key]: true }));
 
+  const handlePasswordChange = (setter) => (e) => {
+    const nextValue = e.target.value;
+    const nativeValue = e.nativeEvent?.dataTransfer?.getData?.("text") || nextValue;
+
+    if (nativeValue.length > MAX_PW_LEN || nextValue.length > MAX_PW_LEN) {
+      setTouched((t) => ({ ...t, pw: true, confirmPw: true }));
+      setError(`Password must be ${MAX_PW_LEN} characters or fewer.`);
+      setter(nextValue.slice(0, MAX_PW_LEN));
+      return;
+    }
+
+    setError("");
+    setter(nextValue);
+  };
+
+  const handlePasswordPaste = (setter) => (e) => {
+    const pasted = e.clipboardData?.getData("text") || "";
+    if (pasted.length <= MAX_PW_LEN) return;
+
+    e.preventDefault();
+    setTouched((t) => ({ ...t, pw: true, confirmPw: true }));
+    setError(`Password must be ${MAX_PW_LEN} characters or fewer.`);
+    setter(pasted.slice(0, MAX_PW_LEN));
+  };
+
   const focusFirstInvalid = () => {
     if (fieldErrors.firstName) return firstNameRef.current?.focus();
     if (fieldErrors.lastName) return lastNameRef.current?.focus();
@@ -223,6 +249,8 @@ const SignUp = () => {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (submittingRef.current) return;
+
     setError("");
 
     setTouched({
@@ -240,6 +268,7 @@ const SignUp = () => {
       return;
     }
 
+    submittingRef.current = true;
     setLoading(true);
 
     try {
@@ -278,6 +307,7 @@ const SignUp = () => {
       console.error("[signup] submit error", err);
       setError(err.message || "Network error.");
     } finally {
+      submittingRef.current = false;
       setLoading(false);
     }
   }
@@ -394,7 +424,8 @@ const SignUp = () => {
                   type={showPw ? "text" : "password"}
                   autoComplete="new-password"
                   value={pw}
-                  onChange={(e) => setPw(e.target.value)}
+                  onChange={handlePasswordChange(setPw)}
+                  onPaste={handlePasswordPaste(setPw)}
                   onBlur={() => markTouched("pw")}
                   className="account-input"
                   placeholder={`Password (${MIN_PW_LEN}-${MAX_PW_LEN} chars)`}
@@ -436,7 +467,8 @@ const SignUp = () => {
                 type={showPw ? "text" : "password"}
                 autoComplete="new-password"
                 value={confirmPw}
-                onChange={(e) => setConfirmPw(e.target.value)}
+                onChange={handlePasswordChange(setConfirmPw)}
+                onPaste={handlePasswordPaste(setConfirmPw)}
                 onBlur={() => markTouched("confirmPw")}
                 className="account-input"
                 placeholder="Confirm Password"

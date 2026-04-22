@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Home from "./home/Home";
 import About from "./pages/About/About.js";
@@ -6,7 +6,6 @@ import AboutFeatureDetail from "./pages/About/AboutFeatureDetail";
 import Study from "./pages/Study/Study";
 import Community from "./pages/Community/Community";
 import Account from "./pages/Account/Account";
-import Contact from "./pages/Contact/Contact";
 import SignUp from "./pages/Account/signUp/SignUp";
 import FindPw from "./pages/Account/findUser/FindPw";
 import CreateCommunity from "./pages/Community/createCommunity/CreateCommunity";
@@ -58,9 +57,25 @@ function App() {
                   <Route path="/" exact element={<Home />} />
                   <Route path="/about" exact element={<About />} />
                   <Route path="/about/:featureSlug" exact element={<AboutFeatureDetail />} />
-                  <Route path="/study" exact element={<Study />} />
-                  <Route path="/community" exact element={<Community />} />
-                  <Route path="/contact" exact element={<Contact />} />
+                  <Route path="/bible" element={<Navigate to="/study" replace />} />
+                  <Route
+                    path="/study"
+                    exact
+                    element={
+                      <RequireAuth>
+                        <Study />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/community"
+                    exact
+                    element={
+                      <RequireAuth>
+                        <Community />
+                      </RequireAuth>
+                    }
+                  />
                   <Route path="/account" exact element={<Account />} />
                   <Route path="/signup" exact element={<SignUp />} />
                   <Route path="/findpw" exact element={<FindPw />} />
@@ -158,7 +173,7 @@ function App() {
                   <Route
                     path="/community/:communityId/members/manage"
                     element={
-                      <RequireCommunityAccess mode="manage-members">
+                      <RequireCommunityAccess>
                         <MemberManage />
                       </RequireCommunityAccess>
                     }
