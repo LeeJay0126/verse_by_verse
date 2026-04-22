@@ -4,6 +4,8 @@
     justify-content: center;
     align-items: center;
     width: 100%;
+    margin-top: auto;
+    flex-shrink: 0;
     /* Fluid height for better tap area on mobile */
     height: clamp(36px, 5vh, 56px);
     padding: 0 12px;

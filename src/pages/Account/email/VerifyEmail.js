@@ -14,7 +14,7 @@ export default function VerifyEmail() {
   const token = useMemo(() => (params.get("token") || "").trim(), [params]);
   const mobileAppUrl = useMemo(() => buildMobileAppHomeUrl(), []);
 
-  const [status, setStatus] = useState("Verifying…");
+  const [status, setStatus] = useState("Verifying...");
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
 
@@ -37,12 +37,19 @@ export default function VerifyEmail() {
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok || data?.ok === false) {
-          throw new Error(data?.error || "Verification failed.");
+          const nextError = new Error(data?.error || "Verification failed.");
+          nextError.code = data?.code;
+          nextError.status = res.status;
+          throw nextError;
         }
 
         if (!mounted) return;
 
-        setStatus("Email verified successfully!");
+        setStatus(
+          data?.alreadyVerified
+            ? "Your email was already verified."
+            : "Your email has been verified."
+        );
         setDone(true);
 
         setTimeout(() => {
@@ -50,6 +57,20 @@ export default function VerifyEmail() {
         }, 800);
       } catch (e) {
         if (!mounted) return;
+        const code = String(e?.code || "").toUpperCase();
+        const isInvalidOrExpired = e?.status === 400 && code === "INVALID_OR_EXPIRED";
+
+        if (isInvalidOrExpired) {
+          navigate("/verify-email-expired", {
+            replace: true,
+            state: {
+              email,
+              error: "This verification link is invalid or expired. Request a new one.",
+            },
+          });
+          return;
+        }
+
         setStatus("");
         setError(e?.message || "Verification failed.");
       }

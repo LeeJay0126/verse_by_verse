@@ -34,10 +34,6 @@ const MenuOptions = ({ page = true, onNavigate }) => {
           <Link to="/community" onClick={onNavigate}>COMMUNITIES</Link></li>) : 
           <li className={item}><Link to="/community-how" onClick={onNavigate}>COMMUNITIES</Link></li>}
 
-      <li className={item}>
-        <Link to="/contact" onClick={onNavigate}>CONTACT</Link>
-      </li>
-
       {!user ? (
         <li className={item}>
           <Link to="/account" onClick={onNavigate}>LOGIN</Link>

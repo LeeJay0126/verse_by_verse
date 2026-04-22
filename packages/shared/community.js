@@ -41,17 +41,77 @@ const normalizeCommunityPost = (post, options = {}) => {
   };
 };
 
+const toIdString = (value) => {
+  if (!value) return "";
+  if (typeof value === "object") {
+    return String(value.id || value._id || value.$oid || "");
+  }
+  return String(value);
+};
+
+const getReplyParentId = (reply) => {
+  const parent =
+    reply?.parentReplyId ||
+    reply?.parentReplyID ||
+    reply?.parent_reply_id ||
+    reply?.parent_reply ||
+    reply?.parentId ||
+    reply?.parentID ||
+    reply?.parent_id ||
+    reply?.parentCommentId ||
+    reply?.parent_comment_id ||
+    reply?.parentReply ||
+    reply?.parent ||
+    "";
+
+  return toIdString(parent);
+};
+
+const getNestedCommunityReplies = (reply) => {
+  if (Array.isArray(reply?.children)) return reply.children;
+  if (Array.isArray(reply?.replies)) return reply.replies;
+  if (Array.isArray(reply?.childReplies)) return reply.childReplies;
+  if (Array.isArray(reply?.child_replies)) return reply.child_replies;
+  if (Array.isArray(reply?.nestedReplies)) return reply.nestedReplies;
+  if (Array.isArray(reply?.nested_replies)) return reply.nested_replies;
+  if (Array.isArray(reply?.subReplies)) return reply.subReplies;
+  if (Array.isArray(reply?.sub_replies)) return reply.sub_replies;
+  return [];
+};
+
 const normalizeCommunityReply = (reply, options = {}) => {
   const { formatRelativeTime } = options;
   const activityAt = reply?.updatedAt || reply?.createdAt || null;
 
   return {
     ...reply,
-    id: reply?.id || reply?._id,
+    id: toIdString(reply?.id || reply?._id),
+    parentReplyId: getReplyParentId(reply),
     activityAt,
     activityLabel:
       typeof formatRelativeTime === "function" ? formatRelativeTime(activityAt) : activityAt,
   };
+};
+
+const flattenCommunityReplies = (replies, options = {}, fallbackParentId = "") => {
+  const result = [];
+
+  for (const reply of replies || []) {
+    const normalized = normalizeCommunityReply(
+      fallbackParentId && !getReplyParentId(reply)
+        ? { ...reply, parentReplyId: fallbackParentId }
+        : reply,
+      options
+    );
+    result.push(normalized);
+
+    const children = getNestedCommunityReplies(reply);
+    if (children.length > 0) {
+      result.push(...flattenCommunityReplies(children, options, normalized.id));
+    }
+  }
+
+  return result;
 };
 
 const normalizeStudySubmission = (submission) => {
@@ -229,7 +289,7 @@ const createCommunityApi = ({ apiFetch, formatRelativeTime }) => {
 
     return {
       replies: Array.isArray(data?.replies)
-        ? data.replies.map((item) => normalizeCommunityReply(item, { formatRelativeTime }))
+        ? flattenCommunityReplies(data.replies, { formatRelativeTime })
         : [],
       myUserId: data?.myUserId ? String(data.myUserId) : "",
       page: Number(data?.page || params?.page || 1),

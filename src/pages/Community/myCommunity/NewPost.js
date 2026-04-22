@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MyCommunity.css";
 import { COMMUNITY_TYPES, getTypeByApiValue } from "../communityTypes";
@@ -10,13 +10,26 @@ const NewPostModal = ({
   onClose,
   onSubmit,
   announcementCount = 0,
+  canCreateAnnouncement = false,
   canCreateBibleStudy = false,
 }) => {
   const navigate = useNavigate();
   const typeOptions = useMemo(() => COMMUNITY_TYPES, []);
 
+  const isTypeDisabled = useCallback((apiValue) => {
+    if (apiValue === "bible_study") return !canCreateBibleStudy;
+    if (apiValue === "announcements") {
+      return !canCreateAnnouncement || announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY;
+    }
+    return false;
+  }, [announcementCount, canCreateAnnouncement, canCreateBibleStudy]);
+
+  const defaultType = useMemo(() => {
+    return typeOptions.find((option) => !isTypeDisabled(option.apiValue))?.apiValue || "questions";
+  }, [isTypeDisabled, typeOptions]);
+
   const [title, setTitle] = useState("");
-  const [type, setType] = useState(typeOptions[0]?.apiValue || "bible_study");
+  const [type, setType] = useState(defaultType);
   const [description, setDescription] = useState("");
 
   const [pollOptions, setPollOptions] = useState(["", ""]);
@@ -24,10 +37,16 @@ const NewPostModal = ({
   const [anonymous, setAnonymous] = useState(true);
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState("");
+  const submittingRef = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const selectedType = useMemo(() => getTypeByApiValue(type), [type]);
   const isPoll = !!selectedType?.isPoll;
   const isBibleStudy = selectedType?.apiValue === "bible_study";
+
+  useEffect(() => {
+    if (isTypeDisabled(type)) setType(defaultType);
+  }, [defaultType, isTypeDisabled, type]);
 
   const announcementsDisabled =
     selectedType?.apiValue === "announcements" &&
@@ -35,6 +54,8 @@ const NewPostModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submittingRef.current) return;
+
     setGlobalError("");
     setErrors({});
 
@@ -65,6 +86,11 @@ const NewPostModal = ({
 
     if (cleanType === "announcements" && announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY) {
       setGlobalError(`This community already has ${MAX_ANNOUNCEMENTS_PER_COMMUNITY} announcements.`);
+      return;
+    }
+
+    if (cleanType === "announcements" && !canCreateAnnouncement) {
+      setGlobalError("Only community leaders or the owner can create announcements.");
       return;
     }
 
@@ -100,7 +126,17 @@ const NewPostModal = ({
       };
     }
 
-    await onSubmit?.(payload);
+    try {
+      submittingRef.current = true;
+      setSubmitting(true);
+      const result = await onSubmit?.(payload);
+      if (result && result.ok === false && result.message) {
+        setGlobalError(result.message);
+      }
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
   };
 
   const handleOverlayClick = (e) => {
@@ -166,8 +202,7 @@ const NewPostModal = ({
             <select id="post-type" value={type} onChange={(e) => setType(e.target.value)}>
               {typeOptions.map((option) => {
                 const isAnnouncements = option.apiValue === "announcements";
-                const disabledAnnouncement =
-                  isAnnouncements && announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY;
+                const disabledAnnouncement = isAnnouncements && isTypeDisabled(option.apiValue);
                 const disabledBibleStudy =
                   option.apiValue === "bible_study" && !canCreateBibleStudy;
 
@@ -178,7 +213,12 @@ const NewPostModal = ({
                     disabled={disabledAnnouncement || disabledBibleStudy}
                   >
                     {option.label}
-                    {disabledAnnouncement ? " (limit reached)" : ""}
+                    {isAnnouncements && !canCreateAnnouncement ? " (leaders/owner only)" : ""}
+                    {isAnnouncements &&
+                    canCreateAnnouncement &&
+                    announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY
+                      ? " (limit reached)"
+                      : ""}
                     {disabledBibleStudy ? " (leaders/owner only)" : ""}
                   </option>
                 );
@@ -188,6 +228,12 @@ const NewPostModal = ({
             {announcementsDisabled && (
               <div className="NewPostErrorText">
                 This community already has {MAX_ANNOUNCEMENTS_PER_COMMUNITY} announcements.
+              </div>
+            )}
+
+            {!canCreateAnnouncement && type === "announcements" && (
+              <div className="NewPostErrorText">
+                Only community leaders or the owner can create announcements.
               </div>
             )}
 
@@ -286,8 +332,8 @@ const NewPostModal = ({
             <button type="button" className="NewPostSecondaryButton" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="NewPostPrimaryButton">
-              {isBibleStudy ? "Continue" : isPoll ? "Create Poll" : "Post"}
+            <button type="submit" className="NewPostPrimaryButton" disabled={submitting}>
+              {submitting ? "Posting..." : isBibleStudy ? "Continue" : isPoll ? "Create Poll" : "Post"}
             </button>
           </div>
         </form>

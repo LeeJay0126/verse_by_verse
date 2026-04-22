@@ -20,6 +20,7 @@ import {
   getTypeTagClass,
 } from "../communityTypes";
 import {
+  canCreateAnnouncement,
   canCreateBibleStudy,
   canManageMembers as canManageMembersAccess,
   canModerateCommunityPosts,
@@ -60,6 +61,7 @@ const MyCommunity = () => {
   const [deleteError, setDeleteError] = useState("");
 
   const [page, setPage] = useState(1);
+  const creatingPostRef = useRef(false);
 
   const currentUserId = String(user?.id || user?._id || "");
   const currentRole = useMemo(() => getCommunityRole(community, currentUserId), [community, currentUserId]);
@@ -148,13 +150,26 @@ const MyCommunity = () => {
   }, [posts]);
 
   const handleCreatePost = async (newPostPayload) => {
+    if (creatingPostRef.current) {
+      const message = "Post creation is already in progress.";
+      setNewPostError(message);
+      return { ok: false, message };
+    }
+
     try {
+      creatingPostRef.current = true;
       setNewPostError("");
 
       const payloadType = String(newPostPayload?.type || newPostPayload?.typeValue || "").toLowerCase();
 
       if (payloadType === "announcements" && announcementCount >= MAX_ANNOUNCEMENTS_PER_COMMUNITY) {
         const message = `This community already has ${MAX_ANNOUNCEMENTS_PER_COMMUNITY} announcements on this page.`;
+        setNewPostError(message);
+        return { ok: false, message };
+      }
+
+      if (payloadType === "announcements" && !canCreateAnnouncementPost) {
+        const message = "Only community leaders or the owner can create announcements.";
         setNewPostError(message);
         return { ok: false, message };
       }
@@ -190,6 +205,8 @@ const MyCommunity = () => {
       const message = error.message || "Failed to create post.";
       setNewPostError(message);
       return { ok: false, message };
+    } finally {
+      creatingPostRef.current = false;
     }
   };
 
@@ -241,6 +258,7 @@ const MyCommunity = () => {
   };
 
   const canEditHero = currentRole === "Owner" || currentRole === "Leader";
+  const canCreateAnnouncementPost = canCreateAnnouncement(community, currentUserId);
   const canModeratePosts = canModerateCommunityPosts(community, currentUserId);
 
   const canEditOrDeletePost = useCallback(
@@ -422,6 +440,7 @@ const MyCommunity = () => {
           onClose={handleCloseModal}
           onSubmit={handleCreatePost}
           announcementCount={announcementCount}
+          canCreateAnnouncement={canCreateAnnouncementPost}
           canCreateBibleStudy={canCreateBibleStudy(community, currentUserId)}
         />
       )}

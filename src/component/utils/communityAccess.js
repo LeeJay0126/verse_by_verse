@@ -6,7 +6,7 @@ export const getCommunityRole = (community, userId) => {
   if (ownerId && ownerId === currentUserId) return "Owner";
 
   const match = Array.isArray(community?.members)
-    ? community.members.find((member) => String(member?.id || member?._id || "") === currentUserId)
+    ? community.members.find((member) => String(member?.id || member?._id || member?.userId || "") === currentUserId)
     : null;
 
   return match?.role || null;
@@ -15,6 +15,11 @@ export const getCommunityRole = (community, userId) => {
 export const isCommunityMember = (community, userId) => Boolean(getCommunityRole(community, userId));
 
 export const canCreateBibleStudy = (community, userId) => {
+  const role = getCommunityRole(community, userId);
+  return role === "Owner" || role === "Leader";
+};
+
+export const canCreateAnnouncement = (community, userId) => {
   const role = getCommunityRole(community, userId);
   return role === "Owner" || role === "Leader";
 };

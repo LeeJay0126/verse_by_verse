@@ -22,9 +22,35 @@ const POST_TYPES = [
 
 const emptyPollOptions = ["", ""];
 
-const CommunityCreatePostScreen = ({ route, navigation, communityApi }) => {
+const getCommunityRole = (community, userId) => {
+  const currentUserId = String(userId || "");
+  if (!community || !currentUserId) return "";
+
+  const ownerId = String(community?.owner?.id || community?.owner?._id || community?.owner || "");
+  if (ownerId && ownerId === currentUserId) return "Owner";
+
+  const members = Array.isArray(community?.membersList)
+    ? community.membersList
+    : Array.isArray(community?.members)
+      ? community.members
+      : [];
+
+  const match = members.find(
+    (member) => String(member?.id || member?._id || member?.userId || "") === currentUserId
+  );
+
+  return String(match?.role || "");
+};
+
+const canCreateAnnouncement = (community, user) => {
+  const role = getCommunityRole(community, user?.id || user?._id);
+  return role === "Owner" || role === "Leader";
+};
+
+const CommunityCreatePostScreen = ({ route, navigation, communityApi, user }) => {
   const community = route?.params?.community || {};
   const communityId = community?.id || route?.params?.communityId || "";
+  const canCreateAnnouncements = canCreateAnnouncement(community, user);
 
   const [type, setType] = React.useState("questions");
   const [title, setTitle] = React.useState("");
@@ -33,8 +59,15 @@ const CommunityCreatePostScreen = ({ route, navigation, communityApi }) => {
   const [allowMultiple, setAllowMultiple] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState("");
+  const submittingRef = React.useRef(false);
 
   const typeConfig = POST_TYPES.find((item) => item.value === type) || POST_TYPES[0];
+
+  React.useEffect(() => {
+    if (type === "announcements" && !canCreateAnnouncements) {
+      setType("questions");
+    }
+  }, [canCreateAnnouncements, type]);
 
   const updatePollOption = (index, value) => {
     setPollOptions((current) => current.map((option, optionIndex) => (optionIndex === index ? value : option)));
@@ -52,11 +85,17 @@ const CommunityCreatePostScreen = ({ route, navigation, communityApi }) => {
   };
 
   const handleSubmit = async () => {
-    if (!communityId || submitting) return;
+    if (!communityId || submittingRef.current) return;
 
     try {
+      submittingRef.current = true;
       setSubmitting(true);
       setError("");
+
+      if (type === "announcements" && !canCreateAnnouncements) {
+        setError("Only community leaders or the owner can create announcements.");
+        return;
+      }
 
       const payload = {
         title: title.trim(),
@@ -81,6 +120,7 @@ const CommunityCreatePostScreen = ({ route, navigation, communityApi }) => {
     } catch (err) {
       setError(err?.message || "Unable to publish this post.");
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   };
@@ -113,15 +153,22 @@ const CommunityCreatePostScreen = ({ route, navigation, communityApi }) => {
         <View className="mt-2 gap-3">
           {POST_TYPES.map((option) => {
             const active = option.value === type;
+            const disabled = option.value === "announcements" && !canCreateAnnouncements;
             return (
               <Pressable
                 key={option.value}
-                onPress={() => setType(option.value)}
+                onPress={() => {
+                  if (disabled) return;
+                  setType(option.value);
+                }}
                 className={`rounded-[24px] border px-4 py-4 ${
                   active ? "border-ink bg-white" : "border-line bg-sand/60"
-                }`}
+                } ${disabled ? "opacity-50" : ""}`}
               >
-                <Text className="text-[15px] font-bold text-ink">{option.label}</Text>
+                <Text className="text-[15px] font-bold text-ink">
+                  {option.label}
+                  {disabled ? " (leaders/owner only)" : ""}
+                </Text>
                 <Text className="mt-1 font-body text-[14px] leading-6 text-walnut">
                   {option.description}
                 </Text>

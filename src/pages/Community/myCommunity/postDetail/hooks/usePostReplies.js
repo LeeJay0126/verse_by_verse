@@ -4,6 +4,74 @@ import { emitCommunityActivityUpdated } from "../../../../../component/utils/Com
 
 const ROOT_REPLIES_PER_PAGE = 8;
 
+const toIdString = (value) => {
+  if (!value) return "";
+  if (typeof value === "object") {
+    return String(value.id || value._id || value.$oid || "");
+  }
+  return String(value);
+};
+
+const getReplyId = (reply) => toIdString(reply?.id || reply?._id);
+
+const getParentReplyId = (reply) => {
+  const parent =
+    reply?.parentReplyId ||
+    reply?.parentReplyID ||
+    reply?.parent_reply_id ||
+    reply?.parent_reply ||
+    reply?.parentId ||
+    reply?.parentID ||
+    reply?.parent_id ||
+    reply?.parentCommentId ||
+    reply?.parent_comment_id ||
+    reply?.parentReply ||
+    reply?.parent ||
+    "";
+
+  return toIdString(parent);
+};
+
+const getNestedReplies = (reply) => {
+  if (Array.isArray(reply?.children)) return reply.children;
+  if (Array.isArray(reply?.replies)) return reply.replies;
+  if (Array.isArray(reply?.childReplies)) return reply.childReplies;
+  if (Array.isArray(reply?.child_replies)) return reply.child_replies;
+  if (Array.isArray(reply?.nestedReplies)) return reply.nestedReplies;
+  if (Array.isArray(reply?.nested_replies)) return reply.nested_replies;
+  if (Array.isArray(reply?.subReplies)) return reply.subReplies;
+  if (Array.isArray(reply?.sub_replies)) return reply.sub_replies;
+  return [];
+};
+
+const normalizeReply = (reply, fallbackParentId = "") => {
+  const id = getReplyId(reply);
+  const parentReplyId = getParentReplyId(reply) || String(fallbackParentId || "");
+
+  return {
+    ...reply,
+    id,
+    parentReplyId,
+    authorId: toIdString(reply?.authorId || reply?.author?._id || reply?.author?.id),
+  };
+};
+
+const flattenReplies = (items, fallbackParentId = "") => {
+  const result = [];
+
+  for (const item of items || []) {
+    const normalized = normalizeReply(item, fallbackParentId);
+    result.push(normalized);
+
+    const children = getNestedReplies(item);
+    if (children.length > 0) {
+      result.push(...flattenReplies(children, normalized.id));
+    }
+  }
+
+  return result;
+};
+
 const isInViewport = (el) => {
   if (!el) return false;
   const r = el.getBoundingClientRect();
@@ -59,7 +127,7 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
           throw new Error(data.error || "Failed to load replies.");
         }
 
-        setReplies(Array.isArray(data.replies) ? data.replies : []);
+        setReplies(Array.isArray(data.replies) ? flattenReplies(data.replies) : []);
         setMyUserId(data.myUserId ? String(data.myUserId) : null);
         setReplyMeta({
           page: Number(data.page || page || 1),

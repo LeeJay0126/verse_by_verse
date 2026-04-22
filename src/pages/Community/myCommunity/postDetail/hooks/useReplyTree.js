@@ -6,8 +6,17 @@ const useReplyTree = (replies) => {
     const byId = new Map();
 
     for (const r of replies || []) {
-      byId.set(String(r.id), r);
-      const parentKey = r.parentReplyId ? String(r.parentReplyId) : "root";
+      const id = String(r.id || r._id || "");
+      if (!id) continue;
+      byId.set(id, r);
+    }
+
+    for (const r of replies || []) {
+      const id = String(r.id || r._id || "");
+      if (!id) continue;
+
+      const rawParentKey = r.parentReplyId ? String(r.parentReplyId) : "";
+      const parentKey = rawParentKey && rawParentKey !== id && byId.has(rawParentKey) ? rawParentKey : "root";
       if (!byParent.has(parentKey)) byParent.set(parentKey, []);
       byParent.get(parentKey).push(r);
     }

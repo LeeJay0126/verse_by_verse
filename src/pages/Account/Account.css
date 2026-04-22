@@ -205,6 +205,12 @@
   color: #f5eaea;
 }
 
+.account-action-stack {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
 .account-signup-findpw {
   display: flex;
   justify-content: space-between;

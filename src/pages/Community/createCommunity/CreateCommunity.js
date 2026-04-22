@@ -79,7 +79,13 @@ const CreateCommunity = () => {
     <section className="createCommunity">
       <section className="createCommunityHero">
         <PageHeader />
-        <h1 className="createCommunityHeader">Create a Community</h1>
+        <div className="createCommunityHeroCopy">
+          <p className="createCommunityEyebrow">Build a shared rhythm</p>
+          <h1 className="createCommunityHeader">Create Community</h1>
+          <p className="createCommunitySubHeader">
+            Start your own study group centered on the scriptures
+          </p>
+        </div>
       </section>
 
       <div className="createCommunityBackWrapper">
