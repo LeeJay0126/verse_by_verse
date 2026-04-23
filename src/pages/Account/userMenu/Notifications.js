@@ -22,6 +22,8 @@ const Notifications = () => {
   const [deletingId, setDeletingId] = useState(null);
 
   const mountedRef = useRef(true);
+  const bulkActionInFlightRef = useRef(false);
+  const actedNotificationIdsRef = useRef(new Set());
   useEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -107,6 +109,7 @@ const Notifications = () => {
   }, [notifications]);
 
   const hasAny = notifications.length > 0;
+  const isNotificationBusy = bulkLoading || Boolean(deletingId) || Boolean(actingId);
 
   const getNotificationRoute = useCallback((n) => {
     const communityId = n?.community ? String(n.community) : "";
@@ -198,6 +201,12 @@ const Notifications = () => {
   async function handleNotificationAction(id, action) {
     if (!id) return;
     if (!["accept", "decline"].includes(action)) return;
+    if (bulkLoading || deletingId || actingId || actedNotificationIdsRef.current.has(id)) return;
+
+    const currentNotification = notifications.find((n) => (n?._id || n?.id) === id);
+    if (!isPendingAction(currentNotification)) return;
+
+    actedNotificationIdsRef.current.add(id);
 
     try {
       setActingId(id);
@@ -221,6 +230,7 @@ const Notifications = () => {
 
       refreshUnreadCount();
     } catch (err) {
+      actedNotificationIdsRef.current.delete(id);
       console.error("[notification act error]", err);
       setError(err?.message || "Failed to update notification");
     } finally {
@@ -229,7 +239,9 @@ const Notifications = () => {
   }
 
   async function handleMarkAllRead() {
-    if (!hasAny) return;
+    if (!hasAny || isNotificationBusy || bulkActionInFlightRef.current) return;
+
+    bulkActionInFlightRef.current = true;
 
     try {
       setBulkLoading(true);
@@ -249,12 +261,15 @@ const Notifications = () => {
       console.error("[notifications mark-all-read error]", err);
       setError(err?.message || "Failed to mark all as read");
     } finally {
+      bulkActionInFlightRef.current = false;
       setBulkLoading(false);
     }
   }
 
   async function handleDeleteAll() {
-    if (!hasAny) return;
+    if (!hasAny || isNotificationBusy || bulkActionInFlightRef.current) return;
+
+    bulkActionInFlightRef.current = true;
 
     try {
       setBulkLoading(true);
@@ -273,6 +288,7 @@ const Notifications = () => {
       console.error("[notifications delete-all error]", err);
       setError(err?.message || "Failed to delete notifications");
     } finally {
+      bulkActionInFlightRef.current = false;
       setBulkLoading(false);
     }
   }
@@ -336,7 +352,7 @@ const Notifications = () => {
                           <button
                             type="button"
                             className="notification-action-btn"
-                            disabled={actingId === id || bulkLoading}
+                            disabled={isNotificationBusy}
                             onClick={() => handleNotificationAction(id, "accept")}
                           >
                             {actingId === id ? "Accepting…" : "Accept"}
@@ -344,7 +360,7 @@ const Notifications = () => {
                           <button
                             type="button"
                             className="notification-action-btn notification-action-btn--secondary"
-                            disabled={actingId === id || bulkLoading}
+                            disabled={isNotificationBusy}
                             onClick={() => handleNotificationAction(id, "decline")}
                           >
                             {actingId === id ? "Declining…" : "Decline"}
@@ -377,7 +393,7 @@ const Notifications = () => {
               type="button"
               className="notifications-toolbar-btn"
               onClick={handleMarkAllRead}
-              disabled={bulkLoading || !hasAny}
+              disabled={isNotificationBusy || !hasAny}
             >
               {bulkLoading ? "Working…" : "Mark all as read"}
             </button>
@@ -385,7 +401,7 @@ const Notifications = () => {
               type="button"
               className="notifications-toolbar-btn notifications-toolbar-btn--danger"
               onClick={handleDeleteAll}
-              disabled={bulkLoading || !hasAny}
+              disabled={isNotificationBusy || !hasAny}
             >
               {bulkLoading ? "Working…" : "Delete all"}
             </button>

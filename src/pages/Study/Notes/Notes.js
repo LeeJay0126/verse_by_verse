@@ -13,9 +13,9 @@ const Notes = ({
       onClick={onClick}
       disabled={disabled}
       aria-disabled={disabled ? "true" : "false"}
-      title={disabled ? "Select a chapter first" : "Open notes"}
+      title={disabled ? "Select a chapter first" : "Open chapter notes"}
     >
-      Notes
+      Chapter Notes
       {hasNote && <span className="NotesDot" aria-hidden="true" />}
       <span className="NotesCaret" aria-hidden="true">▾</span>
     </button>

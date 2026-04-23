@@ -17,6 +17,7 @@ const BibleVersions = ({
   notesActive = false,
   notesHasNote = false,
   onNotesClick,
+  onMyNotesClick,
 }) => {
   const [bookModal, setVisibility] = useState(false);
   const [versionModal, setVersionVisibility] = useState(false);
@@ -97,6 +98,19 @@ const BibleVersions = ({
           }}
         />
 
+        <button
+          type="button"
+          className="MyNotesLibraryButton"
+          disabled={notesDisabled}
+          onClick={() => {
+            if (notesDisabled) return;
+            onMyNotesClick?.();
+            setVisibility(false);
+            setVersionVisibility(false);
+          }}
+        >
+          My Notes
+        </button>
       </div>
     </div>
   );

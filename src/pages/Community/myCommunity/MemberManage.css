@@ -193,6 +193,53 @@
   color: #8a1f1f;
 }
 
+.Btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.DisbandConfirmBox {
+  background: #fff6f3;
+  border: 1px solid #f1b7ae;
+  border-radius: 14px;
+  margin-top: 14px;
+  padding: 14px;
+}
+
+.DisbandConfirmTitle {
+  color: #8a1f1f;
+  font-weight: 700;
+}
+
+.DisbandConfirmText {
+  color: #5f3934;
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 6px 0 10px;
+}
+
+.DisbandConfirmInput {
+  border: 1px solid #d9a39b;
+  border-radius: 10px;
+  font-size: 14px;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.DisbandConfirmInput:focus {
+  border-color: #8a1f1f;
+  outline: 2px solid rgba(138, 31, 31, 0.14);
+  outline-offset: 1px;
+}
+
+.DisbandConfirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
 .Btn.primary {
   border: 1px solid #111;
   background: #111;
@@ -243,6 +290,11 @@
   cursor: pointer;
   border: 1px solid #d9d1c6;
   background: #faf7f2;
+}
+
+.ToggleBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
 }
 
 .ToggleBtn.on {

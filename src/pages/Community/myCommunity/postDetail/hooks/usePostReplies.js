@@ -109,6 +109,7 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
   const scrollYRef = useRef(0);
   const restoreScrollRef = useRef(false);
   const lastCreatedReplyIdRef = useRef(null);
+  const replySubmitInFlightRef = useRef(false);
 
   const fetchReplies = useCallback(
     async ({ page = replyMeta.page, keepLoader = false } = {}) => {
@@ -187,7 +188,9 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
   const handleSubmitReply = useCallback(
     async (e) => {
       e.preventDefault();
-      if (!replyBody.trim()) return;
+      if (replySubmitInFlightRef.current || !replyBody.trim()) return;
+
+      replySubmitInFlightRef.current = true;
 
       scrollYRef.current = window.scrollY;
       restoreScrollRef.current = true;
@@ -216,6 +219,7 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
       } catch (error) {
         setReplyError(error.message || "Unable to post reply.");
       } finally {
+        replySubmitInFlightRef.current = false;
         setReplySubmitting(false);
       }
     },
@@ -225,7 +229,9 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
   const handleSubmitChildReply = useCallback(
     async (e) => {
       e.preventDefault();
-      if (!childBody.trim() || !activeReplyTo) return;
+      if (replySubmitInFlightRef.current || !childBody.trim() || !activeReplyTo) return;
+
+      replySubmitInFlightRef.current = true;
 
       scrollYRef.current = window.scrollY;
       restoreScrollRef.current = true;
@@ -253,6 +259,7 @@ const usePostReplies = ({ communityId, postId, post, onPostChanged }) => {
       } catch (error) {
         setReplyError(error.message || "Unable to post reply.");
       } finally {
+        replySubmitInFlightRef.current = false;
         setReplySubmitting(false);
       }
     },

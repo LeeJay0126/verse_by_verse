@@ -1,8 +1,10 @@
 import "./NoteDetails.css";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNotesApi } from "./useNotesApi";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../../component/context/AuthContext";
+
+const NOTE_TITLE_MAX_LEN = 120;
 
 const formatRangeLabel = (n) => {
   if (!n) return "";
@@ -40,6 +42,7 @@ const NoteDetail = ({
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [dirty, setDirty] = useState(false);
+  const saveSubmittingRef = useRef(false);
 
   const canEdit = !!user && !initializing;
 
@@ -85,12 +88,17 @@ const NoteDetail = ({
   const handleSave = async () => {
     if (!note?._id) return;
     if (!canEdit) return;
+    if (saveSubmittingRef.current) return;
 
     try {
+      saveSubmittingRef.current = true;
       setErr("");
       setLoading(true);
 
-      const res = await updateNote(note._id, { title, text });
+      const res = await updateNote(note._id, {
+        title: title.trim().slice(0, NOTE_TITLE_MAX_LEN),
+        text,
+      });
       const updated = res?.note || null;
 
       if (updated) {
@@ -109,6 +117,7 @@ const NoteDetail = ({
           : e?.message || "Failed to save"
       );
     } finally {
+      saveSubmittingRef.current = false;
       setLoading(false);
     }
   };
@@ -199,6 +208,7 @@ const NoteDetail = ({
                 setDirty(true);
               }}
               disabled={!canEdit}
+              maxLength={NOTE_TITLE_MAX_LEN}
               placeholder="Note title"
             />
           </div>

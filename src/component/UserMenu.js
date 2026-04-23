@@ -74,6 +74,13 @@ const UserMenu = ({ itemClass, onNavigate }) => {
           </button>
           <button
             type="button"
+            className="UserDropdownItem"
+            onClick={() => go("/notes")}
+          >
+            My Notes
+          </button>
+          <button
+            type="button"
             className="UserDropdownItem UserDropdownItem--danger"
             onClick={handleLogout}
           >

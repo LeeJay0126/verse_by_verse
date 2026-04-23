@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { FaArrowLeft, FaChurch, FaCrown, FaRegClock, FaUserShield, FaUsers } from "react-icons/fa6";
 import PageHeader from "../../../component/PageHeader";
 import Footer from "../../../component/Footer";
 import Time from "../../../component/utils/Time";
@@ -7,6 +8,17 @@ import { useToast } from "../../../component/context/ToastContext";
 import "./CommunityInfo.css";
 import { apiFetch } from "../../../component/utils/ApiFetch";
 import { buildHeroStyle } from "../../../component/utils/ApiConfig";
+
+const DEFAULT_HERO = "/community/CommunityDefaultHero.png";
+const MAX_DISPLAY_USERS = 5;
+
+const formatUserLabel = (user) => {
+  if (!user) return "Unknown";
+  if (user.username) return user.username;
+  if (user.fullName) return user.fullName;
+  if (user.name) return user.name;
+  return "Unknown";
+};
 
 const CommunityInfo = () => {
   const { communityId } = useParams();
@@ -21,8 +33,6 @@ const CommunityInfo = () => {
   const [error, setError] = useState("");
   const [joinStatus, setJoinStatus] = useState("idle");
 
-  const DEFAULT_HERO = "/community/CommunityDefaultHero.png";
-
   useEffect(() => {
     if (!communityId) return;
 
@@ -34,14 +44,14 @@ const CommunityInfo = () => {
         const res = await apiFetch(`/community/${communityId}`);
         const data = await res.json();
 
-        if (!data.ok) {
-          throw new Error(data.message || "Failed to load community");
+        if (!res.ok || !data.ok) {
+          throw new Error(data.message || data.error || "Failed to load community");
         }
 
-        const c = data.community;
+        const nextCommunity = data.community;
         setCommunity({
-          ...c,
-          lastActive: Time(c.lastActivityAt || c.lastActive),
+          ...nextCommunity,
+          lastActive: Time(nextCommunity.lastActivityAt || nextCommunity.lastActive),
         });
       } catch (err) {
         console.error(err);
@@ -85,7 +95,10 @@ const CommunityInfo = () => {
     return (
       <section className="CommunityInfo">
         <PageHeader />
-        <div className="CommunityInfoBody">
+        <div className="CommunityInfoState">
+          <span className="CommunityInfoStateIcon">
+            <FaChurch />
+          </span>
           <p>Loading community information...</p>
         </div>
         <Footer />
@@ -97,13 +110,17 @@ const CommunityInfo = () => {
     return (
       <section className="CommunityInfo">
         <PageHeader />
-        <div className="CommunityInfoBody">
-          <p className="CommunityInfoError">{error || "Community not found."}</p>
+        <div className="CommunityInfoState CommunityInfoState--error">
+          <span className="CommunityInfoStateIcon">
+            <FaChurch />
+          </span>
+          <p>{error || "Community not found."}</p>
           <button
-            className="CommunityInfoBackButton"
+            type="button"
+            className="CommunityInfoSecondaryButton"
             onClick={() => navigate(-1)}
           >
-            Go Back
+            Go back
           </button>
         </div>
         <Footer />
@@ -123,43 +140,30 @@ const CommunityInfo = () => {
     heroImageUrl,
   } = community;
 
-  const rawMembers = members;
-  const memberList = Array.isArray(rawMembers) ? rawMembers : [];
-
+  const memberList = Array.isArray(members) ? members : [];
   const memberCount =
     typeof community.membersCount === "number"
       ? community.membersCount
-      : typeof rawMembers === "number"
-        ? rawMembers
+      : typeof members === "number"
+        ? members
         : memberList.length;
 
   const joinButtonLabel =
     joinStatus === "loading"
-      ? "Requesting…"
+      ? "Requesting..."
       : joinStatus === "requested"
         ? "Requested"
         : "Request to Join";
 
   const joinDisabled = joinStatus === "loading" || joinStatus === "requested";
 
-  const MAX_DISPLAY_USERS = 5;
-
-  const formatUserLabel = (u) => {
-    if (!u) return "—";
-    if (u.username) return u.username;
-    if (u.fullName) return u.fullName;
-    return "Unknown";
-  };
-
   const heroStyle = {
     ...buildHeroStyle(heroImageUrl, DEFAULT_HERO),
-    backgroundColor: "#00000800",
-    backgroundBlendMode: "saturation",
+    backgroundBlendMode: "multiply",
   };
 
   const displayedLeaders = leaders.slice(0, MAX_DISPLAY_USERS);
   const hasMoreLeaders = leaders.length > MAX_DISPLAY_USERS;
-
   const displayedMembers = memberList.slice(0, MAX_DISPLAY_USERS);
   const hasMoreMembers = memberList.length > MAX_DISPLAY_USERS;
 
@@ -167,107 +171,153 @@ const CommunityInfo = () => {
     <section className="CommunityInfo">
       <div className="CommunityInfoHero" style={heroStyle}>
         <PageHeader />
-        <header className="CommunityInfoHeader">
-          <h1 className="CommunityInfoTitle">{header}</h1>
-          {subheader && <p className="CommunityInfoSubtitle">{subheader}</p>}
-        </header>
+        <button
+          type="button"
+          className="CommunityInfoBackButton"
+          onClick={() => navigate(-1)}
+          aria-label="Back to communities"
+        >
+          <FaArrowLeft />
+        </button>
+
+        <div className="CommunityInfoHeroOverlay">
+          <div className="CommunityInfoHeroCopy">
+            <span className="CommunityInfoEyebrow">
+              <FaChurch /> Community details
+            </span>
+            <h1 className="CommunityInfoTitle">{header}</h1>
+            {subheader && <p className="CommunityInfoSubtitle">{subheader}</p>}
+          </div>
+        </div>
       </div>
 
-      <section className="CommunityInfoMeta">
-        <div className="CommunityInfoMetaItem">
-          <span className="CommunityInfoMetaLabel">Community type</span>
-          <span className="CommunityInfoMetaValue">{type || "—"}</span>
-        </div>
+      <main className="CommunityInfoMain">
+        <section className="CommunityInfoSummaryCard">
+          <div className="CommunityInfoMetaItem">
+            <span className="CommunityInfoMetaIcon">
+              <FaChurch />
+            </span>
+            <span className="CommunityInfoMetaLabel">Community type</span>
+            <strong className="CommunityInfoMetaValue">{type || "Not specified"}</strong>
+          </div>
 
-        <div className="CommunityInfoMetaItem">
-          <span className="CommunityInfoMetaLabel">Members</span>
-          <span className="CommunityInfoMetaValue">
-            {memberCount} member{memberCount === 1 ? "" : "s"}
-          </span>
-        </div>
+          <div className="CommunityInfoMetaItem">
+            <span className="CommunityInfoMetaIcon">
+              <FaUsers />
+            </span>
+            <span className="CommunityInfoMetaLabel">Members</span>
+            <strong className="CommunityInfoMetaValue">
+              {memberCount} member{memberCount === 1 ? "" : "s"}
+            </strong>
+          </div>
 
-        <div className="CommunityInfoMetaItem">
-          <span className="CommunityInfoMetaLabel">Last active</span>
-          <span className="CommunityInfoMetaValue">{lastActive || "—"}</span>
-        </div>
-      </section>
+          <div className="CommunityInfoMetaItem">
+            <span className="CommunityInfoMetaIcon">
+              <FaRegClock />
+            </span>
+            <span className="CommunityInfoMetaLabel">Last active</span>
+            <strong className="CommunityInfoMetaValue">{lastActive || "Not yet active"}</strong>
+          </div>
+        </section>
 
-      <section className="CommunityInfoDescription">
-        <h2 className="CommunityInfoDescriptionTitle">About this community</h2>
-        <p className="CommunityInfoDescriptionText">
-          {content || "No description has been added yet."}
-        </p>
-      </section>
+        <section className="CommunityInfoContentGrid">
+          <article className="CommunityInfoPanel CommunityInfoAboutPanel">
+            <p className="CommunityInfoPanelKicker">About this community</p>
+            <h2 className="CommunityInfoPanelTitle">A little glimpse before you join</h2>
+            <p className="CommunityInfoDescriptionText">
+              {content || "No description has been added yet."}
+            </p>
+          </article>
 
-      <section className="CommunityInfoPeople">
-        <h2 className="CommunityInfoPeopleTitle">People in this community</h2>
+          <aside className="CommunityInfoPanel CommunityInfoJoinPanel">
+            <span className="CommunityInfoJoinIcon">
+              <FaChurch />
+            </span>
+            <h2 className="CommunityInfoJoinTitle">Ready to walk with this group?</h2>
+            <p className="CommunityInfoJoinText">
+              Send a request and the community owner or leaders can review it.
+            </p>
+            <button
+              type="button"
+              className="CommunityInfoPrimaryButton"
+              onClick={handleJoinClick}
+              disabled={joinDisabled}
+            >
+              {joinButtonLabel}
+            </button>
+            <button
+              type="button"
+              className="CommunityInfoSecondaryButton"
+              onClick={() => navigate(-1)}
+            >
+              Back to communities
+            </button>
+          </aside>
+        </section>
 
-        <div className="CommunityInfoPeopleGrid">
-          <div className="CommunityInfoPeopleBlock">
-            <span className="CommunityInfoMetaLabel">Owner</span>
-            <span className="CommunityInfoMetaValue">
+        <section className="CommunityInfoPanel CommunityInfoPeople">
+          <div className="CommunityInfoSectionHeader">
+            <p className="CommunityInfoPanelKicker">People</p>
+            <h2 className="CommunityInfoPanelTitle">Who is gathering here</h2>
+          </div>
+
+          <div className="CommunityInfoPeopleGrid">
+            <div className="CommunityInfoPeopleBlock">
+              <span className="CommunityInfoPeopleIcon CommunityInfoPeopleIcon--owner">
+                <FaCrown />
+              </span>
+              <span className="CommunityInfoPeopleLabel">Owner</span>
               {owner ? (
                 <span className="CommunityInfoUserTag CommunityInfoOwnerTag">
                   {formatUserLabel(owner)}
                 </span>
               ) : (
-                "—"
+                <span className="CommunityInfoEmptyText">Unknown</span>
               )}
-            </span>
+            </div>
+
+            <div className="CommunityInfoPeopleBlock">
+              <span className="CommunityInfoPeopleIcon CommunityInfoPeopleIcon--leader">
+                <FaUserShield />
+              </span>
+              <span className="CommunityInfoPeopleLabel">Leaders</span>
+              {leaders.length === 0 ? (
+                <span className="CommunityInfoEmptyText">None yet</span>
+              ) : (
+                <ul className="CommunityInfoUserList">
+                  {displayedLeaders.map((user) => (
+                    <li key={user.id || user._id || formatUserLabel(user)} className="CommunityInfoUserItem">
+                      <span className="CommunityInfoUserTag CommunityInfoLeaderTag">
+                        {formatUserLabel(user)}
+                      </span>
+                    </li>
+                  ))}
+                  {hasMoreLeaders && <li className="CommunityInfoUserMore">+ more leaders</li>}
+                </ul>
+              )}
+            </div>
+
+            <div className="CommunityInfoPeopleBlock">
+              <span className="CommunityInfoPeopleIcon">
+                <FaUsers />
+              </span>
+              <span className="CommunityInfoPeopleLabel">Members</span>
+              {memberList.length === 0 ? (
+                <span className="CommunityInfoEmptyText">No members yet</span>
+              ) : (
+                <ul className="CommunityInfoUserList">
+                  {displayedMembers.map((user) => (
+                    <li key={user.id || user._id || formatUserLabel(user)} className="CommunityInfoUserItem">
+                      {formatUserLabel(user)}
+                    </li>
+                  ))}
+                  {hasMoreMembers && <li className="CommunityInfoUserMore">+ more members</li>}
+                </ul>
+              )}
+            </div>
           </div>
-
-          <div className="CommunityInfoPeopleBlock">
-            <span className="CommunityInfoMetaLabel">Leaders</span>
-            {leaders.length === 0 ? (
-              <span className="CommunityInfoMetaValue">None yet</span>
-            ) : (
-              <ul className="CommunityInfoUserList">
-                {displayedLeaders.map((u) => (
-                  <li key={u.id} className="CommunityInfoUserItem">
-                    <span className="CommunityInfoUserTag CommunityInfoLeaderTag">
-                      {formatUserLabel(u)}
-                    </span>
-                  </li>
-                ))}
-                {hasMoreLeaders && <li className="CommunityInfoUserMore">…</li>}
-              </ul>
-            )}
-          </div>
-
-          <div className="CommunityInfoPeopleBlock">
-            <span className="CommunityInfoMetaLabel">Members</span>
-            {memberList.length === 0 ? (
-              <span className="CommunityInfoMetaValue">No members yet</span>
-            ) : (
-              <ul className="CommunityInfoUserList">
-                {displayedMembers.map((u) => (
-                  <li key={u.id} className="CommunityInfoUserItem">
-                    {formatUserLabel(u)}
-                  </li>
-                ))}
-                {hasMoreMembers && <li className="CommunityInfoUserMore">…</li>}
-              </ul>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <div className="CommunityInfoActions">
-        <button
-          className="CommunityInfoSecondaryButton"
-          onClick={() => navigate(-1)}
-        >
-          Back to communities
-        </button>
-
-        <button
-          className="CommunityInfoPrimaryButton"
-          onClick={handleJoinClick}
-          disabled={joinDisabled}
-        >
-          {joinButtonLabel}
-        </button>
-      </div>
+        </section>
+      </main>
 
       <Footer />
     </section>

@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import "./App.css";
 import Home from "./home/Home";
 import About from "./pages/About/About.js";
@@ -15,6 +15,7 @@ import Notifications from "./pages/Account/userMenu/Notifications";
 import Profile from "./pages/Account/userMenu/Profile";
 import CommunityInfo from "./pages/Community/browseCommunity/CommunityInfo";
 import PostDetail from "./pages/Community/myCommunity/postDetail/PostDetail";
+import EditCommunityPost from "./pages/Community/myCommunity/EditCommunityPost";
 import CheckEmail from "./pages/Account/email/CheckEmail";
 import ExpiredVerifyEmail from "./pages/Account/email/ExpiredVerifyEmail";
 import VerifyEmail from "./pages/Account/email/VerifyEmail";
@@ -32,11 +33,18 @@ import NotesPage from "./pages/Study/Notes/NotesPage";
 import NotePage from "./pages/Study/Notes/NotePage";
 import CommunityOverview from "./pages/Community/myCommunity/CommunityOverview";
 import MemberManage from "./pages/Community/myCommunity/MemberManage";
+import CommunityMembers from "./pages/Community/myCommunity/CommunityMembers";
 import CommunityBibleStudyComposer from "./pages/Community/myCommunity/bibleStudyComposer/CommunityBibleStudyComposer";
 import BibleStudyShare from "./pages/Community/myCommunity/postDetail/BibleStudyShare";
 import RequireAuth from "./component/routes/RequireAuth";
 import RequireCommunityAccess from "./component/routes/RequireCommunityAccess";
 import MobileUnavailable, { useIsMobileViewport } from "./component/MobileUnavailable";
+import NotFound from "./pages/NotFound/NotFound";
+
+function RedirectToNotFound() {
+  const location = useLocation();
+  return <Navigate to="/page-not-found" replace state={{ from: location.pathname }} />;
+}
 
 function App() {
   const isMobileViewport = useIsMobileViewport();
@@ -131,10 +139,26 @@ function App() {
                     }
                   />
                   <Route
+                    path="/community/:communityId/members"
+                    element={
+                      <RequireCommunityAccess>
+                        <CommunityMembers />
+                      </RequireCommunityAccess>
+                    }
+                  />
+                  <Route
                     path="/community/:communityId/posts/:postId"
                     element={
                       <RequireCommunityAccess>
                         <PostDetail />
+                      </RequireCommunityAccess>
+                    }
+                  />
+                  <Route
+                    path="/community/:communityId/posts/:postId/edit"
+                    element={
+                      <RequireCommunityAccess>
+                        <EditCommunityPost />
                       </RequireCommunityAccess>
                     }
                   />
@@ -162,10 +186,31 @@ function App() {
                       </RequireCommunityAccess>
                     }
                   />
-                  <Route path="/study/notes" element={<Notes />} />
+                  <Route
+                    path="/study/notes"
+                    element={
+                      <RequireAuth>
+                        <Notes />
+                      </RequireAuth>
+                    }
+                  />
                   <Route path="/bible/walkthrough" element={<BibleWalkthrough />} />
-                  <Route path="/notes" element={<NotesPage />} />
-                  <Route path="/notes/:noteId" element={<NotePage />} />
+                  <Route
+                    path="/notes"
+                    element={
+                      <RequireAuth>
+                        <NotesPage />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/notes/:noteId"
+                    element={
+                      <RequireAuth>
+                        <NotePage />
+                      </RequireAuth>
+                    }
+                  />
                   <Route path="/check-email" element={<CheckEmail />} />
                   <Route path="/verify-email" element={<VerifyEmail />} />
                   <Route path="/verify-email-expired" element={<ExpiredVerifyEmail />} />
@@ -178,6 +223,8 @@ function App() {
                       </RequireCommunityAccess>
                     }
                   />
+                  <Route path="/page-not-found" element={<NotFound />} />
+                  <Route path="*" element={<RedirectToNotFound />} />
                 </Routes>
               </ToastProvider>
             </NotificationProvider>

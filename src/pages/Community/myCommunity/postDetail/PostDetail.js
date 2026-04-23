@@ -97,6 +97,8 @@ const PostDetail = () => {
       navigate(`/community/${communityId}/bible-study/${postId}/edit`);
       return;
     }
+
+    navigate(`/community/${communityId}/posts/${postId}/edit`);
   };
 
   if (loading) {

@@ -31,6 +31,7 @@ export default function MemberManage() {
 
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [settingsSaving, setSettingsSaving] = useState(false);
 
   const [inviteInput, setInviteInput] = useState("");
   const [inviteSending, setInviteSending] = useState(false);
@@ -43,6 +44,8 @@ export default function MemberManage() {
   const [inviteActing, setInviteActing] = useState(false);
 
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [showDisbandConfirm, setShowDisbandConfirm] = useState(false);
+  const [disbandConfirmText, setDisbandConfirmText] = useState("");
 
   const currentId = String(user?.id || user?._id || "");
   const communityHomePath = `/community/${communityId}/my-posts`;
@@ -186,20 +189,41 @@ export default function MemberManage() {
   }, [fetchAll]);
 
   const toggleLeadersRule = async () => {
-    if (!isOwner) return;
+    if (!isOwner || settingsSaving) return;
+
+    const nextValue = !leadersCanManageMembers;
 
     try {
       setErr("");
+      setSettingsSaving(true);
       const res = await apiFetch(`/community/${communityId}/settings`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadersCanManageMembers: !leadersCanManageMembers }),
+        body: JSON.stringify({ leadersCanManageMembers: nextValue }),
       });
       const data = await safeJson(res);
-      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to update setting.");
-      setCommunity((prev) => data.community || prev);
+
+      if (!res.ok || !data.ok) {
+        throw new Error(
+          data.error ||
+            `Failed to update setting. PATCH /community/${communityId}/settings returned ${res.status}.`
+        );
+      }
+
+      setCommunity((prev) => {
+        if (data.community) return data.community;
+        return {
+          ...(prev || {}),
+          settings: {
+            ...(prev?.settings || {}),
+            leadersCanManageMembers: nextValue,
+          },
+        };
+      });
     } catch (e) {
       setErr(e.message || "Failed to update setting.");
+    } finally {
+      setSettingsSaving(false);
     }
   };
 
@@ -394,7 +418,7 @@ export default function MemberManage() {
         return;
       }
 
-      navigate(`/community/discover`);
+      navigate(`/browse-community`);
     } catch (e) {
       setErr(e.message || "Failed to update invitation.");
     } finally {
@@ -405,27 +429,58 @@ export default function MemberManage() {
   const handleLeaveOrDisband = async () => {
     if (leaveLoading) return;
 
-    const label = isOwner ? "Disband" : "Leave";
-    const msg = isOwner
-      ? "Disband this community? This will delete the community and its related data. This cannot be undone."
-      : "Leave this community? You will be removed from the community.";
+    if (isOwner) {
+      setErr("");
+      setDisbandConfirmText("");
+      setShowDisbandConfirm(true);
+      return;
+    }
 
-    const ok = window.confirm(msg);
+    const ok = window.confirm("Leave this community? You will be removed from the community.");
     if (!ok) return;
 
     try {
       setErr("");
       setLeaveLoading(true);
 
-      const path = isOwner ? `/community/${communityId}/disband` : `/community/${communityId}/leave`;
-      const res = await apiFetch(path, { method: "DELETE" });
+      const res = await apiFetch(`/community/${communityId}/leave`, { method: "DELETE" });
       const data = await safeJson(res);
 
-      if (!res.ok || !data.ok) throw new Error(data.error || `Failed to ${label.toLowerCase()} community.`);
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to leave community.");
 
-      navigate(`/community/discover`);
+      navigate(`/browse-community`);
     } catch (e) {
       setErr(e.message || "Failed to update membership.");
+    } finally {
+      setLeaveLoading(false);
+    }
+  };
+
+  const communityName = String(community?.header || "");
+  const canConfirmDisband =
+    isOwner && communityName && disbandConfirmText.trim() === communityName.trim();
+
+  const cancelDisband = () => {
+    if (leaveLoading) return;
+    setShowDisbandConfirm(false);
+    setDisbandConfirmText("");
+  };
+
+  const confirmDisbandCommunity = async () => {
+    if (!canConfirmDisband || leaveLoading) return;
+
+    try {
+      setErr("");
+      setLeaveLoading(true);
+
+      const res = await apiFetch(`/community/${communityId}/disband`, { method: "DELETE" });
+      const data = await safeJson(res);
+
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to disband community.");
+
+      navigate(`/browse-community`);
+    } catch (e) {
+      setErr(e.message || "Failed to disband community.");
     } finally {
       setLeaveLoading(false);
     }
@@ -461,8 +516,9 @@ export default function MemberManage() {
                 type="button"
                 className={`ToggleBtn ${leadersCanManageMembers ? "on" : "off"}`}
                 onClick={toggleLeadersRule}
+                disabled={settingsSaving}
               >
-                {leadersCanManageMembers ? "On" : "Off"}
+                {settingsSaving ? "Saving..." : leadersCanManageMembers ? "On" : "Off"}
               </button>
             </div>
           )}
@@ -665,7 +721,7 @@ export default function MemberManage() {
                   </div>
                   <div className="RowSub">
                     {isOwner
-                      ? "This will delete the community and related data."
+                      ? "Only the owner can disband a community. This permanently deletes the community and related data, including posts, replies, membership, requests, and invitations."
                       : "You will no longer be a member of this community."}
                   </div>
                 </div>
@@ -681,6 +737,41 @@ export default function MemberManage() {
                   </button>
                 </div>
               </div>
+
+              {isOwner && showDisbandConfirm && (
+                <div className="DisbandConfirmBox">
+                  <div className="DisbandConfirmTitle">Confirm permanent disband</div>
+                  <p className="DisbandConfirmText">
+                    Type <strong>{communityName}</strong> to enable the final disband action.
+                  </p>
+                  <input
+                    className="DisbandConfirmInput"
+                    value={disbandConfirmText}
+                    onChange={(e) => setDisbandConfirmText(e.target.value)}
+                    placeholder={communityName}
+                    disabled={leaveLoading}
+                    autoComplete="off"
+                  />
+                  <div className="DisbandConfirmActions">
+                    <button
+                      type="button"
+                      className="Btn"
+                      onClick={cancelDisband}
+                      disabled={leaveLoading}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="Btn danger"
+                      onClick={confirmDisbandCommunity}
+                      disabled={!canConfirmDisband || leaveLoading}
+                    >
+                      {leaveLoading ? "Disbanding..." : "Permanently Disband"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

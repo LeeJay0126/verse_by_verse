@@ -1,258 +1,459 @@
 .CommunityInfo {
+  --ink: #2c241c;
+  --muted: #7a6a5b;
+  --paper: #fffaf2;
+  --panel: rgba(255, 252, 245, 0.92);
+  --line: rgba(91, 70, 49, 0.14);
+  --blue: #344d78;
+  --blue-dark: #24395e;
+  --gold: #d8aa53;
+  --sage: #c9d4b8;
   min-height: 100vh;
-  background-color: #f4eee6;
+  background:
+    radial-gradient(circle at 8% 20%, rgba(216, 170, 83, 0.18), transparent 30%),
+    linear-gradient(180deg, #f4ede2 0%, #efe3d2 100%);
+  color: var(--ink);
   display: flex;
   flex-direction: column;
 }
 
 .CommunityInfoHero {
-  /* background-image: url("../../../component/images/community/CommunityDefaultHero.png"); */
-  background-color: #00000080;
   position: relative;
-
-  background-blend-mode: saturation;
+  min-height: 440px;
+  background-color: rgba(21, 20, 18, 0.64);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  height: 400px;
-
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  overflow: hidden;
 }
 
-.CommunityInfoHeader {
-  padding: 20px 40px;
-  margin-bottom: 24px;
+.CommunityInfoHero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(18, 17, 15, 0.82), rgba(18, 17, 15, 0.34) 56%, rgba(18, 17, 15, 0.12)),
+    linear-gradient(180deg, rgba(18, 17, 15, 0.2), rgba(18, 17, 15, 0.72));
+  pointer-events: none;
+}
+
+.CommunityInfoHeroOverlay {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 92px 0 70px;
+}
+
+.CommunityInfoHeroCopy {
+  max-width: 760px;
+}
+
+.CommunityInfoEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 13px;
+  border: 1px solid rgba(255, 250, 242, 0.26);
+  border-radius: 999px;
+  background: rgba(255, 250, 242, 0.13);
+  color: #fff7e9;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .CommunityInfoTitle {
-  font-size: 32px;
-  color: white;
-  font-weight: 600;
-  margin: 0;
+  margin: 18px 0 12px;
+  color: #fffaf2;
+  font-size: clamp(42px, 7vw, 76px);
+  line-height: 0.94;
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  text-shadow: 0 18px 42px rgba(0, 0, 0, 0.36);
 }
 
 .CommunityInfoSubtitle {
-  margin-top: 8px;
-  font-size: 20px;
-  color: white;
+  max-width: 640px;
+  margin: 0;
+  color: rgba(255, 250, 242, 0.9);
+  font-size: clamp(17px, 2vw, 23px);
+  line-height: 1.45;
 }
 
-.CommunityInfoMeta {
+.CommunityInfoBackButton {
+  position: absolute;
+  z-index: 2;
+  top: 88px;
+  left: max(20px, calc((100vw - 1180px) / 2));
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 250, 242, 0.42);
+  background: rgba(20, 18, 15, 0.48);
+  color: #fffaf2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.CommunityInfoBackButton:hover {
+  background: rgba(20, 18, 15, 0.7);
+  transform: translateX(-2px);
+}
+
+.CommunityInfoMain {
+  width: min(1180px, calc(100% - 40px));
+  margin: -48px auto 56px;
+  position: relative;
+  z-index: 2;
+}
+
+.CommunityInfoSummaryCard,
+.CommunityInfoPanel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: 0 24px 70px rgba(63, 48, 34, 0.14);
+  backdrop-filter: blur(12px);
+}
+
+.CommunityInfoSummaryCard {
   display: grid;
-  width: 100%;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  padding: 16px 32px;
-  border-radius: 12px;
-  background: #fffdf9;
-  margin-bottom: 24px;
-}
-
-.CommunityInfoDescription {
-  max-width: 1280px;
-  width: 100%;
-  min-height: 125px;
-  padding: 16px 32px;
-  margin: 0 auto;
-}
-
-.CommunityInfoPeople {
-  max-width: 1280px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.CommunityInfoPeopleBlock {
-  min-height: 125px;
-  display: flex;
-  flex-direction: column;
-}
-
-.CommunityInfoUserList {
-  display: inline;
-}
-
-
-
-@media (min-width: 640px) {
-  .CommunityInfoMeta {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  border-radius: 28px;
+  overflow: hidden;
 }
 
 .CommunityInfoMetaItem {
-  display: flex;
-  flex-direction: column;
+  min-height: 132px;
+  padding: 24px;
+  background: rgba(255, 250, 242, 0.78);
+  display: grid;
+  align-content: center;
+  gap: 8px;
 }
 
-.CommunityInfoMetaLabel {
+.CommunityInfoMetaIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: #efe2cc;
+  color: var(--blue);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.CommunityInfoMetaLabel,
+.CommunityInfoPanelKicker,
+.CommunityInfoPeopleLabel {
+  color: var(--muted);
   font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #888;
-  margin-bottom: 4px;
 }
 
 .CommunityInfoMetaValue {
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--ink);
+  font-size: 19px;
+  line-height: 1.25;
 }
 
-.CommunityInfoDescription {
-  margin-bottom: 24px;
+.CommunityInfoContentGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 20px;
+  margin-top: 20px;
 }
 
-.CommunityInfoDescriptionTitle {
-  font-size: 18px;
-  margin-bottom: 8px;
+.CommunityInfoPanel {
+  border-radius: 28px;
+  padding: 30px;
+}
+
+.CommunityInfoAboutPanel {
+  min-height: 280px;
+}
+
+.CommunityInfoPanelTitle {
+  margin: 8px 0 18px;
+  color: var(--ink);
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
 }
 
 .CommunityInfoDescriptionText {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #333;
+  margin: 0;
+  color: #43382f;
+  font-size: 16px;
+  line-height: 1.75;
   white-space: pre-line;
 }
 
-.CommunityInfoActions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 8px;
+.CommunityInfoJoinPanel {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  background:
+    linear-gradient(155deg, rgba(52, 77, 120, 0.96), rgba(43, 65, 102, 0.96)),
+    var(--blue);
+  color: #fffaf2;
+  overflow: hidden;
+}
+
+.CommunityInfoJoinPanel::after {
+  content: "";
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  right: -70px;
+  bottom: -82px;
+  border-radius: 999px;
+  border: 28px solid rgba(255, 250, 242, 0.1);
+}
+
+.CommunityInfoJoinIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 17px;
+  background: rgba(255, 250, 242, 0.16);
+  color: #fff4d7;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-evenly;
-  margin-bottom: 30px;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.CommunityInfoJoinTitle {
+  position: relative;
+  z-index: 1;
+  margin: 18px 0 10px;
+  font-size: 27px;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.CommunityInfoJoinText {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 22px;
+  color: rgba(255, 250, 242, 0.82);
+  line-height: 1.55;
 }
 
 .CommunityInfoPrimaryButton,
 .CommunityInfoSecondaryButton {
+  position: relative;
+  z-index: 1;
+  width: 100%;
   border-radius: 999px;
-  padding: 15px 30px;
+  padding: 14px 22px;
   font-size: 14px;
+  font-weight: 800;
   border: none;
   cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
 }
 
 .CommunityInfoPrimaryButton {
-  background-color: #3c4f76;
-  color: white;
+  background: #fffaf2;
+  color: var(--blue-dark);
+  box-shadow: 0 15px 32px rgba(0, 0, 0, 0.18);
+}
+
+.CommunityInfoPrimaryButton:hover:not(:disabled),
+.CommunityInfoSecondaryButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.CommunityInfoPrimaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
 }
 
 .CommunityInfoSecondaryButton {
-  background-color: transparent;
-  border: 1px solid #ccc;
-  color: #333;
-}
-
-.CommunityInfoError {
-  margin: 32px 0;
-  color: #b00020;
+  margin-top: 10px;
+  background: rgba(255, 250, 242, 0.1);
+  border: 1px solid rgba(255, 250, 242, 0.3);
+  color: #fffaf2;
 }
 
 .CommunityInfoPeople {
-  margin: 32px 24px;
+  margin-top: 20px;
 }
 
-.CommunityInfoPeopleTitle {
-  font-size: 1.25rem;
-  margin-bottom: 16px;
+.CommunityInfoSectionHeader {
+  margin-bottom: 20px;
 }
 
 .CommunityInfoPeopleGrid {
   display: grid;
-  gap: 16px;
-}
-
-.CommunityInfoUserItem {
-  font-size: 0.95rem;
-  line-height: 1.4;
-}
-
-.joinInputBox {
-  display: flex;
-  gap: 15px;
-}
-
-.joinHeroSearchButton {
-  padding: 5px 20px;
-  border-radius: 5px;
-  background-color: rgba(250,246,240);
-  cursor: pointer;
-}
-
-/* pill-style tags for owner / leaders */
-.CommunityInfoUserTag {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  color: #2b2b2b;
-}
-
-/* Owner: #c8d1b2 */
-.CommunityInfoOwnerTag {
-  background-color: #c8d1b2;
-}
-
-/* Leader: #d3a78c */
-.CommunityInfoLeaderTag {
-  background-color: #d3a78c;
-}
-
-
-@media (min-width: 768px) {
-  .CommunityInfoPeopleGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .CommunityInfoPeopleBlock {
-  padding: 12px 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  min-height: 190px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 250, 242, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.CommunityInfoPeopleIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  background: #eee2ce;
+  color: var(--blue);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.CommunityInfoPeopleIcon--owner {
+  background: #f2dfb8;
+  color: #92651b;
+}
+
+.CommunityInfoPeopleIcon--leader {
+  background: #ead4c5;
+  color: #9a5c38;
 }
 
 .CommunityInfoUserList {
   list-style: none;
-  margin: 4px 0 0;
+  margin: 0;
   padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .CommunityInfoUserItem {
-  font-size: 0.95rem;
+  color: #43382f;
+  font-size: 15px;
   line-height: 1.4;
 }
 
-.CommunityInfoUserMore {
-  font-size: 1.2rem;
-  line-height: 1;
+.CommunityInfoUserTag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #2b251d;
 }
 
-.CommunityBackArrow {
-  position: absolute;
-  top: 84px;          /* tweak if PageHeader overlaps */
-  left: 18px;
+.CommunityInfoOwnerTag {
+  background: #f0d9a5;
+}
 
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
+.CommunityInfoLeaderTag {
+  background: #e6c6b1;
+}
 
-  border: 1px solid rgba(245, 235, 222, 0.9);
-  background: rgba(0, 0, 0, 0.55);
-  color: #f5ebde;
+.CommunityInfoEmptyText,
+.CommunityInfoUserMore {
+  color: var(--muted);
+  font-size: 14px;
+}
 
+.CommunityInfoState {
+  width: min(560px, calc(100% - 40px));
+  min-height: 320px;
+  margin: 60px auto;
+  border-radius: 30px;
+  background: var(--paper);
+  box-shadow: 0 22px 60px rgba(63, 48, 34, 0.14);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
+  gap: 14px;
+  text-align: center;
+  padding: 36px;
 }
 
-.CommunityBackArrow:hover {
-  background: rgba(0, 0, 0, 0.75);
+.CommunityInfoStateIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 22px;
+  background: #efe2cc;
+  color: var(--blue);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.CommunityInfoState--error {
+  color: #8f1f22;
+}
+
+.CommunityInfoState .CommunityInfoSecondaryButton {
+  width: auto;
+  min-width: 150px;
+  color: var(--ink);
+  border-color: var(--line);
+  background: transparent;
+}
+
+@media (max-width: 900px) {
+  .CommunityInfoHero {
+    min-height: 380px;
+  }
+
+  .CommunityInfoSummaryCard,
+  .CommunityInfoContentGrid,
+  .CommunityInfoPeopleGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .CommunityInfoJoinPanel {
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .CommunityInfoHeroOverlay,
+  .CommunityInfoMain {
+    width: min(100% - 28px, 1180px);
+  }
+
+  .CommunityInfoHeroOverlay {
+    padding: 92px 0 46px;
+  }
+
+  .CommunityInfoBackButton {
+    top: 78px;
+    left: 14px;
+  }
+
+  .CommunityInfoPanel,
+  .CommunityInfoMetaItem {
+    padding: 22px;
+  }
+
+  .CommunityInfoMain {
+    margin-top: -34px;
+  }
 }

@@ -27,11 +27,19 @@ export const ToastProvider = ({ children }) => {
       {toast && (
         <div
           className={`Toast Toast--${toast.variant}`}
-          onClick={hideToast}
           role="status"
           aria-live="polite"
         >
-          {toast.message}
+          <span className="ToastAccent" aria-hidden="true" />
+          <span className="ToastMessage">{toast.message}</span>
+          <button
+            type="button"
+            className="ToastClose"
+            onClick={hideToast}
+            aria-label="Dismiss notification"
+          >
+            x
+          </button>
         </div>
       )}
     </ToastContext.Provider>

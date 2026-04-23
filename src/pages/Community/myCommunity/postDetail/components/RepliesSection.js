@@ -43,6 +43,15 @@ const RepliesSection = ({
   const rootReplies = Array.isArray(replyTree?.byParent?.get?.("root"))
     ? replyTree.byParent.get("root")
     : [];
+  const handleReplyKeyDown = (event) => {
+    if (event.key !== "Enter" || event.shiftKey) return;
+
+    event.preventDefault();
+    if (replySubmitting || !replyBody.trim()) return;
+
+    onSubmitReply(event);
+  };
+
   const hasExistingStudyShare = useMemo(() => {
     if (!isBibleStudy || !myUserId || !Array.isArray(replies)) return false;
 
@@ -131,6 +140,7 @@ const RepliesSection = ({
             rows={5}
             value={replyBody}
             onChange={(e) => setReplyBody(e.target.value)}
+            onKeyDown={handleReplyKeyDown}
             disabled={replySubmitting}
             className="replyInputBox"
             placeholder="Write your reply..."
