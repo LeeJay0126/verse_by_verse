@@ -617,6 +617,24 @@
   transform: none;
 }
 
+.ForumBody .PostDetailPager {
+  gap: 12px;
+}
+
+.ForumBody .PostDetailPagerNumbers {
+  gap: 8px;
+}
+
+.ForumBody .PostDetailPager .ReplyActionBtn {
+  font-size: 15px;
+  line-height: 1.2;
+  padding: 4px 6px;
+}
+
+.ForumBody .PostDetailRepliesPagerBottom {
+  padding-bottom: 16px;
+}
+
 @media (max-width: 600px) {
   .ForumBody {
     width: 100%;
