@@ -8,6 +8,7 @@ import { FaTrash } from "react-icons/fa";
 import { apiFetch, getApiBase } from "../../../component/utils/ApiFetch";
 
 const REQUEST_TIMEOUT_MS = 10000;
+const NOTIFICATIONS_PER_PAGE = 10;
 
 const Notifications = () => {
   const navigate = useNavigate();
@@ -20,8 +21,11 @@ const Notifications = () => {
   const [actingId, setActingId] = useState(null);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [page, setPage] = useState(1);
 
   const mountedRef = useRef(true);
+  const bulkActionInFlightRef = useRef(false);
+  const actedNotificationIdsRef = useRef(new Set());
   useEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -107,10 +111,29 @@ const Notifications = () => {
   }, [notifications]);
 
   const hasAny = notifications.length > 0;
+  const isNotificationBusy = bulkLoading || Boolean(deletingId) || Boolean(actingId);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(sortedNotifications.length / NOTIFICATIONS_PER_PAGE)
+  );
+  const safePage = Math.min(page, totalPages);
+  const pagedNotifications = useMemo(() => {
+    const start = (safePage - 1) * NOTIFICATIONS_PER_PAGE;
+    return sortedNotifications.slice(start, start + NOTIFICATIONS_PER_PAGE);
+  }, [safePage, sortedNotifications]);
+  const pageStart = hasAny ? (safePage - 1) * NOTIFICATIONS_PER_PAGE + 1 : 0;
+  const pageEnd = hasAny
+    ? Math.min(safePage * NOTIFICATIONS_PER_PAGE, sortedNotifications.length)
+    : 0;
+
+  useEffect(() => {
+    setPage((prev) => Math.min(prev, totalPages));
+  }, [totalPages]);
 
   const getNotificationRoute = useCallback((n) => {
     const communityId = n?.community ? String(n.community) : "";
     const kind = n?.target?.kind ? String(n.target.kind) : "";
+    const message = String(n?.message || "").toLowerCase();
 
     const postId = kind === "COMMUNITY_POST" && n?.target?.id ? String(n.target.id) : "";
 
@@ -128,6 +151,12 @@ const Notifications = () => {
 
     if (n?.type === "COMMUNITY_ROLE_DEMOTION" && communityId) {
       return `/community/${communityId}/members/manage`;
+    }
+
+    if (n?.type === "COMMUNITY_JOIN_REQUEST_RESULT" && communityId) {
+      return message.includes("declined")
+        ? `/community/${communityId}/info`
+        : `/community/${communityId}/my-posts`;
     }
 
     if (kind === "COMMUNITY_MANAGE" && communityId) {
@@ -167,37 +196,47 @@ const Notifications = () => {
 
   async function handleOpenNotification(n) {
     const id = n?._id || n?.id;
-    if (!id) return;
-    if (bulkLoading || deletingId || actingId) return;
+    if ((!id && !getNotificationRoute(n)) || bulkLoading || deletingId || actingId) return;
 
     const route = getNotificationRoute(n);
-    if (route) navigate(route);
+    const isCurrentlyUnread = isUnread(n);
 
     try {
-      setDeletingId(id);
       setError("");
 
-      const res = await fetchWithTimeout(`/notifications/${id}`, { method: "DELETE" });
-      const data = await safeJson(res);
+      if (id && isCurrentlyUnread) {
+        const res = await fetchWithTimeout(`/notifications/${id}/read`, { method: "POST" });
+        const data = await safeJson(res);
 
-      if (!res.ok || !data?.ok) {
-        throw new Error(data?.error || `Failed to delete notification (${res.status})`);
+        if (!res.ok || !data?.ok) {
+          throw new Error(data?.error || `Failed to mark notification as read (${res.status})`);
+        }
+
+        const readAt = data.notification?.readAt || new Date().toISOString();
+        setNotifications((prev) =>
+          prev.map((item) =>
+            (item?._id || item?.id) === id ? { ...item, readAt } : item
+          )
+        );
+        refreshUnreadCount();
       }
-
-      setNotifications((prev) => prev.filter((x) => (x?._id || x?.id) !== id));
-
-      refreshUnreadCount();
     } catch (e) {
-      console.error("[notification open+delete error]", e);
-      setError(e?.message || "Failed to remove notification");
-    } finally {
-      setDeletingId(null);
+      console.error("[notification open+read error]", e);
+      setError(e?.message || "Failed to mark notification as read");
     }
+
+    if (route) navigate(route);
   }
 
   async function handleNotificationAction(id, action) {
     if (!id) return;
     if (!["accept", "decline"].includes(action)) return;
+    if (bulkLoading || deletingId || actingId || actedNotificationIdsRef.current.has(id)) return;
+
+    const currentNotification = notifications.find((n) => (n?._id || n?.id) === id);
+    if (!isPendingAction(currentNotification)) return;
+
+    actedNotificationIdsRef.current.add(id);
 
     try {
       setActingId(id);
@@ -221,6 +260,7 @@ const Notifications = () => {
 
       refreshUnreadCount();
     } catch (err) {
+      actedNotificationIdsRef.current.delete(id);
       console.error("[notification act error]", err);
       setError(err?.message || "Failed to update notification");
     } finally {
@@ -229,7 +269,9 @@ const Notifications = () => {
   }
 
   async function handleMarkAllRead() {
-    if (!hasAny) return;
+    if (!hasAny || isNotificationBusy || bulkActionInFlightRef.current) return;
+
+    bulkActionInFlightRef.current = true;
 
     try {
       setBulkLoading(true);
@@ -249,12 +291,15 @@ const Notifications = () => {
       console.error("[notifications mark-all-read error]", err);
       setError(err?.message || "Failed to mark all as read");
     } finally {
+      bulkActionInFlightRef.current = false;
       setBulkLoading(false);
     }
   }
 
   async function handleDeleteAll() {
-    if (!hasAny) return;
+    if (!hasAny || isNotificationBusy || bulkActionInFlightRef.current) return;
+
+    bulkActionInFlightRef.current = true;
 
     try {
       setBulkLoading(true);
@@ -273,6 +318,7 @@ const Notifications = () => {
       console.error("[notifications delete-all error]", err);
       setError(err?.message || "Failed to delete notifications");
     } finally {
+      bulkActionInFlightRef.current = false;
       setBulkLoading(false);
     }
   }
@@ -307,7 +353,7 @@ const Notifications = () => {
 
           {hasAny && (
             <ul className="notifications-list">
-              {sortedNotifications.map((n) => {
+              {pagedNotifications.map((n) => {
                 const id = n?._id || n?.id;
                 const pending = isPendingAction(n);
 
@@ -336,7 +382,7 @@ const Notifications = () => {
                           <button
                             type="button"
                             className="notification-action-btn"
-                            disabled={actingId === id || bulkLoading}
+                            disabled={isNotificationBusy}
                             onClick={() => handleNotificationAction(id, "accept")}
                           >
                             {actingId === id ? "Accepting…" : "Accept"}
@@ -344,7 +390,7 @@ const Notifications = () => {
                           <button
                             type="button"
                             className="notification-action-btn notification-action-btn--secondary"
-                            disabled={actingId === id || bulkLoading}
+                            disabled={isNotificationBusy}
                             onClick={() => handleNotificationAction(id, "decline")}
                           >
                             {actingId === id ? "Declining…" : "Decline"}
@@ -372,12 +418,41 @@ const Notifications = () => {
             </ul>
           )}
 
+          {hasAny && totalPages > 1 && (
+            <div className="notifications-pager-wrap">
+              <div className="notifications-pager-meta">
+                Showing {pageStart}-{pageEnd} of {sortedNotifications.length}
+              </div>
+              <div className="notifications-pager">
+                <button
+                  type="button"
+                  className="notifications-pager-btn"
+                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                  disabled={safePage <= 1 || isNotificationBusy}
+                >
+                  Prev
+                </button>
+                <span className="notifications-pager-status">
+                  Page {safePage} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  className="notifications-pager-btn"
+                  onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={safePage >= totalPages || isNotificationBusy}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="notifications-toolbar">
             <button
               type="button"
               className="notifications-toolbar-btn"
               onClick={handleMarkAllRead}
-              disabled={bulkLoading || !hasAny}
+              disabled={isNotificationBusy || !hasAny}
             >
               {bulkLoading ? "Working…" : "Mark all as read"}
             </button>
@@ -385,7 +460,7 @@ const Notifications = () => {
               type="button"
               className="notifications-toolbar-btn notifications-toolbar-btn--danger"
               onClick={handleDeleteAll}
-              disabled={bulkLoading || !hasAny}
+              disabled={isNotificationBusy || !hasAny}
             >
               {bulkLoading ? "Working…" : "Delete all"}
             </button>

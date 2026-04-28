@@ -52,6 +52,119 @@
   background: rgba(0, 0, 0, 0.06);
 }
 
+.CommunityDetailsEditor {
+  background: #fffdf9;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 18px 42px rgba(58, 48, 36, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 26px;
+  padding: 22px 24px;
+}
+
+.CommunityDetailsEditorHeader {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.CommunityDetailsEditorKicker {
+  color: #786d5f;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+}
+
+.CommunityDetailsEditorHeader h2 {
+  color: #1f1a16;
+  font-family: "Georgia", serif;
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.CommunityDetailsEditorClose {
+  align-items: center;
+  background: transparent;
+  border: 1px solid #c7b9a4;
+  border-radius: 999px;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  font-size: 16px;
+  height: 32px;
+  justify-content: center;
+  line-height: 1;
+  width: 32px;
+}
+
+.CommunityDetailsEditorClose:hover:not(:disabled) {
+  background: #f0e4d4;
+}
+
+.CommunityDetailsField {
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 7px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.CommunityDetailsField input,
+.CommunityDetailsField textarea {
+  background: #fffaf2;
+  border: 1px solid #c7b9a4;
+  border-radius: 8px;
+  color: #1f1a16;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.5;
+  padding: 10px 12px;
+  text-transform: none;
+}
+
+.CommunityDetailsField input:focus,
+.CommunityDetailsField textarea:focus {
+  outline: 2px solid #0f0f0f;
+  outline-offset: 1px;
+}
+
+.CommunityDetailsField textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.CommunityDetailsEditorMeta {
+  color: #786d5f;
+  font-size: 12px;
+  margin-top: -8px;
+}
+
+.CommunityDetailsEditorError {
+  background: #fbe4e4;
+  border-radius: 6px;
+  color: #6b2020;
+  font-size: 13px;
+  margin: 0;
+  padding: 8px 10px;
+}
+
+.CommunityDetailsEditorActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .ForumHero {
   background-color: #00000080;
   background-blend-mode: saturation;
@@ -502,6 +615,24 @@
   opacity: 0.4;
   cursor: default;
   transform: none;
+}
+
+.ForumBody .PostDetailPager {
+  gap: 12px;
+}
+
+.ForumBody .PostDetailPagerNumbers {
+  gap: 8px;
+}
+
+.ForumBody .PostDetailPager .ReplyActionBtn {
+  font-size: 15px;
+  line-height: 1.2;
+  padding: 4px 6px;
+}
+
+.ForumBody .PostDetailRepliesPagerBottom {
+  padding-bottom: 16px;
 }
 
 @media (max-width: 600px) {

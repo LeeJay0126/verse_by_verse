@@ -98,6 +98,14 @@ const ReplyNode = ({
   const isStudyShare = reply?.replyType === "study_share";
   const isEditing = editingReplyId === id;
   const studyShareBlocks = isStudyShare ? formatStudyShareBlocks(reply.body) : [];
+  const handleChildReplyKeyDown = (event) => {
+    if (event.key !== "Enter" || event.shiftKey) return;
+
+    event.preventDefault();
+    if (replySubmitting || !childBody.trim()) return;
+
+    onSubmitChildReply(event);
+  };
 
   return (
     <li
@@ -260,6 +268,7 @@ const ReplyNode = ({
                 rows={2}
                 value={childBody}
                 onChange={(e) => setChildBody(e.target.value)}
+                onKeyDown={handleChildReplyKeyDown}
                 placeholder="Write a reply…"
                 disabled={replySubmitting}
                 className="replyInputBox"

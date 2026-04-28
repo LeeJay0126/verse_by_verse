@@ -1,9 +1,11 @@
 import "./Verse.css";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import API from "../../../component/Key";
 import { useAuth } from "../../../component/context/AuthContext";
 import { apiFetch } from "../../../component/utils/ApiFetch";
 import { useNotesApi } from "../Notes/useNotesApi";
+
+const NOTE_TITLE_MAX_LEN = 120;
 
 const Verse = ({
   chapterId,
@@ -26,6 +28,8 @@ const Verse = ({
   const [verseTexts, setVerseTexts] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const noteSubmittingRef = useRef(false);
+  const [noteSubmitting, setNoteSubmitting] = useState(false);
 
   const [noteDraft, setNoteDraft] = useState("");
   const [noteTitleDraft, setNoteTitleDraft] = useState("");
@@ -331,20 +335,27 @@ const Verse = ({
   const submitNotes = async () => {
     if (!hasChapter) return;
     if (!user) return;
+    if (noteSubmittingRef.current) return;
 
     try {
+      noteSubmittingRef.current = true;
+      setNoteSubmitting(true);
+
       await createNote({
         bibleId: currVersionId,
         chapterId,
         rangeStart: activeRange?.start ?? null,
         rangeEnd: activeRange?.end ?? null,
-        title: noteTitleDraft,
+        title: noteTitleDraft.trim().slice(0, NOTE_TITLE_MAX_LEN),
         text: noteDraft,
       });
 
       closeNotes();
     } catch (e) {
       console.error("Failed to save note:", e);
+    } finally {
+      noteSubmittingRef.current = false;
+      setNoteSubmitting(false);
     }
   };
 
@@ -477,6 +488,7 @@ const Verse = ({
                 value={noteTitleDraft}
                 onChange={(e) => setNoteTitleDraft(e.target.value)}
                 placeholder={`Notes — ${book?.name || ""} ${chapterNumber}`}
+                maxLength={NOTE_TITLE_MAX_LEN}
                 disabled={!user || initializing}
               />
 
@@ -488,10 +500,10 @@ const Verse = ({
                   type="button"
                   className="notesBtn notesBtnPrimary"
                   onClick={submitNotes}
-                  disabled={!user || initializing}
+                  disabled={!user || initializing || noteSubmitting}
                   title={!user ? "Log in to save notes" : undefined}
                 >
-                  Submit
+                  {noteSubmitting ? "Saving..." : "Submit"}
                 </button>
               </div>
             </div>

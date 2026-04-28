@@ -101,6 +101,9 @@ const NotesPage = ({ onOpenPassage }) => {
             {user ? "Your saved chapter and range notes." : "Log in to view and manage notes."}
           </div>
         </div>
+        <button type="button" className="NotesBackButton" onClick={() => navigate("/bible")}>
+          Back to Bible
+        </button>
       </header>
 
       <section className="NotesToolbar">

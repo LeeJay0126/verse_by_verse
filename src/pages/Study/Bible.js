@@ -322,6 +322,10 @@ const Bible = () => {
           setIsNotesOpen(false);
           setIsNotesListOpen((v) => !v);
         }}
+        onMyNotesClick={() => {
+          if (!requireAuthForNotes()) return;
+          navigate("/notes");
+        }}
       />
 
       <NotesListDrawer

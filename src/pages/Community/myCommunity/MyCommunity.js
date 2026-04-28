@@ -8,7 +8,8 @@ import NewPostModal from "./NewPost";
 import Time from "../../../component/utils/Time";
 import { apiFetch } from "../../../component/utils/ApiFetch";
 import { buildHeroStyle } from "../../../component/utils/ApiConfig";
-import { FiTrash2 } from "react-icons/fi";
+import { useToast } from "../../../component/context/ToastContext";
+import { FiEdit3, FiTrash2 } from "react-icons/fi";
 
 import {
   COMMUNITY_ACTIVITY_EVENT,
@@ -31,11 +32,21 @@ import Pager from "./postDetail/components/Pager";
 
 const MAX_ANNOUNCEMENTS_PER_COMMUNITY = 3;
 const POSTS_PER_PAGE = 12;
+const MAX_COMMUNITY_TITLE_LENGTH = 80;
+const MAX_COMMUNITY_SUBTITLE_LENGTH = 140;
+const MAX_COMMUNITY_DESCRIPTION_LENGTH = 1200;
+
+const getCommunityDetailsForm = (community) => ({
+  header: community?.header || "",
+  subheader: community?.subheader || "",
+  content: community?.content || "",
+});
 
 const MyCommunity = () => {
   const { communityId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showToast } = useToast();
 
   const [community, setCommunity] = useState(null);
   const [communityErr, setCommunityErr] = useState("");
@@ -62,6 +73,11 @@ const MyCommunity = () => {
 
   const [page, setPage] = useState(1);
   const creatingPostRef = useRef(false);
+
+  const [showDetailsEditor, setShowDetailsEditor] = useState(false);
+  const [detailsForm, setDetailsForm] = useState(getCommunityDetailsForm(null));
+  const [detailsSaving, setDetailsSaving] = useState(false);
+  const [detailsError, setDetailsError] = useState("");
 
   const currentUserId = String(user?.id || user?._id || "");
   const currentRole = useMemo(() => getCommunityRole(community, currentUserId), [community, currentUserId]);
@@ -258,6 +274,7 @@ const MyCommunity = () => {
   };
 
   const canEditHero = currentRole === "Owner" || currentRole === "Leader";
+  const canEditCommunityDetails = currentRole === "Owner";
   const canCreateAnnouncementPost = canCreateAnnouncement(community, currentUserId);
   const canModeratePosts = canModerateCommunityPosts(community, currentUserId);
 
@@ -312,8 +329,114 @@ const MyCommunity = () => {
     [communityId, deletingPostId, fetchCommunity, fetchPosts, page, postsMeta.totalCount]
   );
 
+  const handleEditPost = useCallback(
+    (post) => {
+      if (!post?.id) return;
+      if (post.type === "bible_study") {
+        navigate(`/community/${communityId}/bible-study/${post.id}/edit`);
+        return;
+      }
+      navigate(`/community/${communityId}/posts/${post.id}/edit`);
+    },
+    [communityId, navigate]
+  );
+
   const canManageMembers = canManageMembersAccess(community, currentUserId);
   const isMember = isCommunityMember(community, currentUserId);
+  const detailsPayload = useMemo(
+    () => ({
+      header: detailsForm.header.trim(),
+      subheader: detailsForm.subheader.trim(),
+      content: detailsForm.content.trim(),
+    }),
+    [detailsForm]
+  );
+  const hasDetailsChanges = useMemo(() => {
+    const current = getCommunityDetailsForm(community);
+    return (
+      detailsPayload.header !== current.header.trim() ||
+      detailsPayload.subheader !== current.subheader.trim() ||
+      detailsPayload.content !== current.content.trim()
+    );
+  }, [community, detailsPayload]);
+
+  const openDetailsEditor = () => {
+    setDetailsForm(getCommunityDetailsForm(community));
+    setDetailsError("");
+    setShowDetailsEditor(true);
+  };
+
+  const closeDetailsEditor = () => {
+    if (detailsSaving) return;
+    setDetailsError("");
+    setShowDetailsEditor(false);
+  };
+
+  const handleDetailsChange = (e) => {
+    const { name, value } = e.target;
+    setDetailsForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validateDetailsForm = () => {
+    const { header, subheader, content } = detailsPayload;
+
+    if (!header) return "Community title is required.";
+    if (header.length > MAX_COMMUNITY_TITLE_LENGTH) {
+      return `Community title must be ${MAX_COMMUNITY_TITLE_LENGTH} characters or fewer.`;
+    }
+    if (subheader.length > MAX_COMMUNITY_SUBTITLE_LENGTH) {
+      return `Subtitle must be ${MAX_COMMUNITY_SUBTITLE_LENGTH} characters or fewer.`;
+    }
+    if (!content) return "Description is required.";
+    if (content.length > MAX_COMMUNITY_DESCRIPTION_LENGTH) {
+      return `Description must be ${MAX_COMMUNITY_DESCRIPTION_LENGTH} characters or fewer.`;
+    }
+
+    return "";
+  };
+
+  const handleDetailsSubmit = async (e) => {
+    e.preventDefault();
+    if (!canEditCommunityDetails || detailsSaving) return;
+
+    const validationMessage = validateDetailsForm();
+    if (validationMessage) {
+      setDetailsError(validationMessage);
+      return;
+    }
+
+    if (!hasDetailsChanges) return;
+
+    try {
+      setDetailsSaving(true);
+      setDetailsError("");
+
+      const res = await apiFetch(`/community/${communityId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(detailsPayload),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || data?.ok === false) {
+        throw new Error(data.error || "Failed to update community details.");
+      }
+
+      setCommunity((prev) => ({
+        ...(prev || {}),
+        ...(data.community || {}),
+        ...detailsPayload,
+      }));
+      setShowDetailsEditor(false);
+      showToast("Community details updated.", "success");
+      emitCommunityActivityUpdated();
+    } catch (error) {
+      console.error("[MyCommunity] update details error:", error);
+      setDetailsError(error.message || "Failed to update community details.");
+    } finally {
+      setDetailsSaving(false);
+    }
+  };
 
   const handleManageMembersClick = () => {
     navigate(`/community/${communityId}/members/manage`);
@@ -360,6 +483,16 @@ const MyCommunity = () => {
 
       <section className="ForumBody">
         <div className="ForumActions">
+          {canEditCommunityDetails && (
+            <button className="ManageButton" onClick={openDetailsEditor}>
+              Edit Details
+            </button>
+          )}
+          {isMember && (
+            <button className="ManageButton" onClick={() => navigate(`/community/${communityId}/members`)}>
+              Members
+            </button>
+          )}
           {isMember && (
             <button className="ManageButton" onClick={handleManageMembersClick}>
               {manageLabel}
@@ -369,6 +502,86 @@ const MyCommunity = () => {
             New Post
           </button>
         </div>
+
+        {showDetailsEditor && (
+          <form className="CommunityDetailsEditor" onSubmit={handleDetailsSubmit}>
+            <div className="CommunityDetailsEditorHeader">
+              <div>
+                <p className="CommunityDetailsEditorKicker">Community profile</p>
+                <h2>Edit title and description</h2>
+              </div>
+              <button
+                type="button"
+                className="CommunityDetailsEditorClose"
+                onClick={closeDetailsEditor}
+                disabled={detailsSaving}
+                aria-label="Close community details editor"
+              >
+                x
+              </button>
+            </div>
+
+            <label className="CommunityDetailsField">
+              Community title
+              <input
+                type="text"
+                name="header"
+                value={detailsForm.header}
+                onChange={handleDetailsChange}
+                maxLength={MAX_COMMUNITY_TITLE_LENGTH}
+                required
+              />
+            </label>
+
+            <label className="CommunityDetailsField">
+              Subtitle or purpose
+              <input
+                type="text"
+                name="subheader"
+                value={detailsForm.subheader}
+                onChange={handleDetailsChange}
+                maxLength={MAX_COMMUNITY_SUBTITLE_LENGTH}
+                placeholder="Optional short purpose statement"
+              />
+            </label>
+
+            <label className="CommunityDetailsField">
+              Description
+              <textarea
+                name="content"
+                value={detailsForm.content}
+                onChange={handleDetailsChange}
+                maxLength={MAX_COMMUNITY_DESCRIPTION_LENGTH}
+                rows={6}
+                required
+              />
+            </label>
+
+            <div className="CommunityDetailsEditorMeta">
+              {detailsForm.content.trim().length}/{MAX_COMMUNITY_DESCRIPTION_LENGTH} description characters
+            </div>
+
+            {detailsError && <p className="CommunityDetailsEditorError">{detailsError}</p>}
+
+            <div className="CommunityDetailsEditorActions">
+              <button
+                type="button"
+                className="NewPostSecondaryButton"
+                onClick={closeDetailsEditor}
+                disabled={detailsSaving}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="NewPostPrimaryButton"
+                disabled={detailsSaving || !hasDetailsChanges}
+              >
+                {detailsSaving ? "Saving..." : hasDetailsChanges ? "Save details" : "No changes"}
+              </button>
+            </div>
+          </form>
+        )}
 
         {err && <p className="communityError">{err}</p>}
         {deleteError && <p className="communityError">{deleteError}</p>}
@@ -410,16 +623,27 @@ const MyCommunity = () => {
                       onClick={(e) => e.stopPropagation()}
                     >
                       {canEditOrDeletePost(post) && (
-                        <button
-                          type="button"
-                          className="PostDeleteIcon"
-                          aria-label="Delete post"
-                          title="Delete"
-                          onClick={() => handleDeletePost(post.id)}
-                          disabled={deletingPostId === String(post.id)}
-                        >
-                          <FiTrash2 size={16} />
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className="PostDeleteIcon"
+                            aria-label="Edit post"
+                            title="Edit"
+                            onClick={() => handleEditPost(post)}
+                          >
+                            <FiEdit3 size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="PostDeleteIcon"
+                            aria-label="Delete post"
+                            title="Delete"
+                            onClick={() => handleDeletePost(post.id)}
+                            disabled={deletingPostId === String(post.id)}
+                          >
+                            <FiTrash2 size={16} />
+                          </button>
+                        </>
                       )}
                     </td>
                   </tr>

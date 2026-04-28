@@ -181,29 +181,92 @@ h3 {
 
 .Toast {
   position: fixed;
-  right: 16px;
-  bottom: 16px;
-  padding: 10px 14px;
-  border-radius: 8px;
+  top: 24px;
+  left: 50%;
+  width: 50%;
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 16px;
+  border: 1px solid rgba(60, 79, 118, 0.2);
+  border-radius: 15px;
   font-size: 0.9rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  background-color: #333;
-  color: #fff;
+  line-height: 1.4;
+  box-shadow: 0 18px 44px rgba(58, 48, 36, 0.18);
+  background: linear-gradient(135deg, #fffdf9 0%, #f4eee6 100%);
+  color: #2f2a24;
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 0;
   z-index: 9999;
+  max-width: 720px;
+  min-width: 280px;
+  transform: translateX(-50%);
+}
+
+.ToastAccent {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #3c4f76;
+  box-shadow: 0 0 0 5px rgba(60, 79, 118, 0.12);
+}
+
+.ToastMessage {
+  font-weight: 600;
+}
+
+.ToastClose {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(60, 79, 118, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 253, 249, 0.72);
+  color: #3c4f76;
   cursor: pointer;
-  max-width: 280px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ToastClose:hover {
+  background: #fffdf9;
 }
 
 .Toast--success {
-  background-color: #2e7d32; /* green-ish */
+  border-color: rgba(60, 79, 118, 0.24);
+  color: #263550;
+}
+
+.Toast--success .ToastAccent {
+  background: #3c4f76;
 }
 
 .Toast--error {
-  background-color: #c62828; /* red-ish */
+  border-color: rgba(159, 47, 32, 0.24);
+  color: #6b2020;
+}
+
+.Toast--error .ToastAccent {
+  background: #9f2f20;
+  box-shadow: 0 0 0 5px rgba(159, 47, 32, 0.12);
 }
 
 .Toast--info {
-  background-color: #424242; /* neutral */
+  border-color: rgba(47, 42, 36, 0.18);
+  color: #2f2a24;
+}
+
+.Toast--info .ToastAccent {
+  background: #786d5f;
+  box-shadow: 0 0 0 5px rgba(120, 109, 95, 0.12);
+}
+
+@media (max-width: 720px) {
+  .Toast {
+    top: 16px;
+    width: calc(100vw - 32px);
+  }
 }
 
 /* =================================================================

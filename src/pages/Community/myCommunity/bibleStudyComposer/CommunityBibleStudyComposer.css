@@ -3,6 +3,11 @@
   width: 86%;
   margin: 0 auto 40px;
   padding: 24px 0 40px;
+  color: #14110e;
+}
+
+.BibleStudyComposerBody * {
+  color: inherit;
 }
 
 .BibleStudyComposerBreadcrumbs {
@@ -10,7 +15,7 @@
 }
 
 .BibleStudyComposerBreadcrumbs a {
-  color: #f9f4ea;
+  color: #14110e;
   text-decoration: underline;
   font-size: 14px;
 }
@@ -38,13 +43,13 @@
 
 .createBibleStudyLink {
   text-decoration: underline;
-  color: black;
+  color: #14110e;
   padding-bottom: 15px;
 }
 
 .createBibleStudyLink:visited {
   text-decoration: underline;
-  color: black;
+  color: #14110e;
   padding-bottom: 15px;
 }
 
@@ -67,7 +72,7 @@
 
 .BibleStudyComposerCardHeader p {
   margin: 0;
-  color: #666;
+  color: #3b352e;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -90,7 +95,7 @@
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #333;
+  color: #14110e;
 }
 
 .BibleStudyField input,
@@ -102,6 +107,12 @@
   font-size: 14px;
   font-family: inherit;
   background: #fffdf9;
+  color: #14110e;
+}
+
+.BibleStudyField input::placeholder,
+.BibleStudyField textarea::placeholder {
+  color: #5f574d;
 }
 
 .BibleStudyField input:focus,
@@ -139,7 +150,7 @@
 
 .BibleStudyVersePreviewMeta {
   font-size: 13px;
-  color: #666;
+  color: #3b352e;
   margin-bottom: 10px;
 }
 
@@ -152,7 +163,7 @@
 .BibleStudyVerseItem {
   margin: 0;
   line-height: 1.7;
-  color: #333;
+  color: #14110e;
 }
 
 .BibleStudyVerseItem sup {

@@ -57,11 +57,38 @@
   margin: 0 auto;
 
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 10px;
   padding-top: 10px;
 }
 
 .NotesRow .Notes {
   transform: scale(0.95);
   opacity: 0.9;
+}
+
+.MyNotesLibraryButton {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid rgba(50, 34, 21, 0.16);
+  border-radius: 999px;
+  background: #2f2117;
+  color: #fff8ec;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.MyNotesLibraryButton:hover:not(:disabled) {
+  background: #4b3322;
+  box-shadow: 0 8px 18px rgba(47, 33, 23, 0.16);
+  transform: translateY(-1px);
+}
+
+.MyNotesLibraryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }

@@ -243,6 +243,7 @@
 
 .ThreadContent {
   flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   padding: 0 10px;
@@ -335,10 +336,14 @@
   font-size: 15px;
   font-weight: 600;
   line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .PostDetailReplyBlockContent {
   margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .PostDetailReplyActionsRow {
@@ -383,6 +388,7 @@
 
 .PostDetailInlineReplyForm {
   padding: 8px 0 4px;
+  width: 100%;
 }
 
 .PostDetailInlineReplyActions {
@@ -465,8 +471,13 @@
 }
 
 .replyInputBox {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
   height: 100px;
   padding: 5px 10px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .NewPostPrimaryButton {
