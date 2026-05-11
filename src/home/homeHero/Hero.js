@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "./Hero.css";
 
 const Hero = () => {
@@ -9,9 +10,9 @@ const Hero = () => {
             <h2 className="HeroH2">
                 One Verse At a Time
             </h2>
-            <div className="HeroButton">
+            <Link to="/about" className="HeroButton">
                 GET STARTED
-            </div>
+            </Link>
         </div>
     );
 };
